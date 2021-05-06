@@ -1,7 +1,7 @@
 {
   "name": "escolasoft/cart",
-  "description": "Discount package for Escola LMS",
-  "type": "escola-lms-package",
+  "description": "Escola Headless LMS Cart",
+  "type": "package",
   "require": {
     "php": ">=7.4",
     "laravel/framework": "^8.0",
