@@ -6,6 +6,9 @@ use EscolaSoft\Cart\Services\Contracts\ShopServiceContract;
 use EscolaSoft\Cart\Services\ShopService;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * SWAGGER_VERSION
+ */
 class CartServiceProvider extends ServiceProvider
 {
     public $singletons = [

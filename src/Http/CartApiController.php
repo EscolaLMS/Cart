@@ -4,9 +4,9 @@ namespace EscolaSoft\Cart\Http;
 
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
 use EscolaLms\Core\Http\Resources\Status;
-use EscolaLms\Courses\Models\Course;
 use EscolaLms\Courses\ValueObjects\CourseContent;
 use EscolaSoft\Cart\Http\Swagger\CartSwagger;
+use EscolaSoft\Cart\Models\Course;
 use EscolaSoft\Cart\Services\Contracts\ShopServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
