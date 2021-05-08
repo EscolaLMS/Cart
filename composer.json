@@ -6,7 +6,8 @@
     "php": ">=7.4",
     "laravel/framework": "^8.0",
     "treestoneit/shopping-cart": "^1.4",
-    "escolalms/core": ">=0.1"
+    "escolalms/core": ">=0.1",
+    "escolalms/courses": ">=0.0.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.0",
