@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Treestoneit\ShoppingCart\Models\Cart;
 
-trait HasOrders
+trait CanTransaction
 {
     public function orders(): HasMany
     {
