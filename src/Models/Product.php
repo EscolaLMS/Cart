@@ -18,7 +18,6 @@ class Product extends Model implements Buyable
 
     public function getBuyablePrice()
     {
-        dd('s');
         return $this->price;
     }
 }
