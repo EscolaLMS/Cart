@@ -1,0 +1,199 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Escola LMS",
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "categories"
+                ],
+                "description": "Get Categories",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::index",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Category create",
+                "description": "Create single Categories",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dokumentacja"
+                                    },
+                                    "icon_class": {
+                                        "type": "string",
+                                        "example": "fa-business-time"
+                                    },
+                                    "is_active": {
+                                        "type": "bool",
+                                        "example": "true"
+                                    },
+                                    "parent_id": {
+                                        "type": "?integer",
+                                        "example": "null"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories/tree": {
+            "get": {
+                "tags": [
+                    "categories"
+                ],
+                "description": "Get Categories Tree",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::tree",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories/{id}": {
+            "get": {
+                "tags": [
+                    "categories"
+                ],
+                "description": "Get single Categories",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::show",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update category",
+                "description": "Update single Categories",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dokumentacja"
+                                    },
+                                    "icon_class": {
+                                        "type": "string",
+                                        "example": "fa-business-time"
+                                    },
+                                    "is_active": {
+                                        "type": "bool",
+                                        "example": "true"
+                                    },
+                                    "parent_id": {
+                                        "type": "?integer",
+                                        "example": "null"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Destroy category",
+                "description": "Destroy the specified category",
+                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::destroy",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
