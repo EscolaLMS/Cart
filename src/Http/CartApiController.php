@@ -28,13 +28,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
     {
         $this->cartService->loadUserCart($request->user());
 
-        return new JsonResponse([
-            'total' => $this->cartService->total(),
-            'subtotal' => $this->cartService->subtotal(),
-            'tax' => $this->cartService->tax(),
-            'items' => $this->cartService->content()->pluck('buyable')->toArray(),
-            'discount' => $this->cartService->getDiscount()
-        ]);
+        return $this->cartService->getResource();
     }
 
     public function addCourse(int $course, Request $request): JsonResponse

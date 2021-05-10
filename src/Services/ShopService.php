@@ -13,6 +13,7 @@ class ShopService extends CartManager implements ShopServiceContract
 {
     use Concerns\UniqueItems;
     use Concerns\AvoidDeleted;
+    use Concerns\Discounts;
 
     protected Authenticatable $user;
 
