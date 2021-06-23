@@ -58,8 +58,6 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
 
             return (new Status(true))->response();
         } catch (\Exception $e) {
-
-            dd($e);
             return new JsonResponse(['message' => $e->getMessage()], 400);
         }
     }
