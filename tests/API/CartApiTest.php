@@ -68,9 +68,6 @@ class CartApiTest extends TestCase
         $this->response->assertOk();
     }
 
-    /**
-     * @depends test_send_payment_method_and_pay
-     */
     public function test_get_orders(): void
     {
         $user = User::factory()->create();
