@@ -24,7 +24,7 @@
       "Database\\Factories\\EscolaLms\\Cart\\Models\\": "database/factories"
     }
   },
-  "license": "(c) Escola",
+  "license": "MIT",
   "authors": [
     {
       "name": "Paweł Chołaj",
