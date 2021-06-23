@@ -43,7 +43,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "EscolaLms\\Cart\\CartServiceProvider",
+        "EscolaLms\\Cart\\CartServiceProvider"
       ]
     }
   },
