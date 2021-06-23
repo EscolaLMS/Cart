@@ -54,7 +54,7 @@ class CartApiTest extends TestCase
         $this->assertTrue(in_array($course->getKey(), $cartItemsId));
     }
 
-    public function test_send_payment_method_and_pay(): array
+    public function test_send_payment_method_and_pay()
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
@@ -68,7 +68,7 @@ class CartApiTest extends TestCase
         $this->response->assertOk();
     }
 
-    public function test_get_orders(): void
+    public function test_get_orders()
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
