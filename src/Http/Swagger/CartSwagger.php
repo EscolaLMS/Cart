@@ -1,10 +1,10 @@
 <?php
 
 
-namespace EscolaSoft\Cart\Http\Swagger;
+namespace EscolaLms\Cart\Http\Swagger;
 
 
-use EscolaSoft\Cart\Http\Requests\PaymentRequest;
+use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

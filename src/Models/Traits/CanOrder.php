@@ -1,14 +1,13 @@
 <?php
 
-namespace EscolaSoft\Cart\Models\Traits;
+namespace EscolaLms\Cart\Models\Traits;
 
-use EscolaLms\Core\Models\User;
-use EscolaSoft\Cart\Models\Order;
+use EscolaLms\Cart\Models\Order;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Treestoneit\ShoppingCart\Models\Cart;
 
-trait CanTransaction
+trait CanOrder
 {
     public function orders(): HasMany
     {

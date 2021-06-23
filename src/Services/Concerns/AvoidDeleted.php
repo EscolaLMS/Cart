@@ -1,8 +1,6 @@
 <?php
 
-
-namespace EscolaSoft\Cart\Services\Concerns;
-
+namespace EscolaLms\Cart\Services\Concerns;
 
 trait AvoidDeleted
 {

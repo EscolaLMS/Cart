@@ -1,9 +1,9 @@
 <?php
 
-namespace EscolaSoft\Cart\Services\Strategies\Abstracts;
+namespace EscolaLms\Cart\Services\Strategies\Abstracts;
 
-use EscolaSoft\Cart\Models\Discount;
-use EscolaSoft\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
+use EscolaLms\Cart\Models\Discount;
+use EscolaLms\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
 
 abstract class DiscountStrategy implements DiscountStrategyContract
 {

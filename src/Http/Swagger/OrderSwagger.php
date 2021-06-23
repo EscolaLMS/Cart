@@ -1,15 +1,12 @@
 <?php
 
-
-namespace EscolaSoft\Cart\Http\Swagger;
-
+namespace EscolaLms\Cart\Http\Swagger;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 interface OrderSwagger
 {
-
     /**
      * @OA\Get(
      *      path="/api/orders",
@@ -34,6 +31,5 @@ interface OrderSwagger
      *      )
      *   )
      */
-
     public function index(Request $request): JsonResponse;
 }

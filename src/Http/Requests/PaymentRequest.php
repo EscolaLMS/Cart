@@ -1,6 +1,6 @@
 <?php
 
-namespace EscolaSoft\Cart\Http\Requests;
+namespace EscolaLms\Cart\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,7 +24,7 @@ class PaymentRequest extends FormRequest
     public function rules()
     {
         return [
-            'paymentMethodId' => ['nullable']
+            'paymentMethodId' => ['required', 'nullable']
         ];
     }
 }

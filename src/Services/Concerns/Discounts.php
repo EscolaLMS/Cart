@@ -1,13 +1,11 @@
 <?php
 
+namespace EscolaLms\Cart\Services\Concerns;
 
-namespace EscolaSoft\Cart\Services\Concerns;
-
-
-use EscolaSoft\Cart\Enums\DiscountValueType;
-use EscolaSoft\Cart\Models\Discount;
-use EscolaSoft\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
-use EscolaSoft\Cart\Services\Strategies\Discount\NoneStrategy;
+use EscolaLms\Cart\Enums\DiscountValueType;
+use EscolaLms\Cart\Models\Discount;
+use EscolaLms\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
+use EscolaLms\Cart\Services\Strategies\Discount\NoneStrategy;
 
 trait Discounts
 {
@@ -20,6 +18,9 @@ trait Discounts
 
     public function getDiscount(): ?Discount
     {
+        return null;
+        //TODO: move discounts to separate package or implement them here, but for now it doesn't work
+        /*
         $userDiscountId = $this->getModel()->user_discount_id;
 
         if (is_null($userDiscountId)) {
@@ -37,6 +38,7 @@ trait Discounts
         }
 
         return $this->discount = $userDiscount->discount;
+        */
     }
 
     private function getDiscountStrategy(): DiscountStrategyContract
@@ -47,7 +49,7 @@ trait Discounts
         }
 
         $discountType = DiscountValueType::getName($this->discount->value_type);
-        $className = 'EscolaSoft\\Cart\\Services\\Strategies\\Discount\\' . ucfirst(strtolower($discountType)) . 'Strategy';
+        $className = 'EscolaLms\\Cart\\Services\\Strategies\\Discount\\' . ucfirst(strtolower($discountType)) . 'Strategy';
 
         if (!class_exists($className)) {
             throw new \RuntimeException($className . ' strategy is not exists.');
@@ -55,5 +57,4 @@ trait Discounts
 
         return new $className($this->discount);
     }
-
 }

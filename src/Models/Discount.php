@@ -1,12 +1,52 @@
 <?php
 
-namespace EscolaSoft\Cart\Models;
+namespace EscolaLms\Cart\Models;
 
-use EscolaSoft\Cart\Enums\DiscountValueType;
+use EscolaLms\Cart\Enums\DiscountValueType;
+use EscolaLms\Payments\Services\PaymentsService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\App;
+use NumberFormatter;
 
+/**
+ * EscolaLms\Cart\Models\Discount
+ *
+ * @property int $id
+ * @property string|null $name
+ * @property string $code
+ * @property \Illuminate\Support\Carbon $activated_at
+ * @property \Illuminate\Support\Carbon|null $deactivated_at
+ * @property int|null $limit_usage
+ * @property int|null $limit_per_user
+ * @property int $value_type
+ * @property int $value
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read string $type
+ * @property-read string $value_string
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Discount onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereActivatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereDeactivatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereLimitPerUser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereLimitUsage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereValue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Discount whereValueType($value)
+ * @method static \Illuminate\Database\Query\Builder|Discount withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Discount withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Discount extends Model
 {
     use SoftDeletes, HasFactory;
@@ -51,14 +91,14 @@ class Discount extends Model
 
     public function getValueStringAttribute(): string
     {
+        $numberFormatter = NumberFormatter::create(App::currentLocale(), NumberFormatter::DEFAULT_STYLE);
         switch ($this->value_type) {
             case DiscountValueType::PERCENT:
                 return $this->value . '%';
             case DiscountValueType::AMOUNT:
-                return '£' . $this->value;
+                return $numberFormatter->formatCurrency($this->value, app(PaymentsService::class)->getPaymentsConfig()->getDefaultCurrency());
             default:
-                return $this->value;
+                return $numberFormatter->format($this->value);
         }
     }
-
 }

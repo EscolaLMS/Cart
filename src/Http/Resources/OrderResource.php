@@ -1,8 +1,8 @@
 <?php
 
-namespace EscolaSoft\Cart\Http\Resources;
+namespace EscolaLms\Cart\Http\Resources;
 
-use EscolaSoft\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Enums\OrderStatus;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
