@@ -13,7 +13,8 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 class CartApiTest extends TestCase
 {
-    use WithoutMiddleware, DatabaseTransactions;
+    use WithoutMiddleware;
+    use DatabaseTransactions;
     use CreatesPaymentMethods;
 
     private $response;
@@ -63,17 +64,14 @@ class CartApiTest extends TestCase
         $this->shopServiceContract->loadUserCart($user);
         $this->shopServiceContract->add($product, 1);
 
-        $paymentMethodId = $this->getPaymentMethodId();
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $paymentMethodId]);
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
         $this->response->assertOk();
-
-        return [$user];
     }
 
     /**
      * @depends test_send_payment_method_and_pay
      */
-    public function test_get_orders(array $payload): void
+    public function test_get_orders(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
@@ -83,8 +81,7 @@ class CartApiTest extends TestCase
         $this->shopServiceContract->loadUserCart($user);
         $this->shopServiceContract->add($product, 1);
 
-        $paymentMethodId = $this->getPaymentMethodId();
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $paymentMethodId]);
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
 
         $this->response->assertOk();
 
@@ -103,8 +100,7 @@ class CartApiTest extends TestCase
         $this->shopServiceContract->loadUserCart($user);
         $this->shopServiceContract->add($course, 1);
 
-        $paymentMethodId = $this->getPaymentMethodId();
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $paymentMethodId]);
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
 
         $this->response->assertOk();
 

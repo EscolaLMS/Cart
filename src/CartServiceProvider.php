@@ -16,7 +16,8 @@ use Illuminate\Support\ServiceProvider;
 class CartServiceProvider extends ServiceProvider
 {
     public $singletons = [
-        ShopServiceContract::class => ShopService::class
+        ShopServiceContract::class => ShopService::class,
+        OrderProcessingServiceContract::class => OrderProcessingService::class
     ];
 
     public function boot()
@@ -34,8 +35,8 @@ class CartServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/cart.php', 'cart');
+
         $this->app->register(EventServiceProvider::class);
-        $this->app->singleton(OrderProcessingServiceContract::class, OrderProcessingService::class);
     }
 
     protected function bootForConsole(): void
