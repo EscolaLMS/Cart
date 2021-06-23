@@ -1,17 +1,17 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Escola LMS",
+        "title": "EscolaLMS",
         "version": "0.0.1"
     },
     "paths": {
-        "/api/categories": {
+        "/api/cart": {
             "get": {
                 "tags": [
-                    "categories"
+                    "Cart"
                 ],
-                "description": "Get Categories",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::index",
+                "description": "Get cart details",
+                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::index",
                 "responses": {
                     "200": {
                         "description": "successful operation",
@@ -23,92 +23,102 @@
                         "description": "Bad request",
                         "content": {
                             "application/json": {}
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Category create",
-                "description": "Create single Categories",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::create",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Dokumentacja"
-                                    },
-                                    "icon_class": {
-                                        "type": "string",
-                                        "example": "fa-business-time"
-                                    },
-                                    "is_active": {
-                                        "type": "bool",
-                                        "example": "true"
-                                    },
-                                    "parent_id": {
-                                        "type": "?integer",
-                                        "example": "null"
-                                    }
-                                },
-                                "type": "object"
-                            }
                         }
                     }
                 },
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
+                "security": [
+                    {
+                        "passport": []
                     }
-                }
+                ]
             }
         },
-        "/api/categories/tree": {
-            "get": {
+        "/api/cart/course/{course}": {
+            "post": {
                 "tags": [
-                    "categories"
+                    "Cart"
                 ],
-                "description": "Get Categories Tree",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::tree",
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/api/categories/{id}": {
-            "get": {
-                "tags": [
-                    "categories"
-                ],
-                "description": "Get single Categories",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::show",
+                "description": "Add course to cart",
+                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::addCourse",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "course",
                         "in": "path",
                         "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Remove course from cart",
+                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::deleteCourse",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/pay": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Pay for cart",
+                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::pay",
+                "parameters": [
+                    {
+                        "name": "paymentMethodId",
+                        "in": "query",
+                        "required": false,
                         "schema": {
                             "type": "string"
                         }
@@ -127,72 +137,40 @@
                             "application/json": {}
                         }
                     }
-                }
-            },
-            "put": {
-                "summary": "Update category",
-                "description": "Update single Categories",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::update",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Dokumentacja"
-                                    },
-                                    "icon_class": {
-                                        "type": "string",
-                                        "example": "fa-business-time"
-                                    },
-                                    "is_active": {
-                                        "type": "bool",
-                                        "example": "true"
-                                    },
-                                    "parent_id": {
-                                        "type": "?integer",
-                                        "example": "null"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "description": "Get user orders",
+                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\OrderSwagger::index",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
                         }
                     }
                 },
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
+                "security": [
+                    {
+                        "passport": []
                     }
-                }
-            },
-            "delete": {
-                "summary": "Destroy category",
-                "description": "Destroy the specified category",
-                "operationId": "EscolaLms\\Categories\\Http\\Controllers\\Swagger\\CategorySwagger::destroy",
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
+                ]
             }
         }
     }
