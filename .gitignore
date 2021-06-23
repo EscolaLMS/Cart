@@ -24,3 +24,5 @@ Homestead.json
 
 .idea
 composer.lock
+
+_ide_helper.php

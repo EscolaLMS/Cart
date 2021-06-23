@@ -1,12 +1,12 @@
 <?php
 
 
-namespace EscolaSoft\Cart\Http;
+namespace EscolaLms\Cart\Http;
 
 
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
-use EscolaSoft\Cart\Http\Resources\OrderResource;
-use EscolaSoft\Cart\Http\Swagger\OrderSwagger;
+use EscolaLms\Cart\Http\Resources\OrderResource;
+use EscolaLms\Cart\Http\Swagger\OrderSwagger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;

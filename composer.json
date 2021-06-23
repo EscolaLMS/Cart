@@ -1,27 +1,40 @@
 {
-  "name": "escolasoft/cart",
+  "name": "escolalms/cart",
   "description": "Escola Headless LMS Cart",
   "type": "package",
   "require": {
-    "php": ">=7.4",
-    "laravel/framework": "^8.0",
-    "treestoneit/shopping-cart": "^1.4",
+    "php": "^7.4|^8.0",
     "escolalms/core": ">=0.1",
-    "escolalms/courses": ">=0.0.1"
+    "escolalms/courses": ">=0.0.1",
+    "escolalms/payments": "^0.0.5",
+    "laravel/framework": "^8.0",
+    "treestoneit/shopping-cart": "^1.4"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.0",
-    "orchestra/testbench": "^6.0"
+    "barryvdh/laravel-ide-helper": "^2.10",
+    "nunomaduro/collision": "^5.5",
+    "nunomaduro/larastan": "^0.7.6",
+    "orchestra/testbench": "^6.0",
+    "phpunit/phpunit": "^9.0"
   },
   "autoload": {
     "psr-4": {
-      "EscolaSoft\\Cart\\": "src",
-      "EscolaSoft\\Cart\\Tests\\": "tests",
-      "Database\\Factories\\EscolaSoft\\Cart\\Models\\": "database/factories"
+      "EscolaLms\\Cart\\": "src",
+      "EscolaLms\\Cart\\Tests\\": "tests",
+      "Database\\Factories\\EscolaLms\\Cart\\Models\\": "database/factories"
     }
   },
   "license": "(c) Escola",
   "authors": [
+    {
+      "name": "Paweł Chołaj",
+      "email": "pawel.cholaj@escola.pl",
+      "homepage": "https://cholaj.pl"
+    },
+    {
+      "name": "Hubert Krzysztofiak",
+      "email": "hubert.krzysztofiak@escola.pl"
+    },
     {
       "name": "Marcin Lenkowsksi",
       "email": "marcin.lenkowski@escola.pl"
@@ -30,8 +43,22 @@
   "extra": {
     "laravel": {
       "providers": [
-        "EscolaSoft\\Cart\\CartServiceProvider"
+        "EscolaLms\\Cart\\CartServiceProvider",
       ]
     }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@php ./vendor/bin/testbench package:discover --ansi"
+    ],
+    "post-update-cmd": [
+      "@php ./vendor/bin/testbench ide-helper:generate",
+      "@php ./vendor/bin/testbench ide-helper:meta"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": false,
+    "preferred-install": "dist",
+    "sort-packages": true
   }
 }

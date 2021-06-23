@@ -1,15 +1,13 @@
 <?php
 
+namespace EscolaLms\Cart\Services\Concerns;
 
-namespace EscolaSoft\Cart\Services\Concerns;
-
-
-use EscolaLms\Core\Models\Config;
-use EscolaSoft\Cart\Dtos\Contracts\PaymentMethodContract;
-use EscolaSoft\Cart\Enums\OrderStatus;
-use EscolaSoft\Cart\Events\OrderCancelled;
-use EscolaSoft\Cart\Events\OrderPaid;
-use EscolaSoft\Cart\Models\Order;
+use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
+use EscolaLms\Payments\Enums\PaymentStatus;
+use EscolaLms\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Events\OrderCancelled;
+use EscolaLms\Cart\Events\OrderPaid;
+use EscolaLms\Cart\Models\Order;
 use RuntimeException;
 
 trait Payments
@@ -21,15 +19,14 @@ trait Payments
     public function purchase(PaymentMethodContract $paymentMethod = null): void
     {
         $order = $this->createOrder();
+        $paymentProcessor = $order->process();
+        $paymentProcessor->purchase($paymentMethod);
+        $payment = $paymentProcessor->getPayment();
 
-//        $request = $this->getPaymentStrategy()->purchase($this->total(), $paymentMethod, 'Order ID: ' . $order->getKey());
-
-        if (true /*$request->isSuccessful()*/) {
+        if ($payment->status->is(PaymentStatus::PAID)) {
             $this->setPaid($order);
-        } elseif ($request->isCancelled()) {
+        } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
             $this->setCancelled($order);
-        } else {
-            throw new RuntimeException("Payment failed: " . $request->getMessage());
         }
     }
 
@@ -39,7 +36,7 @@ trait Payments
             throw new RuntimeException("User must be initialized, to create order");
         }
 
-        $this->user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
+        $this->getUser()->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
 
         $order = new Order($this->getModel()->getAttributes());
         $order->total = $this->total();
@@ -58,11 +55,6 @@ trait Payments
         $order->items()->insert($items);
 
         return $order;
-    }
-
-    protected function getPaymentConfig(): array
-    {
-        return Config::get('payments');
     }
 
     protected function setPaid(Order $order): void
@@ -85,5 +77,4 @@ trait Payments
             'status' => $status
         ]);
     }
-
 }

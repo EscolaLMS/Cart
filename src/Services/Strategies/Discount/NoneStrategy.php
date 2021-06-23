@@ -1,8 +1,8 @@
 <?php
 
-namespace EscolaSoft\Cart\Services\Strategies\Discount;
+namespace EscolaLms\Cart\Services\Strategies\Discount;
 
-use EscolaSoft\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
+use EscolaLms\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
 
 class NoneStrategy implements DiscountStrategyContract
 {

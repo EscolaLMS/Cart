@@ -1,6 +1,6 @@
 <?php
 
-namespace EscolaSoft\Cart\Services\Strategies\Contracts;
+namespace EscolaLms\Cart\Services\Strategies\Contracts;
 
 interface DiscountStrategyContract
 {

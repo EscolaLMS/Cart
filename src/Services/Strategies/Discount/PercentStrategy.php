@@ -1,8 +1,8 @@
 <?php
 
-namespace EscolaSoft\Cart\Services\Strategies\Discount;
+namespace EscolaLms\Cart\Services\Strategies\Discount;
 
-use EscolaSoft\Cart\Services\Strategies\Abstracts\DiscountStrategy;
+use EscolaLms\Cart\Services\Strategies\Abstracts\DiscountStrategy;
 
 class PercentStrategy extends DiscountStrategy
 {

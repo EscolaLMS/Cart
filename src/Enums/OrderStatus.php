@@ -1,6 +1,6 @@
 <?php
 
-namespace EscolaSoft\Cart\Enums;
+namespace EscolaLms\Cart\Enums;
 
 use EscolaLms\Core\Enums\BasicEnum;
 

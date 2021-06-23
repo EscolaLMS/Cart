@@ -1,11 +1,10 @@
 <?php
 
 
-namespace EscolaSoft\Cart\Events;
+namespace EscolaLms\Cart\Events;
 
-
-use EscolaSoft\Cart\Models\Order;
-use Illuminate\Contracts\Auth\Authenticatable;
+use EscolaLms\Cart\Models\Contracts\CanOrder;
+use EscolaLms\Cart\Models\Order;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -14,9 +13,9 @@ class OrderCancelled
     use Dispatchable, SerializesModels;
 
     private Order $order;
-    private Authenticatable $user;
+    private CanOrder $user;
 
-    public function __construct(Order $order, Authenticatable $user)
+    public function __construct(Order $order, CanOrder $user)
     {
         $this->order = $order;
         $this->user = $user;
@@ -31,11 +30,10 @@ class OrderCancelled
     }
 
     /**
-     * @return Authenticatable
+     * @return CanOrder
      */
-    public function getUser(): Authenticatable
+    public function getUser(): CanOrder
     {
         return $this->user;
     }
-
 }

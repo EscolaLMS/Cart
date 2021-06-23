@@ -1,7 +1,7 @@
 <?php
 
-use EscolaSoft\Cart\Http\CartApiController;
-use EscolaSoft\Cart\Http\OrderApiController;
+use EscolaLms\Cart\Http\CartApiController;
+use EscolaLms\Cart\Http\OrderApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function () {

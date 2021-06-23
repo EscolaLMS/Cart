@@ -15,7 +15,7 @@ class CreateOrderItemsTable extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
+            $table->foreignId('order_id');
             $table->morphs('buyable');
             $table->unsignedInteger('quantity');
             $table->json('options')->nullable();

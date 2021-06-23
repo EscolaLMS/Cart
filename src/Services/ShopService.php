@@ -1,9 +1,11 @@
 <?php
 
-namespace EscolaSoft\Cart\Services;
+namespace EscolaLms\Cart\Services;
 
-use EscolaSoft\Cart\Enums\OrderStatus;
-use EscolaSoft\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Models\Contracts\CanOrder;
+use EscolaLms\Cart\Models\Order;
+use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Treestoneit\ShoppingCart\CartManager;
@@ -16,7 +18,7 @@ class ShopService extends CartManager implements ShopServiceContract
     use Concerns\Discounts;
     use Concerns\Payments;
 
-    protected Authenticatable $user;
+    protected CanOrder $user;
 
     public function __construct(Cart $cart)
     {
@@ -25,12 +27,14 @@ class ShopService extends CartManager implements ShopServiceContract
 
     public static function fromUserId(Authenticatable $user): self
     {
+        assert($user instanceof CanOrder);
         $shop = app(ShopServiceContract::class);
         $shop->setCart(
             self::cartFromUser($user)
         );
         $shop->setUser($user);
 
+        assert($shop instanceof ShopService);
         return $shop;
     }
 
@@ -47,13 +51,14 @@ class ShopService extends CartManager implements ShopServiceContract
         $this->refreshCart();
     }
 
-    public function setUser(Authenticatable $user): void
+    public function setUser(CanOrder $user): void
     {
         $this->user = $user;
     }
 
     public function loadUserCart(Authenticatable $user): self
     {
+        assert($user instanceof CanOrder);
         $loadedCart = self::fromUserId($user);
         $this->avoidDeletedItems();
         return $loadedCart;
@@ -61,19 +66,23 @@ class ShopService extends CartManager implements ShopServiceContract
 
     public function attachTo(Authenticatable $user): self
     {
+        assert($user instanceof CanOrder);
         $this->user = $user;
         return parent::attachTo($user);
     }
 
     public function getStatus(): int
     {
-        return $this->getModel()->status ?? OrderStatus::PROCESSING;
+        if ($this->getModel() instanceof Order) {
+            return $this->getModel()->status ?? OrderStatus::PROCESSING;
+        }
+        return OrderStatus::PROCESSING;
     }
 
     /**
-     * @return Authenticatable
+     * @return CanOrder
      */
-    public function getUser(): Authenticatable
+    public function getUser(): CanOrder
     {
         return $this->user;
     }

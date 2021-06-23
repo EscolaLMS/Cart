@@ -1,11 +1,10 @@
 <?php
 
+namespace EscolaLms\Cart\Tests;
 
-namespace EscolaSoft\Cart\Tests;
-
-
-use EscolaSoft\Cart\CartServiceProvider;
-use EscolaSoft\Cart\Tests\Models\User;
+use EscolaLms\Cart\CartServiceProvider;
+use EscolaLms\Cart\Tests\Models\User;
+use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 
@@ -17,7 +16,8 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             ...parent::getPackageProviders($app),
             PermissionServiceProvider::class,
             PassportServiceProvider::class,
-            CartServiceProvider::class
+            CartServiceProvider::class,
+            PaymentsServiceProvider::class,
         ];
     }
 
@@ -25,5 +25,6 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
     {
         $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('passport.client_uuids', false);
+        $app['config']->set('app.debug', env('APP_DEBUG', true));
     }
 }
