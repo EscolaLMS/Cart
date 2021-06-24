@@ -9,6 +9,7 @@ use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Services\OrderProcessingService;
 use EscolaLms\Cart\Services\ShopService;
 use Illuminate\Support\ServiceProvider;
+use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvider;
 
 /**
  * SWAGGER_VERSION
@@ -37,6 +38,7 @@ class CartServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/cart.php', 'cart');
 
         $this->app->register(EventServiceProvider::class);
+        $this->app->register(TreestoneitCartServiceProvider::class);
     }
 
     protected function bootForConsole(): void
