@@ -11,7 +11,7 @@
                     "Cart"
                 ],
                 "description": "Get cart details",
-                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::index",
+                "operationId": "764bd0113215a87ea5b597699b82d6f9",
                 "responses": {
                     "200": {
                         "description": "successful operation",
@@ -39,7 +39,7 @@
                     "Cart"
                 ],
                 "description": "Add course to cart",
-                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::addCourse",
+                "operationId": "a44f1a604e25d9a686e61cb51687b5f8",
                 "parameters": [
                     {
                         "name": "course",
@@ -75,7 +75,7 @@
                     "Cart"
                 ],
                 "description": "Remove course from cart",
-                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::deleteCourse",
+                "operationId": "d68437563ed5f93a2252f6b7c395891f",
                 "parameters": [
                     {
                         "name": "course",
@@ -113,7 +113,7 @@
                     "Cart"
                 ],
                 "description": "Pay for cart",
-                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\CartSwagger::pay",
+                "operationId": "a9183308a576feb0f769f81a32d6cb21",
                 "parameters": [
                     {
                         "name": "paymentMethodId",
@@ -151,7 +151,7 @@
                     "Orders"
                 ],
                 "description": "Get user orders",
-                "operationId": "EscolaLms\\Cart\\Http\\Swagger\\OrderSwagger::index",
+                "operationId": "8997737565f012fc6483d7874fed7375",
                 "responses": {
                     "200": {
                         "description": "successful operation",
