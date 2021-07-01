@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Tests;
 
 use EscolaLms\Cart\CartServiceProvider;
 use EscolaLms\Cart\Tests\Models\User;
+use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -16,8 +17,9 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             ...parent::getPackageProviders($app),
             PermissionServiceProvider::class,
             PassportServiceProvider::class,
-            CartServiceProvider::class,
+            EscolaLmsCourseServiceProvider::class,
             PaymentsServiceProvider::class,
+            CartServiceProvider::class,
         ];
     }
 

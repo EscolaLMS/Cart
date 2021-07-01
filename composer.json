@@ -4,7 +4,7 @@
   "type": "package",
   "require": {
     "php": "^7.4|^8.0",
-    "escolalms/core": ">=0.1",
+    "escolalms/core": "^0|^1",
     "escolalms/courses": "^0",
     "escolalms/payments": "^0",
     "laravel/framework": "^8.0",
@@ -45,6 +45,9 @@
       "providers": [
         "EscolaLms\\Cart\\CartServiceProvider"
       ]
+    },
+    "branch-alias": {
+      "dev-main": "0.x-dev"
     }
   },
   "scripts": {

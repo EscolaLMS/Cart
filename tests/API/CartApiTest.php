@@ -58,7 +58,7 @@ class CartApiTest extends TestCase
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
-            'price' => 10
+            'price' => 1000
         ]);
 
         $this->shopServiceContract->loadUserCart($user);
@@ -72,7 +72,7 @@ class CartApiTest extends TestCase
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
-            'price' => 10
+            'price' => 1000
         ]);
 
         $this->shopServiceContract->loadUserCart($user);
@@ -84,7 +84,7 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
-            ->assertJson([['status' => 'PAID', 'total' => 10, 'subtotal' => 10, 'tax' => 0]])
+            ->assertJson([['status' => 'PAID', 'total' => 1000, 'subtotal' => 1000, 'tax' => 0]])
             ->assertJsonCount(1)
             ->assertJsonCount(1, '0.items');
     }
@@ -103,7 +103,7 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
-            ->assertJson([['status' => 'PAID', 'total' => 11.99, 'subtotal' => 11.99, 'tax' => 0]])
+            ->assertJson([['status' => 'PAID', 'total' => $course->base_price, 'subtotal' => $course->base_price, 'tax' => 0]])
             ->assertJsonCount(1)
             ->assertJsonCount(1, '0.items');
 
