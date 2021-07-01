@@ -1,6 +1,6 @@
 # Cart
 
-[![swagger](https://img.shields.io/badge/documentation-swagger-green)](https://escolalms.github.io/cart/)
+[![swagger](https://img.shields.io/badge/documentation-swagger-green)](https://escolalms.github.io/Cart/)
 [![codecov](https://codecov.io/gh/EscolaLMS/cart/branch/main/graph/badge.svg?token=NRAN4R8AGZ)](https://codecov.io/gh/EscolaLMS/cart)
 [![phpunit](https://github.com/EscolaLMS/cart/actions/workflows/test.yml/badge.svg)](https://github.com/EscolaLMS/cart/actions/workflows/test.yml)
 [![downloads](https://img.shields.io/packagist/dt/escolalms/cart)](https://packagist.org/packages/escolalms/cart)
