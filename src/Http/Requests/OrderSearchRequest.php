@@ -16,8 +16,8 @@ class OrderSearchRequest extends FormRequest
     public function rules()
     {
         return [
-            'date_from' => ['sometimes', 'datetime'],
-            'date_to' => ['sometimes', 'datetime'],
+            'date_from' => ['sometimes', 'date'],
+            'date_to' => ['sometimes', 'date'],
             'user_id' => ['sometimes', 'integer'],
             'author_id' => ['sometimes', 'integer'],
             'course_id' => ['sometimes', 'integer'],

@@ -11,6 +11,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
 
 class AdminApiTest extends TestCase
@@ -71,5 +72,23 @@ class AdminApiTest extends TestCase
         ]);
         $this->response->assertStatus(200);
         $this->response->assertJsonCount(5, 'data');
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'date_from' => Carbon::now()->addDay(1)->toISOString(),
+        ]);
+        $this->response->assertStatus(200);
+        $this->response->assertJsonCount(0, 'data');
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'date_to' => Carbon::now()->addDay(1)->toISOString(),
+        ]);
+        $this->response->assertStatus(200);
+        $this->response->assertJsonCount(10, 'data');
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'date_to' => Carbon::now()->subDay(1)->toISOString(),
+        ]);
+        $this->response->assertStatus(200);
+        $this->response->assertJsonCount(0, 'data');
     }
 }
