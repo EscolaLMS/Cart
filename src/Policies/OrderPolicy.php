@@ -20,7 +20,7 @@ class OrderPolicy
     public function view(User $user, Order $order)
     {
         return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS)
-            || ($user->can(CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS) && $order->whereHasCourseWithAuthor($user)->exists())
+            || ($user->can(CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS) && $order->courses()->where('author_id', '=', $user->getKey())->first())
             || $user->getKey() === $order->user_id;
     }
 
