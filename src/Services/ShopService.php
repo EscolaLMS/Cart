@@ -87,15 +87,20 @@ class ShopService extends CartManager implements ShopServiceContract
         return $this->user;
     }
 
-    public function getResource(): JsonResponse
+    public function getCartData(): array
     {
-        return new JsonResponse([
+        return [
             'total' => $this->moneyFormat($this->total()),
             'subtotal' => $this->moneyFormat($this->subtotal()),
             'tax' => $this->moneyFormat($this->tax()),
             'items' => $this->content()->pluck('buyable')->toArray(),
             'discount' => $this->getDiscount()
-        ]);
+        ];
+    }
+
+    public function getResource(): JsonResponse
+    {
+        return new JsonResponse($this->getCartData());
     }
 
     public function removeItemFromCart(string $item): void

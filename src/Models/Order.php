@@ -2,17 +2,37 @@
 
 namespace EscolaLms\Cart\Models;
 
+use Database\Factories\EscolaLms\Cart\Models\OrderFactory;
+use EscolaLms\Cart\CartServiceProvider;
 use EscolaLms\Cart\Enums\OrderStatus;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Treestoneit\ShoppingCart\Models\Cart;
+use EscolaLms\Cart\QueryBuilders\OrderQueryBuilder;
+use EscolaLms\Courses\Models\Course as BasicCourse;
 use EscolaLms\Payments\Concerns\Payable;
 use EscolaLms\Payments\Contracts\Billable;
 use EscolaLms\Payments\Contracts\Payable as PayableContract;
 use EscolaLms\Payments\Enums\Currency;
-use EscolaLms\Cart\CartServiceProvider;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Treestoneit\ShoppingCart\Models\Cart;
 
 /**
  * EscolaLms\Cart\Models\Order
+ *
+ * @OA\Schema(
+ *      schema="Order",
+ *      @OA\Property(
+ *          property="id",
+ *          description="id",
+ *          type="integer",
+ *      ),
+ *      @OA\Property(
+ *          property="user_id",
+ *          description="user_id",
+ *          type="integer"
+ *      )
+ * )
  *
  * @property int $id
  * @property int|null $user_id
@@ -45,10 +65,19 @@ use EscolaLms\Cart\CartServiceProvider;
 class Order extends Cart implements PayableContract
 {
     use Payable;
+    use HasFactory;
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function courses(): HasManyThrough
+    {
+        return $this->hasManyThrough(Course::class, OrderItem::class, 'order_id', 'id', 'id', 'buyable_id')->whereIn('buyable_type', [
+            Course::class,
+            BasicCourse::class,
+        ]);
     }
 
     public function user(): BelongsTo
@@ -89,5 +118,10 @@ class Order extends Cart implements PayableContract
     public function getPaymentOrderId(): ?string
     {
         return $this->getKey();
+    }
+
+    public function newEloquentBuilder($query): OrderQueryBuilder
+    {
+        return new OrderQueryBuilder($query);
     }
 }

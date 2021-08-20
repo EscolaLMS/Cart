@@ -16,6 +16,8 @@ interface ShopServiceContract extends CartContract
 
     public function getResource(): JsonResponse;
 
+    public function getCartData(): array;
+
     public function addUnique(Buyable $item): self;
 
     public function removeItemFromCart(string $item): void;

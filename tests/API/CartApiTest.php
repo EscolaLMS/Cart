@@ -10,6 +10,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
 {
@@ -17,7 +18,7 @@ class CartApiTest extends TestCase
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
-    private $response;
+    private TestResponse $response;
     private ShopServiceContract $shopServiceContract;
 
     public function setUp(): void
@@ -46,11 +47,15 @@ class CartApiTest extends TestCase
         $this->response->assertStatus(200);
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
-        $this->assertObjectHasAttribute('items', $this->response->getData());
-        $this->assertNotEmpty($this->response->getData()->items);
+        $responseContent = $this->response->json();
+
+        $this->assertTrue($responseContent['success']);
+        $this->assertNotEmpty($responseContent['message']);
+        $this->assertNotEmpty($responseContent['data']);
+        $this->assertNotEmpty($responseContent['data']['items']);
         $cartItemsId = array_map(function ($item) {
-            return $item->id;
-        }, $this->response->getData()->items);
+            return $item['id'];
+        }, $responseContent['data']['items']);
         $this->assertTrue(in_array($course->getKey(), $cartItemsId));
     }
 
@@ -84,9 +89,19 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
-            ->assertJson([['status' => 'PAID', 'total' => 1000, 'subtotal' => 1000, 'tax' => 0]])
-            ->assertJsonCount(1)
-            ->assertJsonCount(1, '0.items');
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    [
+                        'status' => 'PAID',
+                        'total' => 1000,
+                        'subtotal' => 1000,
+                        'tax' => 0
+                    ]
+                ]
+            ])
+            ->assertJsonCount(3)
+            ->assertJsonCount(1, 'data.0.items');
     }
 
     public function test_buy_course()
@@ -103,9 +118,19 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
-            ->assertJson([['status' => 'PAID', 'total' => $course->base_price, 'subtotal' => $course->base_price, 'tax' => 0]])
-            ->assertJsonCount(1)
-            ->assertJsonCount(1, '0.items');
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    [
+                        'status' => 'PAID',
+                        'total' => $course->base_price,
+                        'subtotal' => $course->base_price,
+                        'tax' => 0
+                    ]
+                ]
+            ])
+            ->assertJsonCount(3)
+            ->assertJsonCount(1, 'data.0.items');
 
         $user->refresh();
         $course->refresh();
