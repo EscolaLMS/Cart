@@ -14,7 +14,7 @@ class OrderApiController extends EscolaLmsBaseController implements OrderSwagger
     public function index(Request $request): JsonResponse
     {
         try {
-            return $this->sendResponse(OrderResource::collection($request->user()->orders)->toArray($request), __("Your orders history"));
+            return $this->sendResponseForResource(OrderResource::collection($request->user()->orders), __("Your orders history"));
         } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 400);
         }
