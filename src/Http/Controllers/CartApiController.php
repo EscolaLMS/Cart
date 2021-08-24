@@ -1,17 +1,16 @@
 <?php
 
-namespace EscolaLms\Cart\Http;
+namespace EscolaLms\Cart\Http\Controllers;
 
-use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
-use EscolaLms\Core\Http\Resources\Status;
-use EscolaLms\Payments\Dtos\PaymentMethodDto;
 use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Swagger\CartSwagger;
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Payments\Dtos\PaymentMethodDto;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Model;
 
 class CartApiController extends EscolaLmsBaseController implements CartSwagger
 {
@@ -26,7 +25,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
     {
         $this->shopService->loadUserCart($request->user());
 
-        return $this->shopService->getResource();
+        return $this->sendResponse($this->shopService->getCartData(), __("Cart data fetched"));
     }
 
     public function addCourse(int $course, Request $request): JsonResponse
@@ -38,7 +37,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         }
         $this->shopService->loadUserCart($request->user());
         $this->shopService->addUnique($course);
-        return (new Status(true))->response();
+        return $this->sendSuccess(__("Course added to cart"));
     }
 
     public function deleteCourse(string $course, Request $request): JsonResponse
@@ -46,7 +45,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         $this->shopService->loadUserCart($request->user());
         $this->shopService->removeItemFromCart($course);
 
-        return (new Status(true))->response();
+        return $this->sendSuccess(__("Course removed from cart"));
     }
 
     public function pay(PaymentRequest $request): JsonResponse
@@ -56,9 +55,9 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
             $paymentMethodDto = PaymentMethodDto::instantiateFromRequest($request);
             $this->shopService->purchase($paymentMethodDto);
 
-            return (new Status(true))->response();
+            return $this->sendSuccess(__("Payment successful"));
         } catch (\Exception $e) {
-            return new JsonResponse(['message' => $e->getMessage()], 400);
+            return $this->sendError($e->getMessage(), 400);
         }
     }
 }
