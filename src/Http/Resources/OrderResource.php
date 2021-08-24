@@ -22,8 +22,8 @@ class OrderResource extends JsonResource
             'total' => $this->total,
             'subtotal' => $this->subtotal,
             'tax' => $this->tax,
-            'created_at' => $this->created_at
+            'created_at' => $this->created_at,
+            'user_id' => $this->user_id,
         ];
     }
-
 }
