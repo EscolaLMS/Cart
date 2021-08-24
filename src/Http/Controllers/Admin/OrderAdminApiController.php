@@ -29,6 +29,6 @@ class OrderAdminApiController extends EscolaLmsBaseController implements OrderAd
             $search['author_id'] = $request->user()->getKey();
         }
         $paginatedResults = $this->orderService->searchAndPaginateOrders($sortDto, $search, $request->input('per_page'));
-        return $this->sendResponse(OrderResource::collection($paginatedResults)->toArray($request), __("Order search results"));
+        return $this->sendResponseForResource(OrderResource::collection($paginatedResults), __("Order search results"));
     }
 }
