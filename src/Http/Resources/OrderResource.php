@@ -25,5 +25,4 @@ class OrderResource extends JsonResource
             'created_at' => $this->created_at
         ];
     }
-
 }
