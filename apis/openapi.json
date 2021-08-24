@@ -1,17 +1,17 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "EscolaLMS",
-        "version": "0.0.1"
+        "title": "EscolaLMS Tags",
+        "version": "0.1"
     },
     "paths": {
-        "/api/cart": {
+        "/api/tags": {
             "get": {
                 "tags": [
-                    "Cart"
+                    "tags"
                 ],
-                "description": "Get cart details",
-                "operationId": "764bd0113215a87ea5b597699b82d6f9",
+                "description": "Display a listing of the Tag",
+                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::index",
                 "responses": {
                     "200": {
                         "description": "successful operation",
@@ -25,60 +25,148 @@
                             "application/json": {}
                         }
                     }
-                },
-                "security": [
-                    {
-                        "passport": []
-                    }
-                ]
-            }
-        },
-        "/api/cart/course/{course}": {
-            "post": {
-                "tags": [
-                    "Cart"
-                ],
-                "description": "Add course to cart",
-                "operationId": "a44f1a604e25d9a686e61cb51687b5f8",
-                "parameters": [
-                    {
-                        "name": "course",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "passport": []
-                    }
-                ]
+                }
             },
             "delete": {
+                "summary": "Destroy Tags",
+                "description": "Destroy Tags",
+                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::destroy",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/unique": {
+            "get": {
                 "tags": [
-                    "Cart"
+                    "tags"
                 ],
-                "description": "Remove course from cart",
-                "operationId": "d68437563ed5f93a2252f6b7c395891f",
+                "description": "Display the unique Tags",
+                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::unique",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/create": {
+            "post": {
+                "tags": [
+                    "tags"
+                ],
+                "description": "Create multiple Tags",
+                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::create",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "model_type": {
+                                        "type": "string",
+                                        "example": "Category"
+                                    },
+                                    "model_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Nowości"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/{tag}": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "description": "Display the specified Tag",
+                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::show",
                 "parameters": [
                     {
-                        "name": "course",
+                        "name": "tag",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -93,84 +181,13 @@
                             "application/json": {}
                         }
                     },
-                    "422": {
-                        "description": "Bad request",
+                    "404": {
+                        "description": "Not found",
                         "content": {
                             "application/json": {}
                         }
                     }
-                },
-                "security": [
-                    {
-                        "passport": []
-                    }
-                ]
-            }
-        },
-        "/api/cart/pay": {
-            "post": {
-                "tags": [
-                    "Cart"
-                ],
-                "description": "Pay for cart",
-                "operationId": "a9183308a576feb0f769f81a32d6cb21",
-                "parameters": [
-                    {
-                        "name": "paymentMethodId",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "passport": []
-                    }
-                ]
-            }
-        },
-        "/api/orders": {
-            "get": {
-                "tags": [
-                    "Orders"
-                ],
-                "description": "Get user orders",
-                "operationId": "8997737565f012fc6483d7874fed7375",
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "passport": []
-                    }
-                ]
+                }
             }
         }
     }
