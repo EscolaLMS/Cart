@@ -16,6 +16,11 @@ class User extends CoreUser implements ContractsBillable, ContractsCanOrder
     use Billable;
     use HasCourses;
 
+    protected function getTraitOwner(): self
+    {
+        return $this;
+    }
+
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
