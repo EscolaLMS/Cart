@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Models;
 
-use Database\Factories\EscolaLms\Cart\Models\CourseFactory as CartCourseFactory;
+use EscolaLms\Cart\Database\Factories\CourseFactory as CartCourseFactory;
 use EscolaLms\Courses\Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\Buyable;

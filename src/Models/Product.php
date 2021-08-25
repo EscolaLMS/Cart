@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Models;
 
+use EscolaLms\Cart\Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\Buyable;
@@ -36,5 +37,10 @@ class Product extends Model implements Buyable
     public function getBuyablePrice()
     {
         return $this->price;
+    }
+
+    protected static function newFactory(): ProductFactory
+    {
+        return ProductFactory::new();
     }
 }

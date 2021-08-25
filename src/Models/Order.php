@@ -2,8 +2,8 @@
 
 namespace EscolaLms\Cart\Models;
 
-use Database\Factories\EscolaLms\Cart\Models\OrderFactory;
 use EscolaLms\Cart\CartServiceProvider;
+use EscolaLms\Cart\Database\Factories\OrderFactory;
 use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\QueryBuilders\OrderQueryBuilder;
 use EscolaLms\Courses\Models\Course as BasicCourse;
@@ -123,5 +123,10 @@ class Order extends Cart implements PayableContract
     public function newEloquentBuilder($query): OrderQueryBuilder
     {
         return new OrderQueryBuilder($query);
+    }
+
+    protected static function newFactory(): OrderFactory
+    {
+        return OrderFactory::new();
     }
 }
