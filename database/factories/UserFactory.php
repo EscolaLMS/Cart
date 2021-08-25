@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories\EscolaLms\Cart\Models;
+namespace EscolaLms\Cart\Database\Factories\Models;
 
 use Database\Factories\EscolaLms\Core\Models\UserFactory as CoreUserFactory;
 use EscolaLms\Cart\Models\User;

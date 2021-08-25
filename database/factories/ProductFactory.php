@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories\EscolaLms\Cart\Models;
+namespace EscolaLms\Cart\Database\Factories\Models;
 
 use EscolaLms\Cart\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
