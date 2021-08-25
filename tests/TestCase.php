@@ -3,7 +3,7 @@
 namespace EscolaLms\Cart\Tests;
 
 use EscolaLms\Cart\CartServiceProvider;
-use EscolaLms\Cart\Tests\Models\User;
+use EscolaLms\Cart\Models\User;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use Laravel\Passport\PassportServiceProvider;
