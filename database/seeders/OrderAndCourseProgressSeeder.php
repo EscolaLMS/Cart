@@ -16,6 +16,7 @@ use EscolaLms\Courses\Models\TopicContent\Image;
 use EscolaLms\Courses\Models\TopicContent\OEmbed;
 use EscolaLms\Courses\Models\TopicContent\RichText;
 use EscolaLms\Courses\Models\TopicContent\Video;
+use EscolaLms\Courses\Repositories\CourseProgressRepository;
 use EscolaLms\Courses\Services\ProgressService;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Database\Seeder;
@@ -29,7 +30,7 @@ class OrderAndCourseProgressSeeder extends Seeder
     {
         $student = User::role(UserRole::STUDENT)->first();
         if (!$student) {
-            // This will only be called if User were not seeded before CartSeeder was Called
+            // This will only be called if Users were not seeded before CartSeeder was Called
             $users = User::factory()->count(10)->create();
             /** @var User $user */
             foreach ($users as $user) {
@@ -95,18 +96,19 @@ class OrderAndCourseProgressSeeder extends Seeder
         }
 
         $progressService = app(ProgressService::class);
+        $progressRepository = app(CourseProgressRepository::class);
         foreach ($students as $student) {
             $progressedCourses = $progressService->getByUser($student);
             foreach ($progressedCourses as $course) {
-                $progress = [];
                 /** @var Course $course */
                 foreach ($course->topic as $topic) {
-                    $progress[] = [
-                        'topic_id' => $topic->getKey(),
-                        'status' => ProgressStatus::getRandomValue(),
-                    ];
+                    $status = ProgressStatus::getRandomValue();
+                    $progressRepository->updateInTopic($topic, $student, $status, $status !== ProgressStatus::INCOMPLETE ? rand(60, 300) : null);
+                    if ($status === ProgressStatus::IN_PROGRESS) {
+                        $progressService->ping($student, $topic);
+                    }
                 }
-                $progressService->update($course, $student, $progress);
+                $result = $progressService->update($course, $student, []);
             }
         }
     }

@@ -2,7 +2,8 @@
 
 namespace EscolaLms\Cart\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\EscolaLms\Cart\Models\CourseFactory as CartCourseFactory;
+use EscolaLms\Courses\Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\Buyable;
 use Treestoneit\ShoppingCart\BuyableTrait;
@@ -53,7 +54,6 @@ use Treestoneit\ShoppingCart\BuyableTrait;
 class Course extends \EscolaLms\Courses\Models\Course implements Buyable
 {
     use BuyableTrait;
-    use HasFactory;
 
     public function getBuyablePrice(): float
     {
@@ -63,5 +63,10 @@ class Course extends \EscolaLms\Courses\Models\Course implements Buyable
     public function alreadyBoughtBy(Model $user): bool
     {
         return $this->users()->where('users.id', $user->getKey())->exists();
+    }
+
+    protected static function newFactory(): CourseFactory
+    {
+        return CartCourseFactory::new();
     }
 }
