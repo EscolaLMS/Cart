@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories\EscolaLms\Cart\Models;
+namespace EscolaLms\Cart\Database\Factories;
 
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Courses\Database\Factories\CourseFactory as BaseCourseFactory;

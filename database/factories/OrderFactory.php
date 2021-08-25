@@ -1,7 +1,6 @@
 <?php
 
-
-namespace Database\Factories\EscolaLms\Cart\Models;
+namespace EscolaLms\Cart\Database\Factories;
 
 use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Models\Order;
