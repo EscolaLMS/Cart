@@ -31,10 +31,8 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             EscolaLmsAuthServiceProvider::class,
             PermissionServiceProvider::class,
             PassportServiceProvider::class,
-            EscolaLmsCategoriesServiceProvider::class,
             EscolaLmsCourseServiceProvider::class,
             AuthServiceProvider::class,
-            EscolaLmsTagsServiceProvider::class,
             PaymentsServiceProvider::class,
             CartServiceProvider::class,
         ];
