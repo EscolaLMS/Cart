@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\EscolaLms\Cart;
+namespace EscolaLms\Cart\Database\Seeders;
 
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\User;
