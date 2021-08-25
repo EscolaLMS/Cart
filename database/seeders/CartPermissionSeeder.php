@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\EscolaLms\Cart;
+namespace EscolaLms\Cart\Database\Seeders;
 
 use EscolaLms\Cart\Enums\CartPermissionsEnum;
 use EscolaLms\Core\Enums\UserRole;
