@@ -21,8 +21,8 @@
     "psr-4": {
       "EscolaLms\\Cart\\": "src",
       "EscolaLms\\Cart\\Tests\\": "tests",
-      "Database\\Factories\\EscolaLms\\Cart\\Models\\": "database/factories",
-      "Database\\Seeders\\EscolaLms\\Cart\\": "database/seeders"
+      "EscolaLms\\Cart\\Database\\Factories\\": "database/factories",
+      "EscolaLms\\Cart\\Database\\Seeders\\": "database/seeders"
     }
   },
   "license": "MIT",
