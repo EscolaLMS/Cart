@@ -18,6 +18,7 @@ class CartApiTest extends TestCase
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
+    private $user;
     private TestResponse $response;
     private ShopServiceContract $shopServiceContract;
 
@@ -26,13 +27,14 @@ class CartApiTest extends TestCase
         parent::setUp();
 
         $this->shopServiceContract = app(ShopServiceContract::class);
+        $this->user = config('auth.providers.users.model')::factory()->create();
+        $this->user->guard_name = 'api';
     }
 
     public function test_add_course_to_cart()
     {
         $course = Course::factory()->create();
-        $user = User::factory()->create();
-
+        $user = $this->user;
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
         $this->response->assertStatus(200);
         $this->assertTrue((bool)$user->cart->getKey());
@@ -42,7 +44,7 @@ class CartApiTest extends TestCase
     public function test_cart_items_list()
     {
         $course = Course::factory()->create();
-        $user = User::factory()->create();
+        $user = $this->user;
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
         $this->response->assertStatus(200);
 
@@ -61,7 +63,7 @@ class CartApiTest extends TestCase
 
     public function test_send_payment_method_and_pay()
     {
-        $user = User::factory()->create();
+        $user = $this->user;
         $product = Product::factory()->create([
             'price' => 1000
         ]);
@@ -75,7 +77,7 @@ class CartApiTest extends TestCase
 
     public function test_get_orders()
     {
-        $user = User::factory()->create();
+        $user = $this->user;
         $product = Product::factory()->create([
             'price' => 1000
         ]);
@@ -106,7 +108,7 @@ class CartApiTest extends TestCase
 
     public function test_buy_course()
     {
-        $user = User::factory()->create();
+        $user = $this->user;
         $course = Course::factory()->create();
 
         $this->shopServiceContract->loadUserCart($user);
