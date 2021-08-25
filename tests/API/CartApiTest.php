@@ -14,7 +14,7 @@ use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
 {
-    use WithoutMiddleware;
+    // use WithoutMiddleware;
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
