@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
-use Database\Seeders\EscolaLms\Cart\CartPermissionSeeder;
+use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
