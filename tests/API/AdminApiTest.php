@@ -27,7 +27,7 @@ class AdminApiTest extends TestCase
         parent::setUp();
         $this->seed(CartPermissionSeeder::class);
         $this->shopServiceContract = app(ShopServiceContract::class);
-        $this->user = User::factory()->create();
+        $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::ADMIN);
     }
