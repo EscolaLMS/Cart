@@ -8,8 +8,9 @@ use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Courses\Enum\ProgressStatus;
 use EscolaLms\Courses\Repositories\CourseProgressRepository;
 use EscolaLms\Courses\Services\ProgressService;
+use Illuminate\Database\Seeder;
 
-class ProgressSeeder
+class ProgressSeeder extends Seeder
 {
     public function run()
     {
