@@ -30,7 +30,7 @@ class AdminApiTest extends TestCase
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::ADMIN);
-        OrderItem::truncate();
+        // OrderItem::truncate();
         Order::truncate();
         Course::truncate();
     }
