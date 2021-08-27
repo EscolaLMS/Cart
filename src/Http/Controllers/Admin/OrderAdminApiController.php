@@ -33,9 +33,9 @@ class OrderAdminApiController extends EscolaLmsBaseController implements OrderAd
         return $this->sendResponseForResource(OrderResource::collection($paginatedResults), __("Order search results"));
     }
 
-    public function show(int $order, OrderSearchRequest $request): JsonResponse
+    public function show(int $order, OrderViewRequest $request): JsonResponse
     {
-        $order = $this->orderService->find($id);
-        return $this->sendResponseForResource(OrderResource::make($order), __("Order fetched"));
+        $orderRecord = $this->orderService->find($order);
+        return $this->sendResponseForResource(OrderResource::make($orderRecord), __("Order fetched"));
     }
 }

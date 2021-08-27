@@ -12,4 +12,8 @@ class OrderViewRequest extends FormRequest
     {
         return $this->user()->can('viewAny', Order::class);
     }
+    public function rules()
+    {
+        return [];
+    }
 }

@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Http\Swagger\Admin;
 
 use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
+use EscolaLms\Cart\Http\Requests\OrderViewRequest;
+
 use Illuminate\Http\JsonResponse;
 
 interface OrderAdminSwagger

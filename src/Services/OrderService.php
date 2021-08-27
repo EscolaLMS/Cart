@@ -43,6 +43,6 @@ class OrderService implements OrderServiceContract
 
     public function find($id): Model
     {
-        Order::findOrFail($id);
+        return Order::findOrFail($id);
     }
 }
