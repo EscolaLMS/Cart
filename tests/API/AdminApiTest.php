@@ -105,4 +105,29 @@ class AdminApiTest extends TestCase
     {
         $this->assertLessThanOrEqual(count($response->getData()->data), $count);
     }
+
+
+    public function test_fetch_order()
+    {
+        $courses = [
+            ...Course::factory()->for(User::factory(), 'author')->count(1)->create(),
+        ];
+        /** @var Course $course */
+        $orders = [];
+        foreach ($courses as $course) {
+            /** @var Order $order */
+            $order = Order::factory()->for(User::factory()->create())->create();
+            $orderItem = new OrderItem();
+            $orderItem->buyable()->associate($course);
+            $orderItem->quantity = 1;
+            $orderItem->order_id = $order->getKey();
+            $orderItem->save();
+            $orders[] = $order;
+        }
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/'.$order->id);
+        $this->response->assertStatus(200);
+
+        $this->assertEquals($this->response->getData()->data->id, $order->id);
+    }
 }

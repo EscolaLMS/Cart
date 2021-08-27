@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Http\Swagger\Admin;
 
 use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
+use EscolaLms\Cart\Http\Requests\OrderViewRequest;
+
 use Illuminate\Http\JsonResponse;
 
 interface OrderAdminSwagger
@@ -113,4 +115,49 @@ interface OrderAdminSwagger
      *   )
      */
     public function index(OrderSearchRequest $request): JsonResponse;
+
+
+    /**
+     * @OA\Get(
+     *      path="/api/admin/orders/{id}",
+     *      summary="Display the specified Order",
+     *      tags={"Admin Orders"},
+     *      description="Get Order",
+     *      security={
+     *         {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="id of Order",
+     *          @OA\Schema(
+     *             type="integer",
+     *         ),
+     *          required=true,
+     *          in="path"
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          ),
+     *          @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="success",
+     *                  type="boolean"
+     *              ),
+     *              @OA\Property(
+     *                  property="data",
+     *                  ref="#/components/schemas/Order"
+     *              ),
+     *              @OA\Property(
+     *                  property="message",
+     *                  type="string"
+     *              )
+     *          )
+     *      )
+     * )
+     */
+    public function show(int $order, OrderViewRequest $request): JsonResponse;
 }

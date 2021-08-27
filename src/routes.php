@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function () {
     Route::get('/orders', [OrderAdminApiController::class, 'index']);
+    Route::get('/orders/{order}', [OrderAdminApiController::class, 'show']);
 });
 
 Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function () {

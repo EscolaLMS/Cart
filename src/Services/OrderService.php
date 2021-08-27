@@ -9,6 +9,7 @@ use EscolaLms\Core\Dtos\OrderDto as SortDto;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class OrderService implements OrderServiceContract
 {
@@ -38,5 +39,10 @@ class OrderService implements OrderServiceContract
         }
 
         return $query->paginate($per_page ?? 15);
+    }
+
+    public function find($id): Model
+    {
+        return Order::findOrFail($id);
     }
 }

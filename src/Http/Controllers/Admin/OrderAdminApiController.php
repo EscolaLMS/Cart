@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Controllers\Admin;
 
 use EscolaLms\Cart\Enums\CartPermissionsEnum;
 use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
+use EscolaLms\Cart\Http\Requests\OrderViewRequest;
 use EscolaLms\Cart\Http\Resources\OrderResource;
 use EscolaLms\Cart\Http\Swagger\Admin\OrderAdminSwagger;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
@@ -30,5 +31,11 @@ class OrderAdminApiController extends EscolaLmsBaseController implements OrderAd
         }
         $paginatedResults = $this->orderService->searchAndPaginateOrders($sortDto, $search, $request->input('per_page'));
         return $this->sendResponseForResource(OrderResource::collection($paginatedResults), __("Order search results"));
+    }
+
+    public function show(int $order, OrderViewRequest $request): JsonResponse
+    {
+        $orderRecord = $this->orderService->find($order);
+        return $this->sendResponseForResource(OrderResource::make($orderRecord), __("Order fetched"));
     }
 }
