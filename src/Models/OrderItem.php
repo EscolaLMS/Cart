@@ -17,11 +17,11 @@ use Treestoneit\ShoppingCart\Models\CartItem;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $buyable
  * @property-read mixed $description
- * @property-read float|int $extra_fees
+ * @property-read int $extra_fees
  * @property-read string $identifier
- * @property-read float|null $price
- * @property-read float $subtotal
- * @property-read float $total
+ * @property-read int|null $price
+ * @property-read int $subtotal
+ * @property-read int $total
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] all($columns = ['*'])
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] get($columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem newModelQuery()

@@ -34,7 +34,7 @@ class Product extends Model implements Buyable
         return 'Example product ' . $this->getKey();
     }
 
-    public function getBuyablePrice()
+    public function getBuyablePrice(): int
     {
         return $this->price;
     }

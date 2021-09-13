@@ -6,8 +6,8 @@ use EscolaLms\Cart\Models\Contracts\CanOrder;
 use EscolaLms\Cart\Models\OrderItem;
 use EscolaLms\Cart\Services\Contracts\OrderProcessingServiceContract;
 use EscolaLms\Courses\Models\Course;
-use EscolaLms\Courses\Models\Traits\HasCourses;
 use EscolaLms\Courses\ValueObjects\CourseProgressCollection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class OrderProcessingService implements OrderProcessingServiceContract
@@ -26,8 +26,8 @@ class OrderProcessingService implements OrderProcessingServiceContract
 
     private function processBuyingCourse(Course $course, CanOrder $user)
     {
-        if (in_array(HasCourses::class, class_uses_recursive($user), true)) {
-            $user->courses()->attach($course->getKey());
+        if ($user instanceof Model) {
+            $course->users()->syncWithoutDetaching([$user->getKey()]);
             CourseProgressCollection::make($user, $course);
         }
     }

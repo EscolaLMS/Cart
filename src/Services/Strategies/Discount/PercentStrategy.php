@@ -6,8 +6,9 @@ use EscolaLms\Cart\Services\Strategies\Abstracts\DiscountStrategy;
 
 class PercentStrategy extends DiscountStrategy
 {
-    public function total(float $subtotal, float $tax): float
+    public function total(int $subtotal, int $tax): int
     {
-        return $this->value(($subtotal + $tax) * ((100 - $this->discount->value) / 100));
+        $result = intdiv(($subtotal + $tax) * (100 - $this->discount->value), 100);
+        return $this->value($result);
     }
 }

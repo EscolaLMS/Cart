@@ -20,7 +20,7 @@ use Treestoneit\ShoppingCart\Models\Cart;
 /**
  * EscolaLms\Cart\Models\Order
  *
- * @OA\Schema(
+ * @OA\Schema (
  *      schema="Order",
  *      @OA\Property(
  *          property="id",
@@ -37,11 +37,13 @@ use Treestoneit\ShoppingCart\Models\Cart;
  * @property int $id
  * @property int|null $user_id
  * @property int $status
- * @property float $total
- * @property float $subtotal
- * @property float $tax
+ * @property int $total
+ * @property int $subtotal
+ * @property int $tax
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\Course[] $courses
+ * @property-read int|null $courses_count
  * @property-read int $quantity
  * @property-read string $status_name
  * @property-read \Treestoneit\ShoppingCart\Models\CartItemCollection|\EscolaLms\Cart\Models\OrderItem[] $items
@@ -49,17 +51,22 @@ use Treestoneit\ShoppingCart\Models\Cart;
  * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Payments\Models\Payment[] $payments
  * @property-read int|null $payments_count
  * @property-read \EscolaLms\Cart\Models\User|null $user
- * @method static \Illuminate\Database\Eloquent\Builder|Order newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Order newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Order query()
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereSubtotal($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereTax($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereTotal($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Order whereUserId($value)
+ * @method static \EscolaLms\Cart\Database\Factories\OrderFactory factory(...$parameters)
+ * @method static OrderQueryBuilder|Order newModelQuery()
+ * @method static OrderQueryBuilder|Order newQuery()
+ * @method static OrderQueryBuilder|Order query()
+ * @method static OrderQueryBuilder|Order whereCreatedAt($value)
+ * @method static OrderQueryBuilder|Order whereHasCourse(\EscolaLms\Courses\Models\Course $course)
+ * @method static OrderQueryBuilder|Order whereHasCourseId(int $course_id)
+ * @method static OrderQueryBuilder|Order whereHasCourseWithAuthor(\EscolaLms\Core\Models\User $author)
+ * @method static OrderQueryBuilder|Order whereHasCourseWithAuthorId(int $author_id)
+ * @method static OrderQueryBuilder|Order whereId($value)
+ * @method static OrderQueryBuilder|Order whereStatus($value)
+ * @method static OrderQueryBuilder|Order whereSubtotal($value)
+ * @method static OrderQueryBuilder|Order whereTax($value)
+ * @method static OrderQueryBuilder|Order whereTotal($value)
+ * @method static OrderQueryBuilder|Order whereUpdatedAt($value)
+ * @method static OrderQueryBuilder|Order whereUserId($value)
  * @mixin \Eloquent
  */
 class Order extends Cart implements PayableContract
@@ -102,7 +109,7 @@ class Order extends Cart implements PayableContract
 
     public function getPaymentAmount(): int
     {
-        return (int) ($this->total * 100); // because someone decided to use floats instead of integers representing minor currency unit
+        return $this->total;
     }
 
     public function getPaymentCurrency(): ?Currency
