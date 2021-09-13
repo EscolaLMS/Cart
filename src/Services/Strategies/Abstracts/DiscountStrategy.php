@@ -18,8 +18,8 @@ abstract class DiscountStrategy implements DiscountStrategyContract
         $this->discount = $discount;
     }
 
-    protected function value(float $value): float
+    protected function value(int $value): int
     {
-        return $value >= 0 ? round($value, 2) : 0;
+        return $value >= 0 ? $value : 0;
     }
 }

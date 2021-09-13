@@ -17,9 +17,9 @@ class CreateOrdersTable extends Migration
             $table->bigIncrements('id');
             $table->foreignId('user_id')->nullable();
             $table->unsignedSmallInteger('status');
-            $table->double('total', 10, 2)->default(0);
-            $table->double('subtotal', 10, 2)->default(0);
-            $table->double('tax', 10, 2)->default(0);
+            $table->unsignedInteger('total')->default(0);
+            $table->unsignedInteger('subtotal')->default(0);
+            $table->unsignedInteger('tax')->default(0);
             $table->timestamps();
 
             $table->index('user_id');

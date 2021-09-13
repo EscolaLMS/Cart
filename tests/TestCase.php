@@ -3,18 +3,15 @@
 namespace EscolaLms\Cart\Tests;
 
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
+use EscolaLms\Auth\Tests\Models\Client;
 use EscolaLms\Cart\CartServiceProvider;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Cart\Tests\Models\User as TestUser;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
+use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
-use EscolaLms\Auth\Tests\Models\Client;
-
-use EscolaLms\Auth\Models\User;
-use Laravel\Passport\Passport;
-use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
 
 class TestCase extends \EscolaLms\Core\Tests\TestCase
 {

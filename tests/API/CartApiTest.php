@@ -4,17 +4,16 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
+use EscolaLms\Payments\Facades\Payments;
+use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
 {
-    // use WithoutMiddleware;
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
@@ -104,11 +103,16 @@ class CartApiTest extends TestCase
             ])
             ->assertJsonCount(3)
             ->assertJsonCount(1, 'data.0.items');
+
+        $order_id = $this->response->json('data.0.id');
+        $payment = Payment::where('payable_id', $order_id)->first();
+        $this->assertEquals(1000, $payment->amount);
     }
 
     public function test_buy_course()
     {
         $user = $this->user;
+        /** @var Course $course */
         $course = Course::factory()->create();
 
         $this->shopServiceContract->loadUserCart($user);
@@ -137,5 +141,10 @@ class CartApiTest extends TestCase
         $user->refresh();
         $course->refresh();
         $this->assertTrue($course->alreadyBoughtBy($user));
+        $this->assertTrue($user->courses()->where('courses.id', $course->getKey())->exists());
+
+        $order_id = $this->response->json('data.0.id');
+        $payment = Payment::where('payable_id', $order_id)->first();
+        $this->assertEquals($course->base_price, $payment->amount);
     }
 }

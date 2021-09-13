@@ -8,8 +8,7 @@ use EscolaLms\Cart\Models\OrderItem;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User as ModelsUser;
-use EscolaLms\Courses\Models\Lesson;
-use EscolaLms\Courses\Models\Topic;
+use EscolaLms\Courses\Database\Seeders\CoursesSeeder;
 use EscolaLms\Courses\Models\TopicContent\Audio;
 use EscolaLms\Courses\Models\TopicContent\Image;
 use EscolaLms\Courses\Models\TopicContent\OEmbed;
@@ -37,26 +36,7 @@ class OrdersSeeder extends Seeder
 
         $course = Course::first();
         if (!$course) {
-            // This will only be called if CourseSeeder was not called before CartSeeder
-            $courses = Course::factory()
-                ->count(rand(5, 10))
-                ->has(Lesson::factory()
-                    ->has(
-                        Topic::factory()
-                            ->count(rand(5, 10))
-                            ->afterCreating(function ($topic) {
-                                $content = $this->getRandomRichContent();
-                                if (method_exists($content, 'updatePath')) {
-                                    $content = $content->updatePath($topic->id)->create();
-                                } else {
-                                    $content = $content->create();
-                                }
-
-                                $topic->topicable()->associate($content)->save();
-                            })
-                    )
-                    ->count(rand(5, 10)))
-                ->create();
+            $this->call(CoursesSeeder::class);
         }
 
         $students = User::role(UserRole::STUDENT)->take(10)->get();

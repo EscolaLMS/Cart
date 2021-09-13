@@ -6,7 +6,7 @@ use EscolaLms\Cart\Services\Strategies\Contracts\DiscountStrategyContract;
 
 class NoneStrategy implements DiscountStrategyContract
 {
-    public function total(float $subtotal, float $tax): float
+    public function total(int $subtotal, int $tax): int
     {
         return $subtotal + $tax;
     }

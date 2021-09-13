@@ -112,8 +112,15 @@ class ShopService extends CartManager implements ShopServiceContract
         }
     }
 
-    private function moneyFormat(float $value): string
+    private function moneyFormat(int $value): string
     {
-        return number_format($value, 2, '.', '');
+        $quotient = intdiv($value, 100);
+        $remainder = $value - ($quotient * 100);
+
+        $result = (string) $quotient . '.';
+        if ($remainder < 10) {
+            return $result . '0' . (string) $remainder;
+        }
+        return $result . (string) $remainder;
     }
 }
