@@ -39,9 +39,9 @@ trait Payments
         $this->getUser()->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
 
         $order = new Order($this->getModel()->getAttributes());
-        $order->total = $this->total();
-        $order->subtotal = $this->subtotal();
-        $order->tax = $this->tax();
+        $order->total = (int) $this->total();
+        $order->subtotal = (int) $this->subtotal();
+        $order->tax = (int) $this->tax();
         $order->status = OrderStatus::PROCESSING;
         $order->save();
 

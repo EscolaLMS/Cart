@@ -13,7 +13,7 @@ trait Discounts
 
     public function total(int $taxRate = null): int
     {
-        return $this->getDiscountStrategy()->total($this->subtotal(), $this->tax($taxRate));
+        return $this->getDiscountStrategy()->total((int) $this->subtotal(), (int) $this->tax($taxRate));
     }
 
     public function getDiscount(): ?Discount
