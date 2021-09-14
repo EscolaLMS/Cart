@@ -90,9 +90,9 @@ class ShopService extends CartManager implements ShopServiceContract
     public function getCartData(): array
     {
         return [
-            'total' => $this->moneyFormat($this->total()),
-            'subtotal' => $this->moneyFormat($this->subtotal()),
-            'tax' => $this->moneyFormat($this->tax()),
+            'total' => $this->moneyFormat((int) $this->total()),
+            'subtotal' => $this->moneyFormat((int) $this->subtotal()),
+            'tax' => $this->moneyFormat((int) $this->tax()),
             'items' => $this->content()->pluck('buyable')->toArray(),
             'discount' => $this->getDiscount()
         ];
@@ -122,5 +122,18 @@ class ShopService extends CartManager implements ShopServiceContract
             return $result . '0' . (string) $remainder;
         }
         return $result . (string) $remainder;
+    }
+
+    public function subtotal(): float
+    {
+        return round(parent::subtotal(), 0);
+    }
+
+    /**
+     * @param  int|float|null  $rate
+     */
+    public function tax($rate = null): float
+    {
+        return round(parent::tax($rate), 0);
     }
 }
