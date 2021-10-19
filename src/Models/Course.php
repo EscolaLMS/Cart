@@ -73,7 +73,7 @@ class Course extends \EscolaLms\Courses\Models\Course implements Buyable
 
     public function getBuyablePrice(): int
     {
-        return $this->base_price;
+        return $this->base_price ?? 0;
     }
 
     public function alreadyBoughtBy(Model $user): bool
