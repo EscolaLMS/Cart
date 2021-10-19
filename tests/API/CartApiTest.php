@@ -147,4 +147,52 @@ class CartApiTest extends TestCase
         $payment = Payment::where('payable_id', $order_id)->first();
         $this->assertEquals($course->base_price, $payment->amount);
     }
+
+
+    public function test_buy_free_course()
+    {
+        $user = $this->user;
+        /** @var Course $course */
+        $course = Course::factory()->create([
+            'base_price' => 0,
+            'active' => true,
+        ]);
+
+        $this->shopServiceContract->loadUserCart($user);
+        $this->shopServiceContract->add($course, 1);
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => 'free']);
+
+        $this->response->assertOk();
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
+        $this->response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    [
+                        'status' => 'PAID',
+                        'total' => $course->base_price,
+                        'subtotal' => $course->base_price,
+                        'tax' => 0
+                    ]
+                ]
+            ])
+            ->assertJsonCount(3)
+            ->assertJsonCount(1, 'data.0.items');
+
+        $user->refresh();
+        $course->refresh();
+        $this->assertTrue($course->alreadyBoughtBy($user));
+        $this->assertTrue($user->courses()->where('courses.id', $course->getKey())->exists());
+
+        $order_id = $this->response->json('data.0.id');
+        $payment = Payment::where('payable_id', $order_id)->first();
+        $this->assertEquals($course->base_price, $payment->amount);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/courses/progress');
+
+        $course_id = $this->response->json('data.0.course.id');
+        $this->assertEquals($course->getKey(), $course_id);
+    }
 }

@@ -9,6 +9,7 @@ use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Cart\Tests\Models\User as TestUser;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
+use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -28,8 +29,9 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             EscolaLmsAuthServiceProvider::class,
             PermissionServiceProvider::class,
             PassportServiceProvider::class,
-            EscolaLmsCourseServiceProvider::class,
             AuthServiceProvider::class,
+            EscolaLmsCourseServiceProvider::class,
+            EscolaLmsScormServiceProvider::class,
             PaymentsServiceProvider::class,
             CartServiceProvider::class,
         ];
