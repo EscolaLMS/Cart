@@ -6,6 +6,7 @@
 [![downloads](https://img.shields.io/packagist/dt/escolalms/cart)](https://packagist.org/packages/escolalms/cart)
 [![downloads](https://img.shields.io/packagist/v/escolalms/cart)](https://packagist.org/packages/escolalms/cart)
 [![downloads](https://img.shields.io/packagist/l/escolalms/cart)](https://packagist.org/packages/escolalms/cart)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b8c8aa16976961f670b4/maintainability)](https://codeclimate.com/github/EscolaLMS/Cart/maintainability)
 
 ## Usage
 
