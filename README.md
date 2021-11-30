@@ -10,7 +10,7 @@
 
 ## Usage
 
-User model (or any other Model representing Authenticatable entity) must be extended with the trait CanOrder:
+User model (or any other Model representing Authenticatable entity) must be extended with the trait CanOrder, like:
 
 ```php
 use EscolaLms\Cart\Models\Traits\CanOrder;
