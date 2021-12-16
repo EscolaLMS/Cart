@@ -8,32 +8,6 @@ use EscolaLms\Cart\Models\Order;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderPaid
+class OrderPaid extends EscolaLmsCartTemplateEvent
 {
-    use Dispatchable, SerializesModels;
-
-    private Order $order;
-    private CanOrder $user;
-
-    public function __construct(Order $order, CanOrder $user)
-    {
-        $this->order = $order;
-        $this->user = $user;
-    }
-
-    /**
-     * @return Order
-     */
-    public function getOrder(): Order
-    {
-        return $this->order;
-    }
-
-    /**
-     * @return CanOrder
-     */
-    public function getUser(): CanOrder
-    {
-        return $this->user;
-    }
 }
