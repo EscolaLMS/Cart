@@ -5,8 +5,8 @@ namespace EscolaLms\Cart\Services\Concerns;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Cart\Enums\OrderStatus;
-use EscolaLms\Cart\Events\OrderCancelled;
-use EscolaLms\Cart\Events\OrderPaid;
+use EscolaLms\Cart\Events\EscolaLmsCartOrderCancelledTemplateEvent;
+use EscolaLms\Cart\Events\EscolaLmsCartOrderPaidTemplateEvent;
 use EscolaLms\Cart\Models\Order;
 use RuntimeException;
 
@@ -60,14 +60,14 @@ trait Payments
     protected function setPaid(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::PAID);
-        event(new OrderPaid($order, $this->getUser()));
+        event(new EscolaLmsCartOrderPaidTemplateEvent($order, $this->getUser()));
         $this->destroy();
     }
 
     protected function setCancelled(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::CANCELLED);
-        event(new OrderCancelled($order, $this->getUser()));
+        event(new EscolaLmsCartOrderCancelledTemplateEvent($this->getUser(), $order));
         $this->destroy();
     }
 

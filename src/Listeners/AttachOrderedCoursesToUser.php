@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Listeners;
 
-use EscolaLms\Cart\Events\OrderPaid;
+use EscolaLms\Cart\Events\EscolaLmsCartOrderPaidTemplateEvent;
 use EscolaLms\Cart\Services\Contracts\OrderProcessingServiceContract;
 
 class AttachOrderedCoursesToUser
@@ -24,7 +24,7 @@ class AttachOrderedCoursesToUser
      *
      * @return void
      */
-    public function handle(OrderPaid $event)
+    public function handle(EscolaLmsCartOrderPaidTemplateEvent $event)
     {
         //TODO: move this functionality to Courses Service?
         $this->orderProcessing->processOrderItems($event->getOrder()->items, $event->getUser());
