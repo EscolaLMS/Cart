@@ -60,7 +60,7 @@ trait Payments
     protected function setPaid(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::PAID);
-        event(new EscolaLmsCartOrderPaidTemplateEvent($order, $this->getUser()));
+        event(new EscolaLmsCartOrderPaidTemplateEvent($this->getUser(), $order));
         $this->destroy();
     }
 
