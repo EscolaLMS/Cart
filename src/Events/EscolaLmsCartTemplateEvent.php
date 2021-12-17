@@ -11,10 +11,10 @@ abstract class EscolaLmsCartTemplateEvent
 {
     use Dispatchable, SerializesModels;
 
-    private Order $order;
+    private ?Order $order;
     private CanOrder $user;
 
-    public function __construct(CanOrder $user, Order $order)
+    public function __construct(CanOrder $user, ?Order $order = null)
     {
         $this->order = $order;
         $this->user = $user;
@@ -23,9 +23,9 @@ abstract class EscolaLmsCartTemplateEvent
     /**
      * @return Order
      */
-    public function getOrder(): Order
+    public function getOrder(): ?Order
     {
-        return $this->order;
+        return $this->order ?? null;
     }
 
     /**

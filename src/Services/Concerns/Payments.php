@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Services\Concerns;
 
 use EscolaLms\Cart\Events\EscolaLmsCartOrderSuccessTemplateEvent;
+use EscolaLms\Cart\Services\Contracts\OrderProcessingServiceContract;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Cart\Enums\OrderStatus;
@@ -60,15 +61,24 @@ trait Payments
     protected function setPaid(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::PAID);
-        event(new EscolaLmsCartOrderPaidTemplateEvent($this->getUser(), $order));
+        $this->clearCartBeforeDestroy($order);
         $this->destroy();
+        event(new EscolaLmsCartOrderPaidTemplateEvent($this->getUser(), $order));
     }
 
     protected function setCancelled(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::CANCELLED);
-        event(new EscolaLmsCartOrderCancelledTemplateEvent($this->getUser(), $order));
+        $this->clearCartBeforeDestroy($order);
         $this->destroy();
+        event(new EscolaLmsCartOrderCancelledTemplateEvent($this->getUser(), $order));
+    }
+
+    private function clearCartBeforeDestroy(Order $order): void
+    {
+        $orderProcessingContract = app(OrderProcessingServiceContract::class);
+        $orderProcessingContract->processOrderItems($order->items, $this->getUser());
+        $this->items()->each(fn ($item) => $this->remove($item->getKey()));
     }
 
     private function setOrderStatus(Order $order, int $status): void

@@ -57,6 +57,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
 
             return $this->sendSuccess(__("Payment successful"));
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return $this->sendError($e->getMessage(), 400);
         }
     }

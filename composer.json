@@ -4,7 +4,6 @@
   "type": "package",
   "require": {
     "php": "^7.4|^8.0",
-    "escolalms/auth": "^0",
     "escolalms/core": "^1",
     "escolalms/courses": "^0",
     "escolalms/payments": "^0",
