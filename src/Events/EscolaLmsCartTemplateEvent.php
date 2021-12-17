@@ -1,21 +1,20 @@
 <?php
 
-
 namespace EscolaLms\Cart\Events;
 
 use EscolaLms\Cart\Models\Contracts\CanOrder;
 use EscolaLms\Cart\Models\Order;
-use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderCancelled
+abstract class EscolaLmsCartTemplateEvent
 {
     use Dispatchable, SerializesModels;
 
     private Order $order;
     private CanOrder $user;
 
-    public function __construct(Order $order, CanOrder $user)
+    public function __construct(CanOrder $user, Order $order)
     {
         $this->order = $order;
         $this->user = $user;
