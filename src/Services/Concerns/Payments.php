@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services\Concerns;
 
+use EscolaLms\Cart\Events\EscolaLmsCartOrderSuccessTemplateEvent;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Cart\Enums\OrderStatus;
@@ -22,7 +23,6 @@ trait Payments
         $paymentProcessor = $order->process();
         $paymentProcessor->purchase($paymentMethod);
         $payment = $paymentProcessor->getPayment();
-
         if ($payment->status->is(PaymentStatus::PAID)) {
             $this->setPaid($order);
         } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
@@ -53,7 +53,7 @@ trait Payments
             );
         }
         $order->items()->insert($items);
-
+        event(new EscolaLmsCartOrderSuccessTemplateEvent($this->getUser(), $order));
         return $order;
     }
 
