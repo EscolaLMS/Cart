@@ -23,7 +23,6 @@ trait Payments
         $paymentProcessor = $order->process();
         $paymentProcessor->purchase($paymentMethod);
         $payment = $paymentProcessor->getPayment();
-
         if ($payment->status->is(PaymentStatus::PAID)) {
             $this->setPaid($order);
         } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
