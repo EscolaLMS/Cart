@@ -14,7 +14,7 @@ abstract class EscolaLmsCartTemplateEvent
     private Order $order;
     private CanOrder $user;
 
-    public function __construct(Order $order, CanOrder $user)
+    public function __construct(CanOrder $user, Order $order)
     {
         $this->order = $order;
         $this->user = $user;
