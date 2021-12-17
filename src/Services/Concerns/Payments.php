@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services\Concerns;
 
+use EscolaLms\Cart\Events\EscolaLmsCartOrderSuccessTemplateEvent;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Cart\Enums\OrderStatus;
@@ -53,7 +54,7 @@ trait Payments
             );
         }
         $order->items()->insert($items);
-
+        event(new EscolaLmsCartOrderSuccessTemplateEvent($this->getUser(), $order));
         return $order;
     }
 
