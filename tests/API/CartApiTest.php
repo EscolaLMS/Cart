@@ -2,8 +2,8 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
-use EscolaLms\Cart\Events\EscolaLmsCartOrderPaidTemplateEvent;
-use EscolaLms\Cart\Events\EscolaLmsCartOrderSuccessTemplateEvent;
+use EscolaLms\Cart\Events\CartOrderPaid;
+use EscolaLms\Cart\Events\CartOrderSuccess;
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -65,7 +65,6 @@ class CartApiTest extends TestCase
 
     public function test_send_payment_method_and_pay()
     {
-//        Event::fake();
         $user = $this->user;
         $product = Product::factory()->create([
             'price' => 1000
@@ -76,13 +75,10 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
         $this->response->assertOk();
-//        Event::assertDispatched(EscolaLmsCartOrderSuccessTemplateEvent::class);
-//        Event::assertDispatched(EscolaLmsCartOrderPaidTemplateEvent::class);
     }
 
     public function test_get_orders()
     {
-//        Event::fake();
         $user = $this->user;
         $product = Product::factory()->create([
             'price' => 1000
@@ -94,8 +90,6 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
 
         $this->response->assertOk();
-//        Event::assertDispatched(EscolaLmsCartOrderSuccessTemplateEvent::class);
-//        Event::assertDispatched(EscolaLmsCartOrderPaidTemplateEvent::class);
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
             ->assertJson([
@@ -119,7 +113,6 @@ class CartApiTest extends TestCase
 
     public function test_buy_course()
     {
-//        Event::fake();
         $user = $this->user;
         /** @var Course $course */
         $course = Course::factory()->create();
@@ -130,8 +123,6 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
 
         $this->response->assertOk();
-//        Event::assertDispatched(EscolaLmsCartOrderSuccessTemplateEvent::class);
-//        Event::assertDispatched(EscolaLmsCartOrderPaidTemplateEvent::class);
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
             ->assertJson([

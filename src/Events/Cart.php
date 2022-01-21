@@ -7,7 +7,7 @@ use EscolaLms\Cart\Models\Order;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-abstract class EscolaLmsCartTemplateEvent
+abstract class Cart
 {
     use Dispatchable, SerializesModels;
 
