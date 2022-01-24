@@ -9,6 +9,7 @@ use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
+use EscolaLms\Courses\Enum\CourseStatusEnum;
 use EscolaLms\Payments\Facades\Payments;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -155,7 +156,7 @@ class CartApiTest extends TestCase
         /** @var Course $course */
         $course = Course::factory()->create([
             'base_price' => 0,
-            'active' => true,
+            'status' => CourseStatusEnum::PUBLISHED,
         ]);
 
         $this->shopServiceContract->loadUserCart($user);
