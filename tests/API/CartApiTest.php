@@ -52,7 +52,6 @@ class CartApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
         $responseContent = $this->response->json();
-
         $this->assertTrue($responseContent['success']);
         $this->assertNotEmpty($responseContent['message']);
         $this->assertNotEmpty($responseContent['data']);

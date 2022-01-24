@@ -23,8 +23,12 @@ class OrderQueryBuilder extends Builder
         return $this->whereHasCourseWithAuthorId($author->getKey());
     }
 
-    public function whereHasCourseWithAuthorId(int $author_id)
+    public function whereHasCourseWithAuthorId(int $authorId)
     {
-        return $this->whereHas('courses', fn (Builder $query) => $query->where('author_id', $author_id));
+        return $this->whereHas('courses', function(Builder $query) use($authorId) {
+            $query->whereHas('authors', function (Builder $query) use($authorId) {
+                $query->where('author_id', '=', $authorId);
+            });
+        });
     }
 }

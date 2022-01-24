@@ -4,7 +4,10 @@ namespace EscolaLms\Cart\Models;
 
 use EscolaLms\Cart\Database\Factories\CourseFactory as CartCourseFactory;
 use EscolaLms\Courses\Database\Factories\CourseFactory;
+use Illuminate\Database\ClassMorphViolationException;
+use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Treestoneit\ShoppingCart\Buyable;
 use Treestoneit\ShoppingCart\BuyableTrait;
 
@@ -70,6 +73,7 @@ use Treestoneit\ShoppingCart\BuyableTrait;
 class Course extends \EscolaLms\Courses\Models\Course implements Buyable
 {
     use BuyableTrait;
+    use HasRelationships;
 
     public function getBuyablePrice(): int
     {

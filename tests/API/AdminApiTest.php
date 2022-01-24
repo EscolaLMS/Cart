@@ -38,8 +38,12 @@ class AdminApiTest extends TestCase
     public function test_list_orders()
     {
         $courses = [
-            ...Course::factory()->for(User::factory(), 'author')->count(5)->create(),
-            ...Course::factory()->for(User::factory(), 'author')->count(5)->create(),
+            ...Course::factory([
+                'author_id' => User::factory()->create()->getKey()
+            ])->count(5)->create(),
+            ...Course::factory([
+                'author_id' => User::factory()->create()->getKey()
+            ])->count(5)->create(),
         ];
         /** @var Course $course */
         $orders = [];
@@ -110,7 +114,9 @@ class AdminApiTest extends TestCase
     public function test_fetch_order()
     {
         $courses = [
-            ...Course::factory()->for(User::factory(), 'author')->count(1)->create(),
+            ...Course::factory([
+                'author_id' => User::factory()->create()->getKey()
+            ])->count(1)->create(),
         ];
         /** @var Course $course */
         $orders = [];
