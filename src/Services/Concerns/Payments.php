@@ -2,12 +2,12 @@
 
 namespace EscolaLms\Cart\Services\Concerns;
 
-use EscolaLms\Cart\Events\EscolaLmsCartOrderSuccessTemplateEvent;
+use EscolaLms\Cart\Events\CartOrderSuccess;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Cart\Enums\OrderStatus;
-use EscolaLms\Cart\Events\EscolaLmsCartOrderCancelledTemplateEvent;
-use EscolaLms\Cart\Events\EscolaLmsCartOrderPaidTemplateEvent;
+use EscolaLms\Cart\Events\CartOrderCancelled;
+use EscolaLms\Cart\Events\CartOrderPaid;
 use EscolaLms\Cart\Models\Order;
 use RuntimeException;
 
@@ -53,21 +53,21 @@ trait Payments
             );
         }
         $order->items()->insert($items);
-        event(new EscolaLmsCartOrderSuccessTemplateEvent($this->getUser(), $order));
+        event(new CartOrderSuccess($this->getUser(), $order));
         return $order;
     }
 
     protected function setPaid(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::PAID);
-        event(new EscolaLmsCartOrderPaidTemplateEvent($this->getUser(), $order));
+        event(new CartOrderPaid($this->getUser(), $order));
         $this->destroy();
     }
 
     protected function setCancelled(Order $order): void
     {
         $this->setOrderStatus($order, OrderStatus::CANCELLED);
-        event(new EscolaLmsCartOrderCancelledTemplateEvent($this->getUser(), $order));
+        event(new CartOrderCancelled($this->getUser(), $order));
         $this->destroy();
     }
 

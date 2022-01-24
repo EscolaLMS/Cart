@@ -2,14 +2,14 @@
 
 namespace EscolaLms\Cart\Providers;
 
-use EscolaLms\Cart\Events\EscolaLmsCartOrderPaidTemplateEvent;
+use EscolaLms\Cart\Events\CartOrderPaid;
 use EscolaLms\Cart\Listeners\AttachOrderedCoursesToUser;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        EscolaLmsCartOrderPaidTemplateEvent::class => [
+        CartOrderPaid::class => [
             AttachOrderedCoursesToUser::class,
         ]
     ];

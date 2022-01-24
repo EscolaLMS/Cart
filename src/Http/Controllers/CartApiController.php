@@ -24,7 +24,6 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
     public function index(Request $request): JsonResponse
     {
         $this->shopService->loadUserCart($request->user());
-
         return $this->sendResponse($this->shopService->getCartData(), __("Cart data fetched"));
     }
 
