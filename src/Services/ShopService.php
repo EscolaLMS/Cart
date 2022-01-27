@@ -93,7 +93,6 @@ class ShopService extends CartManager implements ShopServiceContract
             'subtotal' => $this->moneyFormat((int) $this->subtotal()),
             'tax' => $this->moneyFormat((int) $this->tax()),
             'items' => $this->content()->pluck('buyable')->toArray(),
-            'discount' => $this->getDiscount()
         ];
     }
 

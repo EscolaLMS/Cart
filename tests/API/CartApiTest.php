@@ -2,18 +2,14 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
-use EscolaLms\Cart\Events\CartOrderPaid;
-use EscolaLms\Cart\Events\CartOrderSuccess;
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Courses\Enum\CourseStatusEnum;
-use EscolaLms\Payments\Facades\Payments;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
@@ -49,9 +45,11 @@ class CartApiTest extends TestCase
         $course = Course::factory()->create();
         $user = $this->user;
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
-        $this->response->assertStatus(200);
+        $this->response->assertOk();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
+        $this->response->assertOk();
+
         $responseContent = $this->response->json();
         $this->assertTrue($responseContent['success']);
         $this->assertNotEmpty($responseContent['message']);
