@@ -15,7 +15,6 @@ class ShopService extends CartManager implements ShopServiceContract
 {
     use Concerns\UniqueItems;
     use Concerns\AvoidDeleted;
-    use Concerns\Discounts;
     use Concerns\Payments;
 
     protected CanOrder $user;
@@ -129,11 +128,13 @@ class ShopService extends CartManager implements ShopServiceContract
         return round(parent::subtotal(), 0);
     }
 
-    /**
-     * @param  int|float|null  $rate
-     */
     public function tax($rate = null): float
     {
         return round(parent::tax($rate), 0);
+    }
+
+    public function total(int $taxRate = null): int
+    {
+        return (int) $this->subtotal() + (int) $this->tax($taxRate);
     }
 }
