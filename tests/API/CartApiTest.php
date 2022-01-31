@@ -2,8 +2,6 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
-use EscolaLms\Cart\Events\CartOrderPaid;
-use EscolaLms\Cart\Events\CartOrderSuccess;
 use EscolaLms\Cart\Models\Course;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -52,9 +50,11 @@ class CartApiTest extends TestCase
         $course = Course::factory()->create();
         $user = $this->user;
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
-        $this->response->assertStatus(200);
+        $this->response->assertOk();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
+        $this->response->assertOk();
+
         $responseContent = $this->response->json();
         $this->assertTrue($responseContent['success']);
         $this->assertNotEmpty($responseContent['message']);
