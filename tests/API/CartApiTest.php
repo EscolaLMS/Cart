@@ -10,10 +10,13 @@ use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Courses\Enum\CourseStatusEnum;
+use EscolaLms\Courses\Events\CourseAccessStarted;
+use EscolaLms\Courses\Events\CourseAssigned;
 use EscolaLms\Payments\Facades\Payments;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
@@ -113,6 +116,9 @@ class CartApiTest extends TestCase
 
     public function test_buy_course()
     {
+        Notification::fake();
+        Event::fake([CourseAccessStarted::class, CourseAssigned::class]);
+
         $user = $this->user;
         /** @var Course $course */
         $course = Course::factory()->create();
@@ -147,11 +153,22 @@ class CartApiTest extends TestCase
         $order_id = $this->response->json('data.0.id');
         $payment = Payment::where('payable_id', $order_id)->first();
         $this->assertEquals($course->base_price, $payment->amount);
+
+        Event::assertDispatched(CourseAccessStarted::class);
+        Event::assertDispatched(CourseAssigned::class, function (CourseAssigned $event) use ($user, $course) {
+            $this->assertEquals($course->getKey(), $event->getCourse()->getKey());
+            $this->assertEquals($user->getKey(), $event->getUser()->getKey());
+
+            return true;
+        });
     }
 
 
     public function test_buy_free_course()
     {
+        Notification::fake();
+        Event::fake([CourseAccessStarted::class, CourseAssigned::class]);
+
         $user = $this->user;
         /** @var Course $course */
         $course = Course::factory()->create([
@@ -193,5 +210,13 @@ class CartApiTest extends TestCase
 
         $course_id = $this->response->json('data.0.course.id');
         $this->assertEquals($course->getKey(), $course_id);
+
+        Event::assertDispatched(CourseAccessStarted::class);
+        Event::assertDispatched(CourseAssigned::class, function (CourseAssigned $event) use ($user, $course) {
+            $this->assertEquals($course->getKey(), $event->getCourse()->getKey());
+            $this->assertEquals($user->getKey(), $event->getUser()->getKey());
+
+            return true;
+        });
     }
 }
