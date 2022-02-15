@@ -4,7 +4,7 @@ namespace EscolaLms\Cart\Tests;
 
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Auth\Tests\Models\Client;
-use EscolaLms\Cart\EscolalmsCartServiceProvider;
+use EscolaLms\Cart\EscolaLmsCartServiceProvider;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
@@ -29,7 +29,7 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             PassportServiceProvider::class,
             AuthServiceProvider::class,
             PaymentsServiceProvider::class,
-            EscolalmsCartServiceProvider::class,
+            EscolaLmsCartServiceProvider::class,
         ];
     }
 
