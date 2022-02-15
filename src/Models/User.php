@@ -31,11 +31,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $postcode
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Treestoneit\ShoppingCart\Models\Cart|null $cart
+ * @property-read \EscolaLms\Cart\Models\Cart|null $cart
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Client[] $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Courses\Models\Course[] $courses
- * @property-read int|null $courses_count
  * @property-read string|null $avatar_url
  * @property-read bool $email_verified
  * @property-read string $name
@@ -51,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Token[] $tokens
  * @property-read int|null $tokens_count
+ * @method static \EscolaLms\Cart\Database\Factories\UserFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User permission($permissions)
