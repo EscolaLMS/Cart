@@ -6,7 +6,6 @@ use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\Mocks\Product;
-use EscolaLms\Cart\Tests\Mocks\ProductsMigration;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
@@ -26,7 +25,6 @@ class ProductApiTest extends TestCase
         parent::setUp();
 
         $this->seed(CartPermissionSeeder::class);
-        ProductsMigration::run();
         Shop::registerProduct(Product::class);
 
         $this->shopService = app(ShopServiceContract::class);

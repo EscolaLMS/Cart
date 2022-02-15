@@ -7,6 +7,7 @@ use EscolaLms\Auth\Tests\Models\Client;
 use EscolaLms\Cart\EscolaLmsCartServiceProvider;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
+use EscolaLms\Cart\Tests\Mocks\ProductsMigration;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
@@ -38,5 +39,7 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
         $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('passport.client_uuids', false);
         $app['config']->set('app.debug', env('APP_DEBUG', true));
+
+        ProductsMigration::run();
     }
 }

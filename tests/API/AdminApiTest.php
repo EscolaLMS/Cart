@@ -9,7 +9,6 @@ use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
 use EscolaLms\Cart\Tests\Mocks\Product;
-use EscolaLms\Cart\Tests\Mocks\ProductsMigration;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
@@ -30,7 +29,6 @@ class AdminApiTest extends TestCase
         parent::setUp();
 
         $this->seed(CartPermissionSeeder::class);
-        ProductsMigration::run();
         Shop::registerProduct(Product::class);
 
         $this->user = config('auth.providers.users.model')::factory()->create();
