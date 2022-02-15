@@ -2,138 +2,181 @@
 
 namespace EscolaLms\Cart\Services;
 
-use EscolaLms\Cart\Enums\OrderStatus;
-use EscolaLms\Cart\Models\Contracts\CanOrder;
-use EscolaLms\Cart\Models\Order;
+use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Http\Resources\CartResource;
+use EscolaLms\Cart\Models\Cart;
+use EscolaLms\Cart\Services\CartManager;
+use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Http\JsonResponse;
-use Treestoneit\ShoppingCart\CartManager;
-use Treestoneit\ShoppingCart\Models\Cart;
+use EscolaLms\Core\Models\User;
+use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
+use EscolaLms\Payments\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
-class ShopService extends CartManager implements ShopServiceContract
+class ShopService implements ShopServiceContract
 {
-    use Concerns\UniqueItems;
-    use Concerns\AvoidDeleted;
-    use Concerns\Payments;
+    protected OrderServiceContract $orderService;
 
-    protected CanOrder $user;
+    protected array $products = [];
+    protected array $productsMorphs = [];
 
-    public function __construct(Cart $cart)
+    public function __construct(OrderServiceContract $orderService)
     {
-        parent::__construct($cart);
+        $this->orderService = $orderService;
     }
 
-    public static function fromUserId(Authenticatable $user): self
+    public function cartForUser(User $user): Cart
     {
-        assert($user instanceof CanOrder);
-        $shop = app(ShopServiceContract::class);
-        $shop->setCart(
-            self::cartFromUser($user)
-        );
-        $shop->setUser($user);
-
-        assert($shop instanceof ShopService);
-        return $shop;
-    }
-
-    public static function cartFromUser(Authenticatable $user): Cart
-    {
-        return Cart::where('user_id', $user->getAuthIdentifier())->firstOrNew([
+        return Cart::where('user_id', $user->getAuthIdentifier())->latest()->firstOrCreate([
             'user_id' => $user->getAuthIdentifier(),
         ]);
     }
 
-    public function setCart(Cart $cart): void
+    public function cartManagerForCart(Cart $cart): CartManager
     {
-        $this->cart = $cart;
-        $this->refreshCart();
+        return new CartManager($cart);
     }
 
-    public function setUser(CanOrder $user): void
+    public function purchaseCart(Cart $cart, PaymentMethodContract $paymentMethod = null): void
     {
-        $this->user = $user;
-    }
+        $order = $this->orderService->createOrderFromCart($cart);
 
-    public function loadUserCart(Authenticatable $user): self
-    {
-        assert($user instanceof CanOrder);
-        $loadedCart = self::fromUserId($user);
-        $this->avoidDeletedItems();
-        return $loadedCart;
-    }
+        $paymentProcessor = $order->process();
+        $paymentProcessor->purchase($paymentMethod);
+        $payment = $paymentProcessor->getPayment();
 
-    public function attachTo(Authenticatable $user): self
-    {
-        assert($user instanceof CanOrder);
-        $this->user = $user;
-        return parent::attachTo($user);
-    }
-
-    public function getStatus(): int
-    {
-        if ($this->getModel() instanceof Order) {
-            return $this->getModel()->status ?? OrderStatus::PROCESSING;
+        if ($payment->status->is(PaymentStatus::PAID)) {
+            $this->orderService->setPaid($order);
+        } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
+            $this->orderService->setCancelled($order);
         }
-        return OrderStatus::PROCESSING;
+
+        $this->cartManagerForCart($cart)->destroy();
     }
 
-    /**
-     * @return CanOrder
-     */
-    public function getUser(): CanOrder
+    public function cartAsJsonResource(Cart $cart, ?int $taxRate = null): JsonResource
     {
-        return $this->user;
+        return CartResource::make($cart, $taxRate);
     }
 
-    public function getCartData(): array
+    public function removeProductFromCart(Cart $cart, Product $buyable): void
     {
-        return [
-            'total' => $this->moneyFormat((int) $this->total()),
-            'subtotal' => $this->moneyFormat((int) $this->subtotal()),
-            'tax' => $this->moneyFormat((int) $this->tax()),
-            'items' => $this->content()->pluck('buyable')->toArray(),
-        ];
-    }
+        assert($buyable instanceof Model);
 
-    public function getResource(): JsonResponse
-    {
-        return new JsonResponse($this->getCartData());
-    }
+        $cartManager = $this->cartManagerForCart($cart);
 
-    public function removeItemFromCart(string $item): void
-    {
-        $item = $this->content()->firstWhere('buyable_id', $item);
-
+        $item = $cartManager->findBuyable($buyable);
         if ($item) {
-            $this->remove($item->getKey());
+            $cartManager->remove($item->getKey());
         }
     }
 
-    private function moneyFormat(int $value): string
+    public function removeItemFromCart(Cart $cart, int $cartItemId): void
     {
-        $quotient = intdiv($value, 100);
-        $remainder = $value - ($quotient * 100);
+        $cartManager = $this->cartManagerForCart($cart);
+        $cartManager->remove($cartItemId);
+    }
 
-        $result = (string) $quotient . '.';
-        if ($remainder < 10) {
-            return $result . '0' . (string) $remainder;
+    public function addUniqueProductToCart(Cart $cart, Product $buyable): void
+    {
+        assert($buyable instanceof Model);
+
+        if (!$buyable->buyableByUser($cart->user)) {
+            return;
         }
-        return $result . (string) $remainder;
+
+        $cartManager = $this->cartManagerForCart($cart);
+        if (!$cartManager->hasBuyable($buyable)) {
+            $cartManager->add($buyable, 1);
+        }
     }
 
-    public function subtotal(): float
+    public function addProductToCart(Cart $cart, Product $buyable): void
     {
-        return round(parent::subtotal(), 0);
+        assert($buyable instanceof Model);
+
+        if (!$buyable->buyableByUser($cart->user)) {
+            return;
+        }
+
+        $this->cartManagerForCart($cart)->add($buyable, 1);
     }
 
-    public function tax($rate = null): float
+    public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void
     {
-        return round(parent::tax($rate), 0);
+        assert($buyable instanceof Model);
+
+        $cartManager = $this->cartManagerForCart($cart);
+
+        $item = $cartManager->findBuyable($buyable);
+        if ($item) {
+            $cartManager->updateQuantity($item->getKey(), $quantity);
+        }
     }
 
-    public function total(int $taxRate = null): int
+    public function registerProduct(string $productClass): void
     {
-        return (int) $this->subtotal() + (int) $this->tax($taxRate);
+        if (!is_a($productClass, Product::class, true)) {
+            throw new InvalidArgumentException(__('Class must implement Product interface'));
+        }
+        if (!in_array($productClass, $this->products)) {
+            $this->products[] = $productClass;
+            $model = new $productClass();
+            assert($model instanceof Model);
+            $this->productsMorphs[$model->getMorphClass()] = $productClass;
+        }
+    }
+
+    public function registeredProduct(string $productClass): bool
+    {
+        if (in_array($productClass, $this->products)) {
+            return true;
+        }
+        $model = new $productClass();
+        assert($model instanceof Model);
+        return array_key_exists($model->getMorphClass(), $this->productsMorphs);
+    }
+
+    public function registeredProducts(): array
+    {
+        return $this->products;
+    }
+
+    public function canonicalProductClass(string $productClass): ?string
+    {
+        if (in_array($productClass, $this->products)) {
+            return $productClass;
+        }
+        $model = new $productClass();
+        assert($model instanceof Model);
+        if (array_key_exists($model->getMorphClass(), $this->productsMorphs)) {
+            return $this->productMorphs[$model->getMorphClass()];
+        }
+        throw new InvalidArgumentException(__('Unknown Product Class'));
+    }
+
+    public function findProduct(string $productClass, $productId): ?Product
+    {
+        return $this->canonicalProductClass($productClass)::find($productId);
+    }
+
+    public function listProductsBuyableByUser(User $user, ?string $productClass = null): Collection
+    {
+        if (!is_null($productClass)) {
+            $canonicalProductClass = $this->canonicalProductClass($productClass);
+            if ($canonicalProductClass) {
+                return Collection::make($canonicalProductClass::buyableByUser($user)->paginate()->items());
+            }
+            throw new InvalidArgumentException(__('Unknown Product Class'));
+        }
+
+        $collection = new Collection();
+        foreach ($this->products as $productClass) {
+            $collection->push(...$productClass::buyableByUser($user)->paginate()->items());
+        }
+        return $collection;
     }
 }

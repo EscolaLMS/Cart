@@ -3,13 +3,17 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
-use EscolaLms\Cart\Models\Course;
+use EscolaLms\Cart\Events\ProductAttached;
+use EscolaLms\Cart\Events\ProductDetached;
+use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
-use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Cart\Tests\Mocks\Product;
+use EscolaLms\Cart\Tests\Mocks\ProductsMigration;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
@@ -20,38 +24,33 @@ class AdminApiTest extends TestCase
 
     private $user;
     private TestResponse $response;
-    private ShopServiceContract $shopServiceContract;
 
     public function setUp(): void
     {
         parent::setUp();
+
         $this->seed(CartPermissionSeeder::class);
-        $this->shopServiceContract = app(ShopServiceContract::class);
+        ProductsMigration::run();
+        Shop::registerProduct(Product::class);
+
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::ADMIN);
-        // OrderItem::query()->delete();
-        // Order::query()->delete();
-        // Course::query()->delete();
     }
 
     public function test_list_orders()
     {
-        $courses = [
-            ...Course::factory([
-                'author_id' => User::factory()->create()->getKey()
-            ])->count(5)->create(),
-            ...Course::factory([
-                'author_id' => User::factory()->create()->getKey()
-            ])->count(5)->create(),
+        $products = [
+            ...Product::factory()->count(5)->create(),
         ];
-        /** @var Course $course */
+
         $orders = [];
-        foreach ($courses as $course) {
+
+        foreach ($products as $product) {
             /** @var Order $order */
             $order = Order::factory()->for(User::factory()->create())->create();
             $orderItem = new OrderItem();
-            $orderItem->buyable()->associate($course);
+            $orderItem->buyable()->associate($product);
             $orderItem->quantity = 1;
             $orderItem->order_id = $order->getKey();
             $orderItem->save();
@@ -60,29 +59,19 @@ class AdminApiTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders');
         $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(10, 'data');
-        $this->assertDataCountLessThanOrEqual($this->response, 10);
+        $this->assertDataCountLessThanOrEqual($this->response, 5);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
             'user_id' => $orders[0]->user_id,
         ]);
         $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(1, 'data');
         $this->assertDataCountLessThanOrEqual($this->response, 1);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'course_id' => $courses[0]->id,
+            'product_id' => $products[0]->id,
         ]);
         $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(1, 'data');
         $this->assertDataCountLessThanOrEqual($this->response, 1);
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'author_id' => $courses[0]->author_id,
-        ]);
-        $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(5, 'data');
-        $this->assertDataCountLessThanOrEqual($this->response, 5);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
             'date_from' => Carbon::now()->addDay(1)->toISOString(),
@@ -94,14 +83,12 @@ class AdminApiTest extends TestCase
             'date_to' => Carbon::now()->addDay(1)->toISOString(),
         ]);
         $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(10, 'data');
         $this->assertDataCountLessThanOrEqual($this->response, 10);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
             'date_to' => Carbon::now()->subDay(1)->toISOString(),
         ]);
         $this->response->assertStatus(200);
-        // $this->response->assertJsonCount(0, 'data');
         $this->assertDataCountLessThanOrEqual($this->response, 0);
     }
 
@@ -110,30 +97,58 @@ class AdminApiTest extends TestCase
         $this->assertLessThanOrEqual(count($response->getData()->data), $count);
     }
 
-
     public function test_fetch_order()
     {
-        $courses = [
-            ...Course::factory([
-                'author_id' => User::factory()->create()->getKey()
-            ])->count(1)->create(),
-        ];
-        /** @var Course $course */
-        $orders = [];
-        foreach ($courses as $course) {
-            /** @var Order $order */
-            $order = Order::factory()->for(User::factory()->create())->create();
-            $orderItem = new OrderItem();
-            $orderItem->buyable()->associate($course);
-            $orderItem->quantity = 1;
-            $orderItem->order_id = $order->getKey();
-            $orderItem->save();
-            $orders[] = $order;
-        }
+        $product = Product::factory()->create();
 
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/'.$order->id);
+        /** @var Order $order */
+        $order = Order::factory()->for(User::factory()->create())->create();
+        $orderItem = new OrderItem();
+        $orderItem->buyable()->associate($product);
+        $orderItem->quantity = 1;
+        $orderItem->order_id = $order->getKey();
+        $orderItem->save();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/' . $order->id);
         $this->response->assertStatus(200);
 
         $this->assertEquals($this->response->getData()->data->id, $order->id);
+    }
+
+    public function test_attach_and_detach_product()
+    {
+        $event = Event::fake();
+
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        $student = config('auth.providers.users.model')::factory()->create();
+        $student->guard_name = 'api';
+        $student->assignRole(UserRole::STUDENT);
+
+        $this->assertFalse($product->getOwnedByUserAttribute($student));
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/attach', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass(),
+            'user_id' => $student->getKey(),
+        ]);
+        $this->response->assertOk();
+
+        $product->refresh();
+        $this->assertTrue($product->getOwnedByUserAttribute($student));
+
+        $event->assertDispatched(ProductAttached::class);
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/detach', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass(),
+            'user_id' => $student->getKey(),
+        ]);
+        $this->response->assertOk();
+
+        $product->refresh();
+        $this->assertFalse($product->getOwnedByUserAttribute($student));
+
+        $event->assertDispatched(ProductDetached::class);
     }
 }

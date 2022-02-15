@@ -3,10 +3,21 @@
 namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Models\Order;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
 {
+    public function __construct(Order $order)
+    {
+        parent::__construct($order);
+    }
+
+    protected function getOrder(): Order
+    {
+        return $this->resource;
+    }
+
     /**
      * Transform the resource into an array.
      *

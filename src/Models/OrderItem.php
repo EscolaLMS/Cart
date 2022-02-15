@@ -2,41 +2,52 @@
 
 namespace EscolaLms\Cart\Models;
 
-use Treestoneit\ShoppingCart\Models\CartItem;
+use EscolaLms\Cart\Support\OrderItemCollection;
+use Illuminate\Database\Eloquent\Model;
 
-/**
- * EscolaLms\Cart\Models\OrderItem
- *
- * @property int $id
- * @property int $order_id
- * @property string $buyable_type
- * @property int $buyable_id
- * @property int $quantity
- * @property array|null $options
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $buyable
- * @property-read mixed $description
- * @property-read int $extra_fees
- * @property-read string $identifier
- * @property-read int|null $price
- * @property-read int $subtotal
- * @property-read int $total
- * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] all($columns = ['*'])
- * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] get($columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem query()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereBuyableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereBuyableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOptions($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOrderId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereQuantity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-class OrderItem extends CartItem
+class OrderItem extends Model
 {
+    protected $guarded = ['id'];
+
+    protected $casts = ['options' => 'array'];
+
+    public function buyable()
+    {
+        return $this->morphTo('buyable');
+    }
+
+    public function newCollection(array $models = [])
+    {
+        return new OrderItemCollection($models);
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return optional($this->buyable)->getBuyableDescription();
+    }
+
+    public function getPriceAttribute(): int
+    {
+        return $this->getRawOriginal('price') ?? optional($this->buyable)->getBuyablePrice() ?? 0;
+    }
+
+    public function getSubtotalAttribute(): int
+    {
+        return $this->getPriceAttribute() * $this->quantity;
+    }
+
+    public function getTotalAttribute(): int
+    {
+        return $this->getSubtotalAttribute() + $this->extra_fees;
+    }
+
+    public function getTaxAttribute(): int
+    {
+        return (int) round($this->getSubtotalAttribute() * ($this->tax_rate / 100), 0);
+    }
+
+    public function getTotalWithTaxAttribute(): int
+    {
+        return $this->total + $this->tax;
+    }
 }

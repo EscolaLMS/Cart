@@ -3,12 +3,11 @@
 namespace EscolaLms\Cart\Models;
 
 use EscolaLms\Cart\Database\Factories\UserFactory;
-use EscolaLms\Cart\Models\Contracts\CanOrder as ContractsCanOrder;
-use EscolaLms\Cart\Models\Traits\CanOrder;
 use EscolaLms\Core\Models\User as CoreUser;
-use EscolaLms\Courses\Models\Traits\HasCourses;
 use EscolaLms\Payments\Concerns\Billable;
 use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * EscolaLms\Cart\Models\User
@@ -78,16 +77,24 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class User extends CoreUser implements ContractsBillable, ContractsCanOrder
+class User extends CoreUser implements ContractsBillable
 {
-    use CanOrder;
     use Billable;
-    use HasCourses;
 
     protected $table = 'users';
 
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class, 'user_id');
     }
 }

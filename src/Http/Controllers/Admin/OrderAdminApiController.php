@@ -2,7 +2,6 @@
 
 namespace EscolaLms\Cart\Http\Controllers\Admin;
 
-use EscolaLms\Cart\Enums\CartPermissionsEnum;
 use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
 use EscolaLms\Cart\Http\Requests\OrderViewRequest;
 use EscolaLms\Cart\Http\Resources\OrderResource;
@@ -15,7 +14,7 @@ use Illuminate\Support\Arr;
 
 class OrderAdminApiController extends EscolaLmsBaseController implements OrderAdminSwagger
 {
-    private OrderServiceContract $orderService;
+    protected OrderServiceContract $orderService;
 
     public function __construct(OrderServiceContract $orderService)
     {
@@ -26,16 +25,12 @@ class OrderAdminApiController extends EscolaLmsBaseController implements OrderAd
     {
         $sortDto = SortDto::instantiateFromRequest($request);
         $search = Arr::except($request->validated(), ['per_page', 'page', 'order_by', 'order']);
-        if ($request->user()->can(CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS) && $request->user()->cannot(CartPermissionsEnum::LIST_ALL_ORDERS)) {
-            $search['author_id'] = $request->user()->getKey();
-        }
         $paginatedResults = $this->orderService->searchAndPaginateOrders($sortDto, $search, $request->input('per_page'));
         return $this->sendResponseForResource(OrderResource::collection($paginatedResults), __("Order search results"));
     }
 
-    public function show(int $order, OrderViewRequest $request): JsonResponse
+    public function show(OrderViewRequest $request): JsonResponse
     {
-        $orderRecord = $this->orderService->find($order);
-        return $this->sendResponseForResource(OrderResource::make($orderRecord), __("Order fetched"));
+        return $this->sendResponseForResource(OrderResource::make($request->getOrder()), __("Order fetched"));
     }
 }

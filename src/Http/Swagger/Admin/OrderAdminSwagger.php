@@ -41,8 +41,8 @@ interface OrderAdminSwagger
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="number",
-     *               default=1,
+     *              type="integer",
+     *              default=1,
      *          ),
      *      ),
      *      @OA\Parameter(
@@ -51,7 +51,7 @@ interface OrderAdminSwagger
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="number",
+     *              type="integer",
      *               default=15,
      *          ),
      *      ),
@@ -61,25 +61,25 @@ interface OrderAdminSwagger
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="number",
+     *              type="integer",
      *          ),
      *      ),
      *      @OA\Parameter(
-     *          name="course_id",
-     *          description="Course ID",
+     *          name="product_id",
+     *          description="Product ID",
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="number",
+     *              type="integer",
      *          ),
      *      ),
-     *     @OA\Parameter(
-     *          name="author_id",
-     *          description="Author ID",
+     *      @OA\Parameter(
+     *          name="product_type",
+     *          description="Product type (class)",
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="number",
+     *              type="string",
      *          ),
      *      ),
      *      @OA\Response(
@@ -159,5 +159,5 @@ interface OrderAdminSwagger
      *      )
      * )
      */
-    public function show(int $order, OrderViewRequest $request): JsonResponse;
+    public function show(OrderViewRequest $request): JsonResponse;
 }

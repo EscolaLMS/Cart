@@ -6,16 +6,15 @@
     "php": "^7.4|^8.0",
     "escolalms/auth": "^0",
     "escolalms/core": "^1",
-    "escolalms/courses": "^0",
     "escolalms/payments": "^0",
-    "laravel/framework": "^8.0",
+    "laravel/framework": "^8.0|^9.0",
     "treestoneit/shopping-cart": "^1.4"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.10",
     "nunomaduro/collision": "^5.5",
     "nunomaduro/larastan": "^0.7.6",
-    "orchestra/testbench": "^6.0",
+    "orchestra/testbench": "^6.0|^7.0",
     "phpunit/phpunit": "^9.0"
   },
   "autoload": {
@@ -45,7 +44,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "EscolaLms\\Cart\\CartServiceProvider"
+        "EscolaLms\\Cart\\EscolaLmsCartServiceProvider"
       ]
     },
     "branch-alias": {
