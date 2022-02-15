@@ -15,7 +15,9 @@ use EscolaLms\Core\Models\User;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
+use Schema;
 
 class AdminApiTest extends TestCase
 {
@@ -43,7 +45,6 @@ class AdminApiTest extends TestCase
         ];
 
         $orders = [];
-
         foreach ($products as $product) {
             /** @var Order $order */
             $order = Order::factory()->for(User::factory()->create())->create();
@@ -55,9 +56,10 @@ class AdminApiTest extends TestCase
             $orders[] = $order;
         }
 
+        $totalCount = min(15, Order::count());
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders');
         $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, 5);
+        $this->assertDataCountLessThanOrEqual($this->response, $totalCount);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
             'user_id' => $orders[0]->user_id,
@@ -66,6 +68,7 @@ class AdminApiTest extends TestCase
         $this->assertDataCountLessThanOrEqual($this->response, 1);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'product_type' => $products[0]->getMorphClass(),
             'product_id' => $products[0]->id,
         ]);
         $this->response->assertStatus(200);
@@ -92,7 +95,7 @@ class AdminApiTest extends TestCase
 
     private function assertDataCountLessThanOrEqual($response, $count)
     {
-        $this->assertLessThanOrEqual(count($response->getData()->data), $count);
+        $this->assertLessThanOrEqual($count, count($response->getData()->data));
     }
 
     public function test_fetch_order()
