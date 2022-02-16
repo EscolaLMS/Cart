@@ -25,7 +25,7 @@ interface ProductAdminSwagger
      *                  required={"product_id", "product_type", "user_id"},
      *                  @OA\Property(
      *                      property="product_id",
-     *                      type="integer",
+     *                      type="string",
      *                  ),
      *                  @OA\Property(
      *                      property="product_type",
@@ -84,7 +84,7 @@ interface ProductAdminSwagger
      *                  required={"product_id", "product_type", "user_id"},
      *                  @OA\Property(
      *                      property="product_id",
-     *                      type="integer",
+     *                      type="string",
      *                  ),
      *                  @OA\Property(
      *                      property="product_type",

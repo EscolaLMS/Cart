@@ -18,7 +18,7 @@ class ProductExistsRule implements Rule, DataAwareRule
 
     public function message(): string
     {
-        return __('Product with id :attribute and class :class must exist.', ['class' => $this->data['product_type']]);
+        return __('Product with id :input and class :class must exist.', ['class' => $this->data['product_type']]);
     }
 
     public function setData($data): self

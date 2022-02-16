@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Services;
 
 use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Services\CartManager;
@@ -89,8 +90,12 @@ class ShopService implements ShopServiceContract
         }
 
         $cartManager = $this->cartManagerForCart($cart);
+
         if (!$cartManager->hasBuyable($buyable)) {
             $cartManager->add($buyable, 1);
+
+            $buyable->addedToCart($cart);
+            event(new ProductAddedToCart($buyable, $cart));
         }
     }
 
@@ -103,6 +108,9 @@ class ShopService implements ShopServiceContract
         }
 
         $this->cartManagerForCart($cart)->add($buyable, 1);
+
+        $buyable->addedToCart($cart);
+        event(new ProductAddedToCart($buyable, $cart));
     }
 
     public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void

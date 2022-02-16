@@ -14,6 +14,6 @@ class ProductRegisteredRule implements Rule
 
     public function message(): string
     {
-        return 'Class :attribute must represent registered Product type.';
+        return __('Class :input must represent registered Product type.');
     }
 }

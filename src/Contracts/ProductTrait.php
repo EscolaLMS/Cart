@@ -3,7 +3,7 @@
 namespace EscolaLms\Cart\Contracts;
 
 use EscolaLms\Cart\Contracts\Base\BuyableTrait;
-use EscolaLms\Cart\Contracts\Base\TaxableTrait;
+use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Support\Helper;
 use EscolaLms\Core\Models\User;
@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 trait ProductTrait
 {
     use BuyableTrait;
-    use TaxableTrait;
 
     public function scopeBuyableByUser(Builder $query, User $user): Builder
     {
@@ -48,7 +47,12 @@ trait ProductTrait
 
     public function getOwnedByUserAttribute(?User $user = null): bool
     {
-        return $this->scopeOwnedByUser($this::query(), $user ?? Auth::user())->exists();
+        return $this->scopeOwnedByUser($this::query()->where($this->getTable() . '.id', $this->getKey()), $user ?? Auth::user())->exists();
+    }
+
+    public function addedToCart(Cart $cart): void
+    {
+        // do nothing
     }
 
     public function afterBought(Order $order): void

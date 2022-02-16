@@ -97,7 +97,7 @@ interface CartSwagger
      *                  required={"product_id", "product_type"},
      *                  @OA\Property(
      *                      property="product_id",
-     *                      type="integer",
+     *                      type="string",
      *                  ),
      *                  @OA\Property(
      *                      property="product_type",
@@ -176,7 +176,7 @@ interface CartSwagger
      *                  required={"product_id", "product_type"},
      *                  @OA\Property(
      *                      property="product_id",
-     *                      type="integer",
+     *                      type="string",
      *                  ),
      *                  @OA\Property(
      *                      property="product_type",

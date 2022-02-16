@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Contracts;
 
 use EscolaLms\Cart\Contracts\Base\Buyable;
 use EscolaLms\Cart\Contracts\Base\Taxable;
+use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,11 @@ interface Product extends Buyable, Taxable
      */
     public function getBuyableByUserAttribute(?User $user = null): bool;
     public function getOwnedByUserAttribute(?User $user = null): bool;
+
+    /** 
+     * This method will be called when product was added to Cart
+     */
+    public function addedToCart(Cart $cart): void;
 
     /** 
      * This method will be called when product was bought

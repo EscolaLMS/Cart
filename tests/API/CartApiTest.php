@@ -36,7 +36,7 @@ class CartApiTest extends TestCase
         $this->user->assignRole(UserRole::STUDENT);
     }
 
-    public function test_add_course_to_cart()
+    public function test_add_product_to_cart()
     {
         $user = $this->user;
         /** @var Product $product */
@@ -50,6 +50,88 @@ class CartApiTest extends TestCase
 
         $this->assertNotNull($user->cart->getKey());
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+    }
+
+
+    public function test_remove_last_product_from_cart()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $user->refresh();
+        $this->assertNull($user->cart);
+    }
+
+    public function test_remove_product_from_cart()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        /** @var Product $product2 */
+        $product2 = Product::factory()->create();
+        /** @var Product $product2 */
+        $product3 = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product2->getKey(),
+            'product_type' => $product2->getMorphClass()
+        ]);
+        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product3->getKey(),
+            'product_type' => $product3->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $cart = $user->cart;
+        $this->assertNotNull($cart);
+        $this->assertNotNull($cart->getKey());
+        $this->assertContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
+
+        $cartItemId = $cart->items->first()->getKey();
+
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/' . $cartItemId);
+        $this->response->assertOk();
+
+        $cart->refresh();
+
+        $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
+            'product_id' => $product2->getKey(),
+            'product_type' => $product2->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $cart->refresh();
+        $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertNotContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
     }
 
     public function test_cart_items_list()
