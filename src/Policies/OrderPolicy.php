@@ -13,14 +13,12 @@ class OrderPolicy
 
     public function viewAny(User $user)
     {
-        return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS)
-            || $user->can(CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS);
+        return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS);
     }
 
     public function view(User $user, Order $order)
     {
         return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS)
-            || ($user->can(CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS) && $order->courses()->where('author_id', '=', $user->getKey())->first())
             || $user->getKey() === $order->user_id;
     }
 

@@ -3,12 +3,11 @@
 namespace EscolaLms\Cart\Models;
 
 use EscolaLms\Cart\Database\Factories\UserFactory;
-use EscolaLms\Cart\Models\Contracts\CanOrder as ContractsCanOrder;
-use EscolaLms\Cart\Models\Traits\CanOrder;
 use EscolaLms\Core\Models\User as CoreUser;
-use EscolaLms\Courses\Models\Traits\HasCourses;
 use EscolaLms\Payments\Concerns\Billable;
 use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * EscolaLms\Cart\Models\User
@@ -32,11 +31,9 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @property string|null $postcode
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Treestoneit\ShoppingCart\Models\Cart|null $cart
+ * @property-read \EscolaLms\Cart\Models\Cart|null $cart
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Client[] $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Courses\Models\Course[] $courses
- * @property-read int|null $courses_count
  * @property-read string|null $avatar_url
  * @property-read bool $email_verified
  * @property-read string $name
@@ -52,6 +49,7 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Token[] $tokens
  * @property-read int|null $tokens_count
+ * @method static \EscolaLms\Cart\Database\Factories\UserFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User permission($permissions)
@@ -78,16 +76,24 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class User extends CoreUser implements ContractsBillable, ContractsCanOrder
+class User extends CoreUser implements ContractsBillable
 {
-    use CanOrder;
     use Billable;
-    use HasCourses;
 
     protected $table = 'users';
 
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class, 'user_id');
     }
 }

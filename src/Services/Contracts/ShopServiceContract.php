@@ -2,29 +2,35 @@
 
 namespace EscolaLms\Cart\Services\Contracts;
 
-use EscolaLms\Cart\Models\Contracts\CanOrder;
+use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Models\Cart;
+use EscolaLms\Cart\Services\CartManager;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Http\JsonResponse;
-use Treestoneit\ShoppingCart\Buyable;
-use Treestoneit\ShoppingCart\CartContract;
-use Treestoneit\ShoppingCart\Models\Cart;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
-interface ShopServiceContract extends CartContract
+interface ShopServiceContract
 {
-    public function loadUserCart(Authenticatable $user);
+    public function cartForUser(User $user): Cart;
 
-    public function getResource(): JsonResponse;
+    public function cartManagerForCart(Cart $cart): CartManager;
 
-    public function getCartData(): array;
+    public function cartAsJsonResource(Cart $cart, ?int $taxRate = null): JsonResource;
 
-    public function addUnique(Buyable $item): self;
+    public function addUniqueProductToCart(Cart $cart, Product $buyable): void;
+    public function addProductToCart(Cart $cart, Product $buyable): void;
+    public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void;
+    public function removeProductFromCart(Cart $cart, Product $buyable): void;
+    public function removeItemFromCart(Cart $cart, int $cartItemId): void;
 
-    public function removeItemFromCart(string $item): void;
+    public function purchaseCart(Cart $cart, PaymentMethodContract $paymentMethod = null): void;
 
-    public function purchase(PaymentMethodContract $paymentMethod = null): void;
+    public function registerProduct(string $productClass): void;
+    public function registeredProduct(string $productClass): bool;
+    public function registeredProducts(): array;
+    public function canonicalProductClass(string $productClass): ?string;
 
-    public function setCart(Cart $cart): void;
-
-    public function setUser(CanOrder $user): void;
+    public function findProduct(string $productClass, $productId): ?Product;
+    public function listProductsBuyableByUser(User $user, ?string $productClass): Collection;
 }

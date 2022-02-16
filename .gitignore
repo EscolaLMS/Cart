@@ -27,3 +27,5 @@ composer.lock
 
 _ide_helper.php
 env/docker/postgres-data
+.phpstorm.meta.php
+openapi.json

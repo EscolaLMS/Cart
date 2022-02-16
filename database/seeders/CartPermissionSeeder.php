@@ -14,6 +14,7 @@ class CartPermissionSeeder extends Seeder
     {
         $admin   = Role::findOrCreate(UserRole::ADMIN, 'api');
         $tutor   = Role::findOrCreate(UserRole::TUTOR, 'api');
+        $student = Role::findOrCreate(UserRole::STUDENT, 'api');
 
         foreach (CartPermissionsEnum::asArray() as $const => $value) {
             Permission::findOrCreate($value, 'api');
@@ -21,9 +22,17 @@ class CartPermissionSeeder extends Seeder
 
         $admin->givePermissionTo([
             CartPermissionsEnum::LIST_ALL_ORDERS,
+            CartPermissionsEnum::LIST_PRODUCTS,
+            CartPermissionsEnum::ATTACH_PRODUCTS,
         ]);
+
         $tutor->givePermissionTo([
-            CartPermissionsEnum::LIST_AUTHORED_COURSE_ORDERS,
+            CartPermissionsEnum::LIST_PRODUCTS,
+        ]);
+
+        $student->givePermissionTo([
+            CartPermissionsEnum::LIST_PRODUCTS,
+            CartPermissionsEnum::BUY_PRODUCTS,
         ]);
     }
 }

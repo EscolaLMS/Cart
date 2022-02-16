@@ -2,19 +2,16 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
-use EscolaLms\Cart\Models\Course;
-use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Cart\Tests\Mocks\Product;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
-use EscolaLms\Courses\Enum\CourseStatusEnum;
-use EscolaLms\Courses\Events\CourseAccessStarted;
-use EscolaLms\Courses\Events\CourseAssigned;
-use EscolaLms\Payments\Facades\Payments;
+use EscolaLms\Core\Enums\UserRole;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
@@ -22,34 +19,131 @@ class CartApiTest extends TestCase
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
-    private $user;
+    private User $user;
     private TestResponse $response;
-    private ShopServiceContract $shopServiceContract;
+    private ShopServiceContract $shopService;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->shopServiceContract = app(ShopServiceContract::class);
+        $this->seed(CartPermissionSeeder::class);
+        Shop::registerProduct(Product::class);
+
+        $this->shopService = app(ShopServiceContract::class);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
+        $this->user->assignRole(UserRole::STUDENT);
     }
 
-    public function test_add_course_to_cart()
+    public function test_add_product_to_cart()
     {
-        $course = Course::factory()->create();
         $user = $this->user;
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
-        $this->response->assertStatus(200);
-        $this->assertTrue((bool)$user->cart->getKey());
-        $this->assertTrue(in_array($course->getKey(), $user->cart->items->pluck('buyable_id')->toArray()));
+        /** @var Product $product */
+        $product = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+    }
+
+
+    public function test_remove_last_product_from_cart()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $user->refresh();
+        $this->assertNull($user->cart);
+    }
+
+    public function test_remove_product_from_cart()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        /** @var Product $product2 */
+        $product2 = Product::factory()->create();
+        /** @var Product $product2 */
+        $product3 = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
+        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product2->getKey(),
+            'product_type' => $product2->getMorphClass()
+        ]);
+        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product3->getKey(),
+            'product_type' => $product3->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $cart = $user->cart;
+        $this->assertNotNull($cart);
+        $this->assertNotNull($cart->getKey());
+        $this->assertContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
+
+        $cartItemId = $cart->items->first()->getKey();
+
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/' . $cartItemId);
+        $this->response->assertOk();
+
+        $cart->refresh();
+
+        $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
+            'product_id' => $product2->getKey(),
+            'product_type' => $product2->getMorphClass()
+        ]);
+        $this->response->assertOk();
+
+        $cart->refresh();
+        $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertNotContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
     }
 
     public function test_cart_items_list()
     {
-        $course = Course::factory()->create();
         $user = $this->user;
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/course/' . $course->getKey());
+        /** @var Product $product */
+        $product = Product::factory()->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'product_id' => $product->getKey(),
+            'product_type' => $product->getMorphClass()
+        ]);
         $this->response->assertOk();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
@@ -61,20 +155,22 @@ class CartApiTest extends TestCase
         $this->assertNotEmpty($responseContent['data']);
         $this->assertNotEmpty($responseContent['data']['items']);
         $cartItemsId = array_map(function ($item) {
-            return $item['id'];
+            return $item['product_id'];
         }, $responseContent['data']['items']);
-        $this->assertTrue(in_array($course->getKey(), $cartItemsId));
+        $this->assertContains($product->getKey(), $cartItemsId);
     }
 
     public function test_send_payment_method_and_pay()
     {
         $user = $this->user;
+
+        /** @var Product $product */
         $product = Product::factory()->create([
             'price' => 1000
         ]);
 
-        $this->shopServiceContract->loadUserCart($user);
-        $this->shopServiceContract->add($product, 1);
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addProductToCart($cart, $product);
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
         $this->response->assertOk();
@@ -83,104 +179,24 @@ class CartApiTest extends TestCase
     public function test_get_orders()
     {
         $user = $this->user;
+
+        /** @var Product $product */
         $product = Product::factory()->create([
             'price' => 1000
         ]);
-
-        $this->shopServiceContract->loadUserCart($user);
-        $this->shopServiceContract->add($product, 1);
-
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-
-        $this->response->assertOk();
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
-        $this->response->assertOk()
-            ->assertJson([
-                'success' => true,
-                'data' => [
-                    [
-                        'status' => 'PAID',
-                        'total' => 1000,
-                        'subtotal' => 1000,
-                        'tax' => 0
-                    ]
-                ]
-            ])
-            ->assertJsonCount(3)
-            ->assertJsonCount(1, 'data.0.items');
-
-        $order_id = $this->response->json('data.0.id');
-        $payment = Payment::where('payable_id', $order_id)->first();
-        $this->assertEquals(1000, $payment->amount);
-    }
-
-    public function test_buy_course()
-    {
-        Notification::fake();
-        Event::fake([CourseAccessStarted::class, CourseAssigned::class]);
-
-        $user = $this->user;
-        /** @var Course $course */
-        $course = Course::factory()->create();
-
-        $this->shopServiceContract->loadUserCart($user);
-        $this->shopServiceContract->add($course, 1);
-
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-
-        $this->response->assertOk();
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
-        $this->response->assertOk()
-            ->assertJson([
-                'success' => true,
-                'data' => [
-                    [
-                        'status' => 'PAID',
-                        'total' => $course->base_price,
-                        'subtotal' => $course->base_price,
-                        'tax' => 0
-                    ]
-                ]
-            ])
-            ->assertJsonCount(3)
-            ->assertJsonCount(1, 'data.0.items');
-
-        $user->refresh();
-        $course->refresh();
-        $this->assertTrue($course->alreadyBoughtBy($user));
-        $this->assertTrue($user->courses()->where('courses.id', $course->getKey())->exists());
-
-        $order_id = $this->response->json('data.0.id');
-        $payment = Payment::where('payable_id', $order_id)->first();
-        $this->assertEquals($course->base_price, $payment->amount);
-
-        Event::assertDispatched(CourseAccessStarted::class);
-        Event::assertDispatched(CourseAssigned::class, function (CourseAssigned $event) use ($user, $course) {
-            $this->assertEquals($course->getKey(), $event->getCourse()->getKey());
-            $this->assertEquals($user->getKey(), $event->getUser()->getKey());
-
-            return true;
-        });
-    }
-
-
-    public function test_buy_free_course()
-    {
-        Notification::fake();
-        Event::fake([CourseAccessStarted::class, CourseAssigned::class]);
-
-        $user = $this->user;
-        /** @var Course $course */
-        $course = Course::factory()->create([
-            'base_price' => 0,
-            'status' => CourseStatusEnum::PUBLISHED,
+        /** @var Product $productWithTax */
+        $productWithTax = Product::factory()->create([
+            'price' => 1000,
+            'tax_rate' => 10,
         ]);
 
-        $this->shopServiceContract->loadUserCart($user);
-        $this->shopServiceContract->add($course, 1);
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addProductToCart($cart, $product);
+        $this->shopService->addProductToCart($cart, $productWithTax);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => 'free']);
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
         $this->response->assertOk();
+
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()
             ->assertJson([
@@ -188,35 +204,17 @@ class CartApiTest extends TestCase
                 'data' => [
                     [
                         'status' => 'PAID',
-                        'total' => $course->base_price,
-                        'subtotal' => $course->base_price,
-                        'tax' => 0
+                        'total' => 2100,
+                        'subtotal' => 2000,
+                        'tax' => 100
                     ]
                 ]
             ])
             ->assertJsonCount(3)
-            ->assertJsonCount(1, 'data.0.items');
-
-        $user->refresh();
-        $course->refresh();
-        $this->assertTrue($course->alreadyBoughtBy($user));
-        $this->assertTrue($user->courses()->where('courses.id', $course->getKey())->exists());
+            ->assertJsonCount(2, 'data.0.items');
 
         $order_id = $this->response->json('data.0.id');
         $payment = Payment::where('payable_id', $order_id)->first();
-        $this->assertEquals($course->base_price, $payment->amount);
-
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/courses/progress');
-
-        $course_id = $this->response->json('data.0.course.id');
-        $this->assertEquals($course->getKey(), $course_id);
-
-        Event::assertDispatched(CourseAccessStarted::class);
-        Event::assertDispatched(CourseAssigned::class, function (CourseAssigned $event) use ($user, $course) {
-            $this->assertEquals($course->getKey(), $event->getCourse()->getKey());
-            $this->assertEquals($user->getKey(), $event->getUser()->getKey());
-
-            return true;
-        });
+        $this->assertEquals(2100, $payment->amount);
     }
 }
