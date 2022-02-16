@@ -1,173 +1,390 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "EscolaLMS Tags",
-        "version": "0.1"
+        "title": "EscolaLMS",
+        "version": "0.0.1"
     },
     "paths": {
-        "/api/tags": {
+        "/api/admin/orders": {
             "get": {
                 "tags": [
-                    "tags"
+                    "Admin Orders"
                 ],
-                "description": "Display a listing of the Tag",
-                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::index",
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Destroy Tags",
-                "description": "Destroy Tags",
-                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::destroy",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "tags": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "": {
-                                                    "type": "integer",
-                                                    "example": "1"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tags/unique": {
-            "get": {
-                "tags": [
-                    "tags"
-                ],
-                "description": "Display the unique Tags",
-                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::unique",
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tags/create": {
-            "post": {
-                "tags": [
-                    "tags"
-                ],
-                "description": "Create multiple Tags",
-                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::create",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "model_type": {
-                                        "type": "string",
-                                        "example": "Category"
-                                    },
-                                    "model_id": {
-                                        "type": "integer",
-                                        "example": "1"
-                                    },
-                                    "tags": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "title": {
-                                                                "type": "string",
-                                                                "example": "Nowości"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "422": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tags/{tag}": {
-            "get": {
-                "tags": [
-                    "tags"
-                ],
-                "description": "Display the specified Tag",
-                "operationId": "EscolaLms\\Tags\\Http\\Controllers\\Swagger\\TagsApiSwagger::show",
+                "description": "Search orders",
+                "operationId": "3262e26845c9f63908ab9e3a327ae7a3",
                 "parameters": [
                     {
-                        "name": "tag",
+                        "name": "order_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "updated_at",
+                                "user_id"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ASC",
+                                "DESC"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Pagination Page Number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Pagination Per Page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "User (buyer) ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "query",
+                        "description": "Product ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_type",
+                        "in": "query",
+                        "description": "Product type (class)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Display the specified Order",
+                "description": "Get Order",
+                "operationId": "78256b46b7f98b058162a6d5711f6622",
+                "parameters": [
+                    {
+                        "name": "id",
                         "in": "path",
+                        "description": "id of Order",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products/attach": {
+            "post": {
+                "tags": [
+                    "Admin Product"
+                ],
+                "description": "Attach product to user",
+                "operationId": "e093c48ae78e3b17ac7dbe5958615ec6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "product_type",
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "string"
+                                    },
+                                    "product_type": {
+                                        "type": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products/detach": {
+            "post": {
+                "tags": [
+                    "Admin Product"
+                ],
+                "description": "Detach product from user",
+                "operationId": "5fa396baae429426a2845abf64094e06",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "product_type",
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "string"
+                                    },
+                                    "product_type": {
+                                        "type": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart": {
+            "get": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Get cart details",
+                "operationId": "764bd0113215a87ea5b597699b82d6f9",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/pay": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Pay for cart",
+                "operationId": "a9183308a576feb0f769f81a32d6cb21",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/json": {
+                            "schema": {
+                                "required": [
+                                    "paymentMethodId"
+                                ],
+                                "properties": {
+                                    "paymentMethodId": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/add": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Add product to cart",
+                "operationId": "d41e5c2a7634809b0586231d6225c73a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "product_type"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "string"
+                                    },
+                                    "product_type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/{id}": {
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Remove cart item from cart",
+                "operationId": "1583678734ca47968cb4d905da172eae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "cart item id",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -181,13 +398,171 @@
                             "application/json": {}
                         }
                     },
-                    "404": {
-                        "description": "Not found",
+                    "422": {
+                        "description": "Bad request",
                         "content": {
                             "application/json": {}
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/cart/remove": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "description": "Remove product from cart",
+                "operationId": "6af33fc35ba3feef3b1a8cc93fa47ac7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "product_type"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "string"
+                                    },
+                                    "product_type": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "description": "Get user orders",
+                "operationId": "8997737565f012fc6483d7874fed7375",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Get products",
+                "operationId": "697a6765742348342c80652460b71213",
+                "parameters": [
+                    {
+                        "name": "product_type",
+                        "in": "query",
+                        "description": "Product type (class)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Limit per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "422": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Order": {
+                "description": "EscolaLms\\Cart\\Models\\Order",
+                "properties": {
+                    "id": {
+                        "description": "id",
+                        "type": "integer"
+                    },
+                    "user_id": {
+                        "description": "user_id",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
             }
         }
     }
