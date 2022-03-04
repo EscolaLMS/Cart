@@ -6,7 +6,7 @@ use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\User;
-use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User as ModelsUser;
 use EscolaLms\Payments\Models\Payment;
@@ -60,9 +60,7 @@ class OrdersSeeder extends Seeder
                     'subtotal' => $price,
                 ]);
 
-            $products->each(function (Product $product) use ($student) {
-                $product->attachToUser($student);
-            });
+            $products->each(fn (Product $product) => app(ProductServiceContract::class)->attachProductToUser($product, $student));
         }
     }
 }
