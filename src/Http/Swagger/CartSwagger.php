@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Http\Swagger;
 
 use EscolaLms\Cart\Http\Requests\CartItemRemoveFromCartRequest;
 use EscolaLms\Cart\Http\Requests\PaymentRequest;
+use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductRemoveFromCartRequest;
 use Illuminate\Http\JsonResponse;
@@ -82,7 +83,7 @@ interface CartSwagger
 
     /**
      * @OA\Post(
-     *      path="/api/cart/add",
+     *      path="/api/cart/products",
      *      description="Add product to cart",
      *      tags={"Cart"},
      *      security={
@@ -94,14 +95,10 @@ interface CartSwagger
      *              mediaType="multipart/json",
      *              @OA\Schema(
      *                  type="object",
-     *                  required={"product_id", "product_type"},
+     *                  required={"id"},
      *                  @OA\Property(
-     *                      property="product_id",
-     *                      type="string",
-     *                  ),
-     *                  @OA\Property(
-     *                      property="product_type",
-     *                      type="string",
+     *                      property="id",
+     *                      type="integer",
      *                  ),
      *              )
      *          )
@@ -125,8 +122,52 @@ interface CartSwagger
     public function add(ProductAddToCartRequest $request): JsonResponse;
 
     /**
+     * @OA\Post(
+     *      path="/api/cart/add",
+     *      description="Add productable to cart",
+     *      tags={"Cart"},
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *              mediaType="multipart/json",
+     *              @OA\Schema(
+     *                  type="object",
+     *                  required={"productable_id", "productable_type"},
+     *                  @OA\Property(
+     *                      property="productable_id",
+     *                      type="integer",
+     *                  ),
+     *                  @OA\Property(
+     *                      property="productable_type",
+     *                      type="string",
+     *                  ),
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json",
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=422,
+     *          description="Bad request",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          )
+     *      )
+     *   )
+     */
+    public function addProductable(ProductableAddToCartRequest $request): JsonResponse;
+
+    /**
      * @OA\Delete(
-     *      path="/api/cart/{id}",
+     *      path="/api/cart/items/{id}",
      *      description="Remove cart item from cart",
      *      tags={"Cart"},
      *      security={
@@ -160,30 +201,21 @@ interface CartSwagger
     public function removeCartItem(CartItemRemoveFromCartRequest $request): JsonResponse;
 
     /**
-     * @OA\Post(
-     *      path="/api/cart/remove",
+     * @OA\Delete(
+     *      path="/api/cart/products/{id}",
      *      description="Remove product from cart",
      *      tags={"Cart"},
      *      security={
      *          {"passport": {}},
      *      },
-     *      @OA\RequestBody(
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="product id",
      *          required=true,
-     *          @OA\MediaType(
-     *              mediaType="multipart/json",
-     *              @OA\Schema(
-     *                  type="object",
-     *                  required={"product_id", "product_type"},
-     *                  @OA\Property(
-     *                      property="product_id",
-     *                      type="string",
-     *                  ),
-     *                  @OA\Property(
-     *                      property="product_type",
-     *                      type="string",
-     *                  ),
-     *              )
-     *          )
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer",
+     *          ),
      *      ),
      *      @OA\Response(
      *          response=200,
@@ -201,5 +233,5 @@ interface CartSwagger
      *      )
      *   )
      */
-    public function removeProduct(ProductRemoveFromCartRequest $request): JsonResponse;
+    public function remove(ProductRemoveFromCartRequest $request): JsonResponse;
 }

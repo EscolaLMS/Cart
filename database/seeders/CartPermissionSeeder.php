@@ -22,16 +22,16 @@ class CartPermissionSeeder extends Seeder
 
         $admin->givePermissionTo([
             CartPermissionsEnum::LIST_ALL_ORDERS,
-            CartPermissionsEnum::LIST_PRODUCTS,
-            CartPermissionsEnum::ATTACH_PRODUCTS,
+            CartPermissionsEnum::LIST_ALL_PRODUCTS,
+            CartPermissionsEnum::MANAGE_PRODUCTS,
         ]);
 
         $tutor->givePermissionTo([
-            CartPermissionsEnum::LIST_PRODUCTS,
+            CartPermissionsEnum::LIST_ALL_PRODUCTS,
         ]);
 
         $student->givePermissionTo([
-            CartPermissionsEnum::LIST_PRODUCTS,
+            CartPermissionsEnum::LIST_PURCHASABLE_PRODUCTS,
             CartPermissionsEnum::BUY_PRODUCTS,
         ]);
     }

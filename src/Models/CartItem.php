@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Models;
 
-use EscolaLms\Cart\Contracts\Base\Taxable;
+use EscolaLms\Cart\Models\Contracts\Base\Taxable;
 use Illuminate\Support\Facades\Config;
 use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
 

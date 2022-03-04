@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $price
  * @property int $extra_fees
  * @property int $tax_rate
+ * @property string|null $name
  * @property-read Model|\Eloquent $buyable
  * @property-read string|null $description
  * @property-read int $subtotal
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereExtraFees($value)
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOptions($value)
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOrderId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|OrderItem wherePrice($value)

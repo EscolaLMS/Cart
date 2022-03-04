@@ -4,21 +4,38 @@ namespace EscolaLms\Cart\Http\Requests;
 
 use EscolaLms\Cart\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class OrderViewRequest extends FormRequest
 {
     public function authorize()
     {
-        return $this->user()->can('view', $this->getOrder());
+        return Gate::allows('view', $this->getOrder());
+    }
+
+    protected function prepareForValidation()
+    {
+        parent::prepareForValidation();
+        $this->merge([
+            'id' => $this->route('id')
+        ]);
     }
 
     public function rules()
     {
-        return [];
+        return [
+            'id' => ['required', 'integer', Rule::exists(Order::class, 'id')],
+        ];
+    }
+
+    public function getId(): int
+    {
+        return $this->route('id');
     }
 
     public function getOrder(): Order
     {
-        return Order::findOrFail($this->route('id'));
+        return Order::findOrFail($this->getId());
     }
 }

@@ -4,8 +4,11 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Http\Resources\ProductResource;
+use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
-use EscolaLms\Cart\Tests\Mocks\Product;
+use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
@@ -25,7 +28,7 @@ class ProductApiTest extends TestCase
         parent::setUp();
 
         $this->seed(CartPermissionSeeder::class);
-        Shop::registerProduct(Product::class);
+        Shop::registerProductableClass(ExampleProductable::class);
 
         $this->shopService = app(ShopServiceContract::class);
         $this->user = config('auth.providers.users.model')::factory()->create();
@@ -44,50 +47,42 @@ class ProductApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products');
         $this->response->assertOk();
+
         $this->response->assertJsonFragment([
             'data' => [
-                [
-                    'product_id' => $product->getKey(),
-                    'product_type' => get_class($product),
-                    'buyable' => true,
-                    'owned' => false,
-                ],
-                [
-                    'product_id' => $product2->getKey(),
-                    'product_type' => get_class($product),
-                    'buyable' => true,
-                    'owned' => false,
-                ]
+                ProductResource::make($product->refresh())->toArray(null),
+                ProductResource::make($product2->refresh())->toArray(null),
             ]
         ]);
     }
 
-    public function test_list_products_filtered()
+    public function test_search_products()
     {
         $user = $this->user;
 
         /** @var Product $product */
         $product = Product::factory()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
         /** @var Product $product2 */
         $product2 = Product::factory()->create();
+        $productable2 = ExampleProductable::factory()->create();
+        $product2->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable2->getKey()
+        ]));
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['product_type' => $product->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
         $this->response->assertOk();
+
         $this->response->assertJsonFragment([
-            'data' => [
-                [
-                    'product_id' => $product->getKey(),
-                    'product_type' => get_class($product),
-                    'buyable' => true,
-                    'owned' => false,
-                ],
-                [
-                    'product_id' => $product2->getKey(),
-                    'product_type' => get_class($product),
-                    'buyable' => true,
-                    'owned' => false,
-                ]
-            ]
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
         ]);
     }
 }

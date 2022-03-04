@@ -2,9 +2,9 @@
 
 namespace EscolaLms\Cart\Database\Seeders;
 
-use EscolaLms\Cart\Contracts\Product;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Enums\UserRole;
@@ -19,8 +19,6 @@ class OrdersSeeder extends Seeder
 
     public function run()
     {
-        $shopService = app(ShopServiceContract::class);
-
         $student = User::role(UserRole::STUDENT)->first();
         if (!$student) {
             // This will only be called if Users were not seeded before CartSeeder was Called
@@ -35,7 +33,7 @@ class OrdersSeeder extends Seeder
 
         /** @var User $student */
         foreach ($students as $student) {
-            $products = $shopService->listProductsBuyableByUser($student)->random(rand(1, 3));
+            $products = Product::factory()->count(rand(1, 5))->create();
             $price = $products->reduce(fn ($acc, Product $product) => $acc + $product->getBuyablePrice(), 0);
 
             /** @var Order $order */

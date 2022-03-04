@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Auth\Traits\ResourceExtandable;
 use EscolaLms\Cart\Models\CartItem;
+use EscolaLms\Cart\Models\Product;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CartItemResource extends JsonResource
@@ -26,6 +27,7 @@ class CartItemResource extends JsonResource
             'id' => $this->getCartItem()->getKey(),
             'product_id' => $this->getCartItem()->buyable_id,
             'product_type' => $this->getCartItem()->buyable_type,
+            $this->mergeWhen($this->getCartItem()->buyable instanceof Product, fn () => ['product' => ProductResource::make($this->getCartItem()->buyable)]),
             'price' => $this->getCartItem()->price,
             'quantity' => $this->getCartItem()->quantity,
             'subtotal' => $this->getCartItem()->subtotal,

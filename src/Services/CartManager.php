@@ -2,10 +2,11 @@
 
 namespace EscolaLms\Cart\Services;
 
-use EscolaLms\Cart\Contracts\Base\Buyable;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\CartItem;
+use EscolaLms\Cart\Models\Contracts\Base\Buyable;
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\CartManagerContract;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\CartManager as BaseCartManager;
@@ -24,11 +25,7 @@ class CartManager extends BaseCartManager implements CartManagerContract
     {
         /** @var CartItem $item */
         foreach ($this->content() as $item) {
-            if (
-                !class_exists($item->buyable_type)
-                || !Shop::registeredProduct($item->buyable_type)
-                || is_null($item->buyable)
-            ) {
+            if (!class_exists($item->buyable_type) || is_null($item->buyable)) {
                 $this->remove($item->getKey());
             }
         }
@@ -82,5 +79,15 @@ class CartManager extends BaseCartManager implements CartManagerContract
     {
         assert($buyable instanceof Model);
         return $this->content()->where('buyable_id', $buyable->getKey())->where('buyable_type', $buyable->getMorphClass())->first();
+    }
+
+    public function hasProduct(Product $product): bool
+    {
+        return $this->hasBuyable($product);
+    }
+
+    public function findProduct(Product $product): ?CartItem
+    {
+        return $this->findBuyable($product);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace EscolaLms\Cart\Models;
 
+use EscolaLms\Cart\Contracts\CanOrder;
+use EscolaLms\Cart\Contracts\CanOrderTrait;
 use EscolaLms\Cart\Database\Factories\UserFactory;
-use EscolaLms\Cart\Models\Contracts\CanOrder as ContractsCanOrder;
-use EscolaLms\Cart\Models\Traits\CanOrder;
 use EscolaLms\Core\Models\User as CoreUser;
 use EscolaLms\Payments\Concerns\Billable;
 use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
@@ -45,6 +45,8 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @property-read int|null $payments_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Permission[] $permissions
  * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\Product[] $products
+ * @property-read int|null $products_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Permission\Models\Role[] $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Token[] $tokens
@@ -76,10 +78,10 @@ use EscolaLms\Payments\Contracts\Billable as ContractsBillable;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class User extends CoreUser implements ContractsBillable, ContractsCanOrder
+class User extends CoreUser implements ContractsBillable, CanOrder
 {
-    use CanOrder;
     use Billable;
+    use CanOrderTrait;
 
     protected $table = 'users';
 
