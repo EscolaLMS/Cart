@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Services;
 
-use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Dtos\OrdersSearchDto;
 use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Events\OrderCancelled;
 use EscolaLms\Cart\Events\OrderCreated;
@@ -12,43 +12,57 @@ use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\User;
-use EscolaLms\Cart\QueryBuilders\BuyableQueryBuilder;
+use EscolaLms\Cart\QueryBuilders\OrderModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
-use EscolaLms\Core\Dtos\OrderDto as SortDto;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use EscolaLms\Core\Dtos\OrderDto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 class OrderService implements OrderServiceContract
 {
-    public function searchAndPaginateOrders(SortDto $sortDto, array $search = [], ?int $per_page  = 15): LengthAwarePaginator
+    protected ProductServiceContract $productService;
+
+    public function __construct(ProductServiceContract $productService)
     {
-        /** @var BuyableQueryBuilder $query */
+        $this->productService = $productService;
+    }
+
+    public function searchAndPaginateOrders(OrdersSearchDto $searchDto, ?OrderDto $sortDto): LengthAwarePaginator
+    {
+        /** @var OrderModelQueryBuilder $query */
         $query = Order::query();
 
-        if (Arr::get($search, 'date_from')) {
-            $query->where('created_at', '>=', Carbon::parse($search['date_from']));
+        if (!is_null($searchDto->getDateFrom())) {
+            $query->where('created_at', '>=', $searchDto->getDateFrom());
         }
-        if (Arr::get($search, 'date_to')) {
-            $query->where('created_at', '<=', Carbon::parse($search['date_to']));
+
+        if (!is_null($searchDto->getDateTo())) {
+            $query->where('created_at', '<=', $searchDto->getDateTo());
         }
-        if (Arr::get($search, 'user_id')) {
-            $query = $query->where('user_id', $search['user_id']);
+
+        if (!is_null($searchDto->getUserId())) {
+            $query = $query->where('user_id', $searchDto->getUserId());
         }
-        if (Arr::get($search, 'product_id')) {
-            $query = $query->whereHasBuyableId($search['product_id']);
+
+        if (!is_null($searchDto->getProductId())) {
+            $query = $query->whereHasBuyable(Product::class, $searchDto->getProductId());
         }
-        if (Arr::get($search, 'product_type')) {
-            $query = $query->whereHasBuyableType($search['product_type']);
+
+        if (!is_null($searchDto->getProductableId()) && !is_null($searchDto->getProductableType())) {
+            $query = $query->whereHasProductable($searchDto->getProductableType(), $searchDto->getProductableId());
+        } elseif (!is_null($searchDto->getProductableType())) {
+            $query = $query->whereHasProductableClass($searchDto->getProductableType());
         }
-        if (!is_null($sortDto->getOrder())) {
+
+        if (!is_null($sortDto) && !is_null($sortDto->getOrder())) {
             $query = $query->orderBy($sortDto->getOrderBy(), $sortDto->getOrder());
         }
 
-        return $query->paginate($per_page ?? 15);
+        return $query->paginate($searchDto->getPerPage() ?? 15);
     }
 
     public function find($id): Model
@@ -86,6 +100,7 @@ class OrderService implements OrderServiceContract
         return OrderItem::create([
             'buyable_type' => $item->buyable_type,
             'buyable_id'   => $item->buyable_id,
+            'name'         => $item->buyable->name ?? $item->buyable->title ?? null,
             'price'        => $item->price,
             'quantity'     => $item->quantity,
             'tax_rate'     => $item->tax_rate,
@@ -126,9 +141,8 @@ class OrderService implements OrderServiceContract
 
             assert($buyable instanceof Product);
 
-            $buyable->afterBought($order);
-
-            event(new ProductBought($buyable, $order->user));
+            event(new ProductBought($buyable, $order));
+            $this->productService->attachProductToUser($buyable, $order->user);
         }
     }
 }

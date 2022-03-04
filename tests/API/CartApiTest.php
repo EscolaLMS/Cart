@@ -4,8 +4,10 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
-use EscolaLms\Cart\Tests\Mocks\Product;
+use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Core\Enums\UserRole;
@@ -28,7 +30,7 @@ class CartApiTest extends TestCase
         parent::setUp();
 
         $this->seed(CartPermissionSeeder::class);
-        Shop::registerProduct(Product::class);
+        Shop::registerProductableClass(ExampleProductable::class);
 
         $this->shopService = app(ShopServiceContract::class);
         $this->user = config('auth.providers.users.model')::factory()->create();
@@ -40,11 +42,15 @@ class CartApiTest extends TestCase
     {
         $user = $this->user;
         /** @var Product $product */
-        $product = Product::factory()->create();
+        $product = Product::factory()->single()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass()
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product->getKey()
         ]);
         $this->response->assertOk();
 
@@ -52,6 +58,26 @@ class CartApiTest extends TestCase
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
     }
 
+    public function test_add_productable_to_cart()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory()->single()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+    }
 
     public function test_remove_last_product_from_cart()
     {
@@ -59,19 +85,15 @@ class CartApiTest extends TestCase
         /** @var Product $product */
         $product = Product::factory()->create();
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass()
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product->getKey(),
         ]);
         $this->response->assertOk();
 
         $this->assertNotNull($user->cart->getKey());
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass()
-        ]);
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/products/' . $product->getKey());
         $this->response->assertOk();
 
         $user->refresh();
@@ -88,19 +110,16 @@ class CartApiTest extends TestCase
         /** @var Product $product2 */
         $product3 = Product::factory()->create();
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass()
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product->getKey(),
         ]);
         $this->response->assertOk();
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product2->getKey(),
-            'product_type' => $product2->getMorphClass()
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product2->getKey(),
         ]);
         $this->response->assertOk();
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product3->getKey(),
-            'product_type' => $product3->getMorphClass()
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product3->getKey(),
         ]);
         $this->response->assertOk();
 
@@ -113,7 +132,7 @@ class CartApiTest extends TestCase
 
         $cartItemId = $cart->items->first()->getKey();
 
-        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/' . $cartItemId);
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/items/' . $cartItemId);
         $this->response->assertOk();
 
         $cart->refresh();
@@ -122,10 +141,7 @@ class CartApiTest extends TestCase
         $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/remove', [
-            'product_id' => $product2->getKey(),
-            'product_type' => $product2->getMorphClass()
-        ]);
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/products/' . $product2->getKey());
         $this->response->assertOk();
 
         $cart->refresh();
@@ -138,11 +154,16 @@ class CartApiTest extends TestCase
     {
         $user = $this->user;
         /** @var Product $product */
-        $product = Product::factory()->create();
+        $product = Product::factory()->single()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass()
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
         ]);
         $this->response->assertOk();
 
@@ -182,12 +203,14 @@ class CartApiTest extends TestCase
 
         /** @var Product $product */
         $product = Product::factory()->create([
-            'price' => 1000
+            'price' => 1000,
+            'purchasable' => true,
         ]);
         /** @var Product $productWithTax */
         $productWithTax = Product::factory()->create([
             'price' => 1000,
             'tax_rate' => 10,
+            'purchasable' => true,
         ]);
 
         $cart = $this->shopService->cartForUser($user);
@@ -210,7 +233,7 @@ class CartApiTest extends TestCase
                     ]
                 ]
             ])
-            ->assertJsonCount(3)
+            ->assertJsonCount(4)
             ->assertJsonCount(2, 'data.0.items');
 
         $order_id = $this->response->json('data.0.id');

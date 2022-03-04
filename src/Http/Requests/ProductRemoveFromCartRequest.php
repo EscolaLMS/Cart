@@ -2,9 +2,9 @@
 
 namespace EscolaLms\Cart\Http\Requests;
 
-use EscolaLms\Cart\Rules\ProductExistsRule;
-use EscolaLms\Cart\Rules\ProductRegisteredRule;
+use EscolaLms\Cart\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductRemoveFromCartRequest extends FormRequest
 {
@@ -13,24 +13,28 @@ class ProductRemoveFromCartRequest extends FormRequest
         return !!$this->user();
     }
 
+    protected function prepareForValidation()
+    {
+        parent::prepareForValidation();
+        $this->merge([
+            'id' => $this->route('id')
+        ]);
+    }
+
     public function rules(): array
     {
         return [
-            'product_type' => ['required', 'string', new ProductRegisteredRule],
-            'product_id' => ['required', new ProductExistsRule()],
+            'id' => ['required', 'integer', Rule::exists(Product::class, 'id')],
         ];
     }
 
-    public function getProductType(): string
+    public function getId(): int
     {
-        return $this->input('product_type');
+        return $this->validated()['id'];
     }
 
-    /** 
-     * @return string|int
-     */
-    public function getProductId()
+    public function getProduct(): Product
     {
-        return $this->input('product_id');
+        return Product::findOrFail($this->getId());
     }
 }

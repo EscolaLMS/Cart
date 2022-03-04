@@ -2,13 +2,12 @@
 
 namespace EscolaLms\Cart\Services\Contracts;
 
-use EscolaLms\Cart\Contracts\Product;
 use EscolaLms\Cart\Models\Cart;
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Collection;
 
 interface ShopServiceContract
 {
@@ -25,12 +24,4 @@ interface ShopServiceContract
     public function removeItemFromCart(Cart $cart, int $cartItemId): void;
 
     public function purchaseCart(Cart $cart, PaymentMethodContract $paymentMethod = null): void;
-
-    public function registerProduct(string $productClass): void;
-    public function registeredProduct(string $productClass): bool;
-    public function registeredProducts(): array;
-    public function canonicalProductClass(string $productClass): ?string;
-
-    public function findProduct(string $productClass, $productId): ?Product;
-    public function listProductsBuyableByUser(User $user, ?string $productClass): Collection;
 }

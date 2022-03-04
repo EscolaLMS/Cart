@@ -2,7 +2,10 @@
 
 namespace EscolaLms\Cart\Http\Resources;
 
-use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use EscolaLms\Categories\Http\Resources\CategoryResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,11 +23,27 @@ class ProductResource extends JsonResource
 
     public function toArray($request)
     {
+        $user = $request ? $request->user() : Auth::user();
         return [
-            'product_id' => $this->getProduct()->getKey(),
-            'product_type' => $this->getProduct()->getMorphClass(),
-            'buyable' => $this->getProduct()->getBuyableByUserAttribute(Auth::user()),
-            'owned' => $this->getProduct()->getOwnedByUserAttribute(Auth::user()),
+            'id' => $this->getProduct()->getKey(),
+            'type' => $this->getProduct()->type,
+            'name' => $this->getProduct()->name,
+            'description' => $this->getProduct()->getBuyableDescription(),
+            'price' => $this->getProduct()->getBuyablePrice(),
+            'price_old' => $this->getProduct()->price_old,
+            'tax_rate' => $this->getProduct()->getTaxRate(),
+            'extra_fees' => $this->getProduct()->getExtraFees(),
+            'purchasable' => $this->getProduct()->purchasable,
+            'duration' => $this->getProduct()->duration,
+            'limit_per_user' => $this->getProduct()->limit_per_user,
+            'limit_total' => $this->getProduct()->limit_total,
+            'productables' => $this->getProduct()->productables->map(fn (ProductProductable $productProductable) => app(ProductServiceContract::class)->mapProductProductableToJsonResource($productProductable)->toArray($request))->toArray(),
+            'teaser_url' => $this->getProduct()->teaser_url,
+            'poster_url' => $this->getProduct()->poster_url,
+            'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : $this->getProduct()->purchasable,
+            'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
+            'categories' => CategoryResource::collection($this->getProduct()->categories),
+            'tags' => $this->getProduct()->tags,
         ];
     }
 }

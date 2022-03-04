@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Events;
 
-use EscolaLms\Cart\Contracts\Product;
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\User;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;

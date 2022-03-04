@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Swagger\Admin;
 
-use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
+use EscolaLms\Cart\Http\Requests\Admin\OrderSearchRequest;
 use EscolaLms\Cart\Http\Requests\OrderViewRequest;
 
 use Illuminate\Http\JsonResponse;
@@ -70,12 +70,21 @@ interface OrderAdminSwagger
      *          required=false,
      *          in="query",
      *          @OA\Schema(
-     *              type="string",
+     *              type="integer",
      *          ),
      *      ),
      *      @OA\Parameter(
-     *          name="product_type",
-     *          description="Product type (class)",
+     *          name="productable_id",
+     *          description="Productable ID (for example Course Id)",
+     *          required=false,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="integer",
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *          name="productable_type",
+     *          description="Productable type (class) - required if productable_id is sent",
      *          required=false,
      *          in="query",
      *          @OA\Schema(
@@ -115,7 +124,6 @@ interface OrderAdminSwagger
      *   )
      */
     public function index(OrderSearchRequest $request): JsonResponse;
-
 
     /**
      * @OA\Get(
@@ -159,5 +167,5 @@ interface OrderAdminSwagger
      *      )
      * )
      */
-    public function show(OrderViewRequest $request): JsonResponse;
+    public function read(OrderViewRequest $request): JsonResponse;
 }

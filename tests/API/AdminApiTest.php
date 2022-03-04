@@ -8,16 +8,16 @@ use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
-use EscolaLms\Cart\Tests\Mocks\Product;
+use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
-use Schema;
 
 class AdminApiTest extends TestCase
 {
@@ -31,7 +31,7 @@ class AdminApiTest extends TestCase
         parent::setUp();
 
         $this->seed(CartPermissionSeeder::class);
-        Shop::registerProduct(Product::class);
+        Shop::registerProductableClass(ExampleProductable::class);
 
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
@@ -43,6 +43,13 @@ class AdminApiTest extends TestCase
         $products = [
             ...Product::factory()->count(5)->create(),
         ];
+        foreach ($products as $product) {
+            $productable = ExampleProductable::factory()->create();
+            $product->productables()->save(new ProductProductable([
+                'productable_type' => ExampleProductable::class,
+                'productable_id' => $productable->getKey()
+            ]));
+        }
 
         $orders = [];
         foreach ($products as $product) {
@@ -68,8 +75,8 @@ class AdminApiTest extends TestCase
         $this->assertDataCountLessThanOrEqual($this->response, 1);
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'product_type' => $products[0]->getMorphClass(),
-            'product_id' => $products[0]->id,
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->id,
         ]);
         $this->response->assertStatus(200);
         $this->assertDataCountLessThanOrEqual($this->response, 1);
@@ -128,9 +135,7 @@ class AdminApiTest extends TestCase
 
         $this->assertFalse($product->getOwnedByUserAttribute($student));
 
-        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/attach', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass(),
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/' . $product->getKey() . '/attach', [
             'user_id' => $student->getKey(),
         ]);
         $this->response->assertOk();
@@ -140,9 +145,7 @@ class AdminApiTest extends TestCase
 
         $event->assertDispatched(ProductAttached::class);
 
-        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/detach', [
-            'product_id' => $product->getKey(),
-            'product_type' => $product->getMorphClass(),
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/' . $product->getKey() . '/detach', [
             'user_id' => $student->getKey(),
         ]);
         $this->response->assertOk();
@@ -151,5 +154,22 @@ class AdminApiTest extends TestCase
         $this->assertFalse($product->getOwnedByUserAttribute($student));
 
         $event->assertDispatched(ProductDetached::class);
+    }
+
+    public function test_create_product()
+    {
+        $productData = Product::factory()->make()->toArray();
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
+        $this->response->assertCreated();
+    }
+
+    public function test_update_product()
+    {
+        $product = Product::factory()->single()->create();
+
+        $productData = Product::factory()->single()->make()->toArray();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
+        $this->response->assertOk();
     }
 }

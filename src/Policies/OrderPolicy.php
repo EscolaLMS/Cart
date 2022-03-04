@@ -16,6 +16,11 @@ class OrderPolicy
         return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS);
     }
 
+    public function viewOwn(User $user)
+    {
+        return true;
+    }
+
     public function view(User $user, Order $order)
     {
         return $user->can(CartPermissionsEnum::LIST_ALL_ORDERS)

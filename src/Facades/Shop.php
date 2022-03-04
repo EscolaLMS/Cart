@@ -2,19 +2,19 @@
 
 namespace EscolaLms\Cart\Facades;
 
-use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static void registerProduct(string $productClass)
- * @method static bool registeredProduct(string $productClass)
+ * @method static void registerProductableClass(string $productableClass)
+ * @method static bool isProductableClassRegistered(string $productableClass)
  * 
- * @see \EscolaLms\Cart\Services\Contracts\ShopServiceContract
+ * @see \EscolaLms\Cart\Services\Contracts\ProductServiceContract
  */
 class Shop extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return ShopServiceContract::class;
+        return ProductServiceContract::class;
     }
 }

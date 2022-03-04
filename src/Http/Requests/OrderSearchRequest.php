@@ -2,30 +2,26 @@
 
 namespace EscolaLms\Cart\Http\Requests;
 
+use EscolaLms\Cart\Http\Requests\Admin\OrderSearchRequest as AdminOrderSearchRequest;
 use EscolaLms\Cart\Models\Order;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
-class OrderSearchRequest extends FormRequest
+class OrderSearchRequest extends AdminOrderSearchRequest
 {
     public function authorize()
     {
-        return $this->user()->can('viewAny', Order::class);
+        return Gate::allows('viewOwn', Order::class);
+    }
+
+    public function getUserId(): ?int
+    {
+        return Auth::user()->getKey();
     }
 
     public function rules()
     {
-        return [
-            'date_from' => ['sometimes', 'date'],
-            'date_to' => ['sometimes', 'date'],
-            'user_id' => ['sometimes', 'integer'],
-            'author_id' => ['sometimes', 'integer'],
-            'product_type' => ['sometimes', 'string'],
-            'product_id' => ['sometimes', 'integer'],
-            'per_page' => ['sometimes', 'integer'],
-            'page' => ['sometimes', 'integer'],
-            'order_by' => ['sometimes', Rule::in(['created_at', 'updated_at', 'user_id'])],
-            'order' => ['sometimes', Rule::in(['ASC', 'DESC'])],
-        ];
+        return Arr::except(parent::rules(), ['user_id']);
     }
 }

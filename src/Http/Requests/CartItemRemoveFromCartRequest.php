@@ -13,7 +13,6 @@ class CartItemRemoveFromCartRequest extends FormRequest
         return !!$this->user();
     }
 
-
     protected function prepareForValidation()
     {
         parent::prepareForValidation();

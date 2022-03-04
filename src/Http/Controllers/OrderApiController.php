@@ -2,21 +2,34 @@
 
 namespace EscolaLms\Cart\Http\Controllers;
 
+use EscolaLms\Cart\Http\Requests\OrderSearchRequest;
+use EscolaLms\Cart\Http\Requests\OrderViewRequest;
 use EscolaLms\Cart\Http\Resources\OrderResource;
 use EscolaLms\Cart\Http\Swagger\OrderSwagger;
+use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
+use EscolaLms\Core\Dtos\OrderDto as SortDto;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
-use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class OrderApiController extends EscolaLmsBaseController implements OrderSwagger
 {
-    public function index(Request $request): JsonResponse
+    protected OrderServiceContract $orderService;
+
+    public function __construct(OrderServiceContract $orderService)
     {
-        try {
-            return $this->sendResponseForResource(OrderResource::collection($request->user()->orders), __("Your orders history"));
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage(), 400);
-        }
+        $this->orderService = $orderService;
+    }
+
+    public function index(OrderSearchRequest $request): JsonResponse
+    {
+        $sortDto = SortDto::instantiateFromRequest($request);
+        $searchOrdersDto = $request->toDto();
+        $paginatedResults = $this->orderService->searchAndPaginateOrders($searchOrdersDto, $sortDto);
+        return $this->sendResponseForResource(OrderResource::collection($paginatedResults), __("Your orders history"));
+    }
+
+    public function read(OrderViewRequest $request): JsonResponse
+    {
+        return $this->sendResponseForResource(OrderResource::make($request->getOrder()), __("Order fetched"));
     }
 }
