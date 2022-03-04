@@ -219,8 +219,10 @@ class ProductService implements ProductServiceContract
     {
         $product->users()->syncWithoutDetaching($user->getKey());
         foreach ($product->productables as $productProductable) {
-            assert($productProductable->productable instanceof Productable);
-            $this->attachProductableToUser($productProductable->productable, $user);
+            if ($this->isProductableClassRegistered($productProductable->productable_type)) {
+                $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
+                $this->attachProductableToUser($productable, $user);
+            }
         }
         event(new ProductAttached($product, $user));
     }
@@ -229,8 +231,10 @@ class ProductService implements ProductServiceContract
     {
         $product->users()->detach($user->getKey());
         foreach ($product->productables as $productProductable) {
-            assert($productProductable->productable instanceof Productable);
-            $this->detachProductableFromUser($productProductable->productable, $user);
+            if ($this->isProductableClassRegistered($productProductable->productable_type)) {
+                $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
+                $this->detachProductableFromUser($productable, $user);
+            }
         }
         event(new ProductDetached($product, $user));
     }
