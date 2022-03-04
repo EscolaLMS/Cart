@@ -52,10 +52,16 @@ class OrderService implements OrderServiceContract
             $query = $query->whereHasBuyable(Product::class, $searchDto->getProductId());
         }
 
-        if (!is_null($searchDto->getProductableId()) && !is_null($searchDto->getProductableType())) {
-            $query = $query->whereHasProductable($searchDto->getProductableType(), $searchDto->getProductableId());
-        } elseif (!is_null($searchDto->getProductableType())) {
-            $query = $query->whereHasProductableClass($searchDto->getProductableType());
+
+        if (!is_null($searchDto->getProductableType())) {
+            $class = $searchDto->getProductableType();
+            /** @var Model $model */
+            $model = new $class();
+            if (!is_null($searchDto->getProductableId())) {
+                $query = $query->whereHasProductableClassAndId($model->getMorphClass(), $searchDto->getProductableId());
+            } else {
+                $query = $query->whereHasProductableClass($model->getMorphClass());
+            }
         }
 
         if (!is_null($sortDto) && !is_null($sortDto->getOrder())) {

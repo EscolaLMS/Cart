@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Models;
 
+use EscolaLms\Cart\QueryBuilders\OrderItemModelQueryBuilder;
 use EscolaLms\Cart\Support\OrderItemCollection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,23 +27,28 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int $tax
  * @property-read int $total
  * @property-read int $total_with_tax
+ * @property-read \EscolaLms\Cart\Models\Order $order
  * @method static OrderItemCollection|static[] all($columns = ['*'])
  * @method static OrderItemCollection|static[] get($columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem query()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereBuyableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereBuyableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereExtraFees($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOptions($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereOrderId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem wherePrice($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereQuantity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereTaxRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderItem whereUpdatedAt($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem newModelQuery()
+ * @method static OrderItemModelQueryBuilder|OrderItem newQuery()
+ * @method static OrderItemModelQueryBuilder|OrderItem query()
+ * @method static OrderItemModelQueryBuilder|OrderItem whereBuyableClassAndId(string $buyable_type, int $buyable_id)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereBuyableId($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereBuyableType($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereCreatedAt($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereExtraFees($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereHasProductable(\Illuminate\Database\Eloquent\Model $productable)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereHasProductableClassAndId(string $productable_type, int $productable_id)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereId($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereName($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereOptions($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereOrderId($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem wherePrice($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereProductId(int $product_id)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereQuantity($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereTaxRate($value)
+ * @method static OrderItemModelQueryBuilder|OrderItem whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class OrderItem extends Model
@@ -54,6 +60,11 @@ class OrderItem extends Model
     public function buyable()
     {
         return $this->morphTo('buyable');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function newCollection(array $models = [])
@@ -89,5 +100,10 @@ class OrderItem extends Model
     public function getTotalWithTaxAttribute(): int
     {
         return $this->total + $this->tax;
+    }
+
+    public function newEloquentBuilder($query): OrderItemModelQueryBuilder
+    {
+        return new OrderItemModelQueryBuilder($query);
     }
 }

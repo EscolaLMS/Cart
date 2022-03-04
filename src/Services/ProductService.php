@@ -77,7 +77,7 @@ class ProductService implements ProductServiceContract
 
     public function findSingleProductForProductable(Productable $productable): ?Product
     {
-        return Product::where('type', ProductType::SINGLE)->whereHasProductable($this->canonicalProductableClass(get_class($productable)), $productable->getKey())->first();
+        return Product::where('type', ProductType::SINGLE)->whereHasProductable($productable)->first();
     }
 
     public function searchAndPaginateProducts(ProductsSearchDto $searchDto, ?OrderDto $orderDto = null): LengthAwarePaginator
@@ -104,10 +104,15 @@ class ProductService implements ProductServiceContract
             $query = $query->where('purchasable', '=', $searchDto->getPurchasable());
         }
 
-        if (!is_null($searchDto->getProductableId()) && !is_null($searchDto->getProductableType())) {
-            $query = $query->whereHasProductable($this->canonicalProductableClass($searchDto->getProductableType()), $searchDto->getProductableId());
-        } elseif (!is_null($searchDto->getProductableType())) {
-            $query = $query->whereHasProductableClass($this->canonicalProductableClass($searchDto->getProductableType()));
+        if (!is_null($searchDto->getProductableType())) {
+            $class = $searchDto->getProductableType();
+            /** @var Model $model */
+            $model = new $class();
+            if (!is_null($searchDto->getProductableId())) {
+                $query = $query->whereHasProductableClassAndId($model->getMorphClass(), $searchDto->getProductableId());
+            } else {
+                $query = $query->whereHasProductableClass($model->getMorphClass());
+            }
         }
 
         if (!is_null($orderDto) && !is_null($orderDto->getOrder())) {

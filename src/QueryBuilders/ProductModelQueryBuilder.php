@@ -2,8 +2,10 @@
 
 namespace EscolaLms\Cart\QueryBuilders;
 
+use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class ProductModelQueryBuilder extends Builder
@@ -13,7 +15,12 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereHas('productables', fn (Builder $query) => $query->where('productable_type', $productable_type));
     }
 
-    public function whereHasProductable(string $productable_type, int $productable_id): ProductModelQueryBuilder
+    public function whereHasProductable(Model $productable): ProductModelQueryBuilder
+    {
+        return $this->whereHasProductableClassAndId($productable->getMorphClass(), $productable->getKey());
+    }
+
+    public function whereHasProductableClassAndId(string $productable_type, int $productable_id): ProductModelQueryBuilder
     {
         return $this->whereHas('productables', fn (Builder $query) => $query->where('productable_type', $productable_type)->where('productable_id', $productable_id));
     }

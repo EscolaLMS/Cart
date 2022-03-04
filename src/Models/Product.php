@@ -18,6 +18,25 @@ use Illuminate\Support\Facades\Auth;
 /**
  * EscolaLms\Cart\Models\Product
  *
+ * @OA\Schema (
+ *      schema="Product",
+ *      @OA\Property(
+ *          property="id",
+ *          description="id",
+ *          type="integer",
+ *      ),
+ *      @OA\Property(
+ *          property="name",
+ *          description="name",
+ *          type="string"
+ *      ),
+ *      @OA\Property(
+ *          property="price",
+ *          description="price",
+ *          type="integer"
+ *      )
+ * )
+ * 
  * @property int $id
  * @property string $name
  * @property string $type
@@ -54,8 +73,9 @@ use Illuminate\Support\Facades\Auth;
  * @method static ProductModelQueryBuilder|Product whereDoesntHaveProductablesNotOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereDuration($value)
  * @method static ProductModelQueryBuilder|Product whereExtraFees($value)
- * @method static ProductModelQueryBuilder|Product whereHasProductable(string $productable_type, int $productable_id)
+ * @method static ProductModelQueryBuilder|Product whereHasProductable(Model $productable)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
+ * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
  * @method static ProductModelQueryBuilder|Product whereHasProductablesBuyableByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereHasProductablesNotBuyableByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereHasProductablesNotOwnedByUser(?\EscolaLms\Core\Models\User $user = null)

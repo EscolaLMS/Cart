@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static void registerProductableClass(string $productableClass)
  * @method static bool isProductableClassRegistered(string $productableClass)
+ * @method static string canonicalProductableClass(string $productableClass)
  * 
  * @see \EscolaLms\Cart\Services\Contracts\ProductServiceContract
  */
