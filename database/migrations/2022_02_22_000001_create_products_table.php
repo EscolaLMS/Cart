@@ -9,6 +9,7 @@ class CreateProductsTable extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('products');
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
