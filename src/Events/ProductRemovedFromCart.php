@@ -2,6 +2,6 @@
 
 namespace EscolaLms\Cart\Events;
 
-class ProductRemovedFromCart extends AbstractProductEvent
+class ProductRemovedFromCart extends AbstractProductCartEvent
 {
 }

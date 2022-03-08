@@ -74,6 +74,26 @@ class ProductApiTest extends TestCase
             'productable_type' => ExampleProductable::class,
             'productable_id' => $productable2->getKey()
         ]));
+        /** @var Product $product2 */
+        $product3 = Product::factory()->create(['purchasable' => false]);
+        $productable3 = ExampleProductable::factory()->create();
+        $product3->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable3->getKey()
+        ]));
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_type' => $productable->getMorphClass()]);
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
         $this->response->assertOk();
@@ -83,6 +103,9 @@ class ProductApiTest extends TestCase
         ]);
         $this->response->assertJsonMissing([
             ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
         ]);
     }
 }

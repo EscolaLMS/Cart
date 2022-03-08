@@ -77,7 +77,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         try {
             $cart = $this->shopService->cartForUser($request->user());
             $paymentMethodDto = PaymentMethodDto::instantiateFromRequest($request);
-            $this->shopService->purchaseCart($cart, $paymentMethodDto);
+            $this->shopService->purchaseCart($cart, $request->toClientDetailsDto(), $paymentMethodDto);
 
             return $this->sendSuccess(__("Payment successful"));
         } catch (\Exception $e) {
