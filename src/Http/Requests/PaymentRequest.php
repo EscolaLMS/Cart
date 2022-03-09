@@ -2,6 +2,8 @@
 
 namespace EscolaLms\Cart\Http\Requests;
 
+use EscolaLms\Cart\Dtos\ClientDetailsDto;
+use EscolaLms\Cart\Enums\CartPermissionsEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PaymentRequest extends FormRequest
@@ -13,7 +15,7 @@ class PaymentRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can(CartPermissionsEnum::BUY_PRODUCTS);
     }
 
     /**
@@ -24,7 +26,27 @@ class PaymentRequest extends FormRequest
     public function rules()
     {
         return [
-            'paymentMethodId' => ['required', 'nullable']
+            'paymentMethodId' => ['required', 'nullable'],
+            'client_name' => ['sometimes', 'string'],
+            'client_street' => ['sometimes', 'string'],
+            'client_postal' => ['sometimes', 'string'],
+            'client_city' => ['sometimes', 'string'],
+            'client_country' => ['sometimes', 'string'],
+            'client_company' => ['sometimes', 'string'],
+            'client_taxid' => ['sometimes', 'string', 'required_with:client_company'],
         ];
+    }
+
+    public function toClientDetailsDto(): ClientDetailsDto
+    {
+        return new ClientDetailsDto(
+            $this->input('client_name'),
+            $this->input('client_street'),
+            $this->input('client_city'),
+            $this->input('client_postal'),
+            $this->input('client_country'),
+            $this->input('client_company'),
+            $this->input('client_taxid')
+        );
     }
 }

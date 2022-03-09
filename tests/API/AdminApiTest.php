@@ -3,13 +3,17 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Events\ProductableAttached;
+use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
@@ -156,6 +160,51 @@ class AdminApiTest extends TestCase
         $event->assertDispatched(ProductDetached::class);
     }
 
+    public function test_attach_and_detach_productable()
+    {
+        $eventFake = Event::fake();
+
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $student = config('auth.providers.users.model')::factory()->create();
+        $student->guard_name = 'api';
+        $student->assignRole(UserRole::STUDENT);
+
+        $this->assertFalse($productable->getOwnedByUserAttribute($student));
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/attach', [
+            'user_id' => $student->getKey(),
+            'productable_id' => $productable->getKey(),
+            'productable_type' => ExampleProductable::class
+        ]);
+        $this->response->assertOk();
+
+        $product->refresh();
+        $this->assertTrue($productable->getOwnedByUserAttribute($student));
+        $this->assertTrue(app(ProductServiceContract::class)->productIsOwnedByUser($product, $student, true));
+
+        $eventFake->assertDispatched(ProductableAttached::class, fn (ProductableAttached $event) => $event->getProductable()->getKey() === $productable->getKey());
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/detach', [
+            'user_id' => $student->getKey(),
+            'productable_id' => $productable->getKey(),
+            'productable_type' => ExampleProductable::class
+        ]);
+        $this->response->assertOk();
+
+        $product->refresh();
+        $this->assertFalse($productable->getOwnedByUserAttribute($student));
+
+        $eventFake->assertDispatched(ProductableDetached::class, fn (ProductableDetached $event) => $event->getProductable()->getKey() === $productable->getKey());
+    }
+
     public function test_create_product()
     {
         $productData = Product::factory()->make()->toArray();
@@ -171,5 +220,58 @@ class AdminApiTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
         $this->response->assertOk();
+    }
+
+    public function test_search_products()
+    {
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey()
+        ]));
+        /** @var Product $product2 */
+        $product2 = Product::factory()->create();
+        $productable2 = ExampleProductable::factory()->create();
+        $product2->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable2->getKey()
+        ]));
+        /** @var Product $product2 */
+        $product3 = Product::factory()->create(['purchasable' => false]);
+        $productable3 = ExampleProductable::factory()->create();
+        $product3->productables()->save(new ProductProductable([
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable3->getKey()
+        ]));
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_type' => $productable->getMorphClass()]);
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
     }
 }

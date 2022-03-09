@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services;
 
+use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Dtos\OrdersSearchDto;
 use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Events\OrderCancelled;
@@ -76,8 +77,10 @@ class OrderService implements OrderServiceContract
         return Order::findOrFail($id);
     }
 
-    public function createOrderFromCart(Cart $cart): Order
+    public function createOrderFromCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null): Order
     {
+        $optionalClientDetailsDto = optional($clientDetailsDto);
+
         /** @var User $user */
         $user = User::find($cart->user_id);
 
@@ -90,6 +93,13 @@ class OrderService implements OrderServiceContract
         $order->subtotal = $cartManager->total();
         $order->tax = $cartManager->taxInt();
         $order->status = OrderStatus::PROCESSING;
+        $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
+        $order->client_street = $optionalClientDetailsDto->getStreet();
+        $order->client_postal = $optionalClientDetailsDto->getPostal();
+        $order->client_city = $optionalClientDetailsDto->getCity();
+        $order->client_country = $optionalClientDetailsDto->getCountry();
+        $order->client_company = $optionalClientDetailsDto->getCompany();
+        $order->client_taxid = $optionalClientDetailsDto->getTaxid();
         $order->save();
 
         foreach ($cart->items as $item) {

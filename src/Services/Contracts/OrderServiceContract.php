@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services\Contracts;
 
+use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Dtos\OrdersSearchDto;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Order;
@@ -15,7 +16,7 @@ interface OrderServiceContract
 
     public function find(int $id): Model;
 
-    public function createOrderFromCart(Cart $cart): Order;
+    public function createOrderFromCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null): Order;
 
     public function setPaid(Order $order): void;
     public function setCancelled(Order $order): void;

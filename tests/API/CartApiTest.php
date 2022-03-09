@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Events\ProductAddedToCart;
+use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
@@ -14,6 +16,7 @@ use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
@@ -102,6 +105,8 @@ class CartApiTest extends TestCase
 
     public function test_remove_product_from_cart()
     {
+        $eventFake = Event::fake();
+
         $user = $this->user;
         /** @var Product $product */
         $product = Product::factory()->create();
@@ -124,6 +129,14 @@ class CartApiTest extends TestCase
         $this->response->assertOk();
 
         $cart = $user->cart;
+
+        $eventFake->assertDispatched(
+            ProductAddedToCart::class,
+            fn (ProductAddedToCart $event) => $event->getProduct()->getKey() === $product->getKey()
+                && $event->getUser()->getKey() === $user->getKey()
+                && $event->getCart()->getKey() === $cart->getKey()
+        );
+
         $this->assertNotNull($cart);
         $this->assertNotNull($cart->getKey());
         $this->assertContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
@@ -148,6 +161,13 @@ class CartApiTest extends TestCase
         $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertNotContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
+
+        $eventFake->assertDispatched(
+            ProductRemovedFromCart::class,
+            fn (ProductRemovedFromCart $event) => $event->getProduct()->getKey() === $product->getKey()
+                && $event->getUser()->getKey() === $user->getKey()
+                && $event->getCart()->getKey() === $cart->getKey()
+        );
     }
 
     public function test_cart_items_list()

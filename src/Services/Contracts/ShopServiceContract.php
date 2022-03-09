@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services\Contracts;
 
+use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\CartManager;
@@ -23,5 +24,5 @@ interface ShopServiceContract
     public function removeProductFromCart(Cart $cart, Product $buyable): void;
     public function removeItemFromCart(Cart $cart, int $cartItemId): void;
 
-    public function purchaseCart(Cart $cart, PaymentMethodContract $paymentMethod = null): void;
+    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDeails = null, ?PaymentMethodContract $paymentMethod = null): void;
 }

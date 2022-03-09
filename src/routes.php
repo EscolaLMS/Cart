@@ -12,6 +12,7 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
     Route::get('/orders', [OrderAdminApiController::class, 'index']);
     Route::get('/orders/{id}', [OrderAdminApiController::class, 'read']);
 
+    Route::get('/products', [ProductAdminApiController::class, 'index']);
     Route::post('/products', [ProductAdminApiController::class, 'create']);
     Route::get('/products/{id}', [ProductAdminApiController::class, 'read'])->whereNumber('id');
     Route::put('/products/{id}', [ProductAdminApiController::class, 'update'])->whereNumber('id');

@@ -73,7 +73,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static ProductModelQueryBuilder|Product whereDoesntHaveProductablesNotOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereDuration($value)
  * @method static ProductModelQueryBuilder|Product whereExtraFees($value)
- * @method static ProductModelQueryBuilder|Product whereHasProductable(Model $productable)
+ * @method static ProductModelQueryBuilder|Product whereHasProductable(\Illuminate\Database\Eloquent\Model $productable)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
  * @method static ProductModelQueryBuilder|Product whereHasProductablesBuyableByUser(?\EscolaLms\Core\Models\User $user = null)

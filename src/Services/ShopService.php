@@ -2,9 +2,12 @@
 
 namespace EscolaLms\Cart\Services;
 
+use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Events\ProductAddedToCart;
+use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
 use EscolaLms\Cart\Models\Cart;
+use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
@@ -38,9 +41,9 @@ class ShopService implements ShopServiceContract
         return new CartManager($cart);
     }
 
-    public function purchaseCart(Cart $cart, PaymentMethodContract $paymentMethod = null): void
+    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, ?PaymentMethodContract $paymentMethod = null): void
     {
-        $order = $this->orderService->createOrderFromCart($cart);
+        $order = $this->orderService->createOrderFromCart($cart, $clientDetailsDto);
 
         $paymentProcessor = $order->process();
         $paymentProcessor->purchase($paymentMethod);
@@ -67,13 +70,19 @@ class ShopService implements ShopServiceContract
         $item = $cartManager->findProduct($product);
         if ($item) {
             $cartManager->remove($item->getKey());
+            event(new ProductRemovedFromCart($product, $cart));
         }
     }
 
     public function removeItemFromCart(Cart $cart, int $cartItemId): void
     {
         $cartManager = $this->cartManagerForCart($cart);
-        $cartManager->remove($cartItemId);
+        $cartItem = CartItem::find($cartItemId);
+        if ($cartItem) {
+            $product = $cartItem->buyable;
+            $cartManager->remove($cartItemId);
+            event(new ProductRemovedFromCart($product, $cart));
+        }
     }
 
     public function addUniqueProductToCart(Cart $cart, Product $product): void
