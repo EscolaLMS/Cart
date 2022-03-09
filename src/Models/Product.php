@@ -5,8 +5,10 @@ namespace EscolaLms\Cart\Models;
 use EscolaLms\Cart\Database\Factories\ProductFactory;
 use EscolaLms\Cart\Models\Contracts\ProductInterface;
 use EscolaLms\Cart\Models\Contracts\ProductTrait;
+use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\QueryBuilders\ProductModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use EscolaLms\Core\Models\User as CoreUser;
 use EscolaLms\Tags\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -148,12 +150,12 @@ class Product extends Model implements ProductInterface
         return $this->tax_rate ?? 0;
     }
 
-    public function getBuyableByUserAttribute(?User $user = null): bool
+    public function getBuyableByUserAttribute(?CoreUser $user = null): bool
     {
         return app(ProductServiceContract::class)->productIsBuyableByUser($this, $user ?? Auth::user());
     }
 
-    public function getOwnedByUserAttribute(?User $user = null): bool
+    public function getOwnedByUserAttribute(?CoreUser $user = null): bool
     {
         return app(ProductServiceContract::class)->productIsOwnedByUser($this, $user ?? Auth::user());
     }
