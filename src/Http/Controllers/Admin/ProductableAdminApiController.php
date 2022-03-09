@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Controllers\Admin;
 
 use EscolaLms\Cart\Http\Requests\Admin\ProductableAttachRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableDetachRequest;
+use EscolaLms\Cart\Http\Requests\Admin\ProductableRegisteredListRequest;
 use EscolaLms\Cart\Http\Swagger\Admin\ProductableAdminSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -35,5 +36,10 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
         $user = $request->getUser();
         $this->productService->detachProductableFromUser($productable, $user);
         return $this->sendSuccess(__('Productable detached from user'));
+    }
+
+    public function registered(ProductableRegisteredListRequest $request): JsonResponse
+    {
+        return $this->sendResponse($this->productService->listRegisteredProductableClasses(), __('List of registered Productable types'));
     }
 }

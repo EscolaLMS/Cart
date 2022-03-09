@@ -207,9 +207,28 @@ class AdminApiTest extends TestCase
 
     public function test_create_product()
     {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
         $productData = Product::factory()->make()->toArray();
+        $productData['productables'] = [
+            [
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]
+        ];
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
+
+        $productId = $this->response->json()['data']['id'];
+        $product = Product::find($productId);
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment([
+            ProductResource::make($product)->toArray(null),
+        ]);
     }
 
     public function test_update_product()
@@ -272,6 +291,17 @@ class AdminApiTest extends TestCase
         ]);
         $this->response->assertJsonMissing([
             ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+    }
+
+    public function test_get_registered_productables_list()
+    {
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/registered');
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            'data' => [
+                ExampleProductable::class
+            ]
         ]);
     }
 }
