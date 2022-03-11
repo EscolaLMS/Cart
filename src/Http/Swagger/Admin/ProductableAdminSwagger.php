@@ -171,7 +171,7 @@ interface ProductableAdminSwagger
     public function detach(ProductableDetachRequest $request): JsonResponse;
 
     /**
-     * @OA\Post(
+     * @OA\Get(
      *      path="/api/admin/productables/registered",
      *      description="List of registered Productable types",
      *      tags={"Admin Product"},

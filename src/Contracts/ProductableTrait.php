@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * @see \EscolaLms\Cart\Contracts\Productable
@@ -93,15 +94,21 @@ trait ProductableTrait
 
     public function getName(): string
     {
-        if (empty($this->getNameColumn()) || empty($this->{$this->getNameColumn()})) {
-            return $this->name ?? $this->title ?? __('No name field');
+        if (empty($this->getNameColumn())) {
+            return __('Unknown');
         }
         return $this->{$this->getNameColumn()};
     }
 
     public function getNameColumn(): ?string
     {
-        return 'name';
+        if (Schema::hasColumn($this->getTable(), 'name')) {
+            return 'name';
+        }
+        if (Schema::hasColumn($this->getTable(), 'title')) {
+            return 'title';
+        }
+        return null;
     }
 
     public function getDescription(): ?string

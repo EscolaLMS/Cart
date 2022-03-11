@@ -64,9 +64,10 @@ class ProductService implements ProductServiceContract
         foreach ($this->listRegisteredProductableClasses() as $productableClass) {
             /** @var Model&Productable $model */
             $model = new $productableClass();
+            $nameColumn = $model->getNameColumn() ?? ('"' . __('Unknown') . '"');
             $productables = $model::query()->getQuery()->select(
                 'id AS productable_id',
-                ($model->getNameColumn() . ' AS name'),
+                ($nameColumn . ' AS name'),
             )->get();
             $collection = $collection->merge($productables->map(function ($row) use ($productableClass) {
                 $row->productable_type = $productableClass;
