@@ -74,12 +74,17 @@ interface Productable
     public function getApiReadUrl(): ?string;
 
     /** 
-     * Eloquent Model functionality required for polymorphic relations and resource listing
+     * Default Eloquent Model functionality
+     */
+    public function getTable();
+
+    /** 
+     * Default Eloquent Model functionality
      */
     public function getKey();
 
     /** 
-     * Eloquent Model functionality required for polymorphic relations and resource listing
+     * Default Eloquent Model functionality (required for polymorphic relations and resource listing)
      */
     public function getMorphClass();
 }
