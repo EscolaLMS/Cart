@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Controllers\Admin;
 
 use EscolaLms\Cart\Http\Requests\Admin\ProductableAttachRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableDetachRequest;
+use EscolaLms\Cart\Http\Requests\Admin\ProductableListRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableProductRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableRegisteredListRequest;
 use EscolaLms\Cart\Http\Resources\ProductResource;
@@ -22,6 +23,11 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
     {
         $this->productService = $productService;
         $this->shopService = $shopService;
+    }
+
+    public function index(ProductableListRequest $request): JsonResponse
+    {
+        return $this->sendResponse($this->productService->listAllProductables()->toArray(), __('List of Productables'));
     }
 
     public function attach(ProductableAttachRequest $request): JsonResponse

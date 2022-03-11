@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class ProductService implements ProductServiceContract
@@ -55,6 +56,24 @@ class ProductService implements ProductServiceContract
     public function listRegisteredProductableClasses(): array
     {
         return $this->productables;
+    }
+
+    public function listAllProductables(): Collection
+    {
+        $collection = Collection::empty();
+        foreach ($this->listRegisteredProductableClasses() as $productableClass) {
+            /** @var Model&Productable $model */
+            $model = new $productableClass();
+            $productables = $model::query()->getQuery()->select(
+                'id AS productable_id',
+                ($model->getNameColumn() . ' AS name'),
+            )->get();
+            $collection = $collection->merge($productables->map(function ($row) use ($productableClass) {
+                $row->productable_type = $productableClass;
+                return $row;
+            }));
+        }
+        return $collection;
     }
 
     public function canonicalProductableClass(string $productableClass): ?string

@@ -59,6 +59,11 @@ interface Productable
     public function getName(): string;
 
     /**
+     * Get productable name column
+     */
+    public function getNameColumn(): ?string;
+
+    /**
      * Get productable description
      */
     public function getDescription(): ?string;

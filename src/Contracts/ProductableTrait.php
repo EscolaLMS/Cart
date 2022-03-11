@@ -93,7 +93,15 @@ trait ProductableTrait
 
     public function getName(): string
     {
-        return $this->name ?? $this->title ?? __('No name field');
+        if (empty($this->getNameColumn()) || empty($this->{$this->getNameColumn()})) {
+            return $this->name ?? $this->title ?? __('No name field');
+        }
+        return $this->{$this->getNameColumn()};
+    }
+
+    public function getNameColumn(): ?string
+    {
+        return 'name';
     }
 
     public function getDescription(): ?string

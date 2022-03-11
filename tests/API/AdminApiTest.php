@@ -305,6 +305,20 @@ class AdminApiTest extends TestCase
         ]);
     }
 
+    public function test_list_productables()
+    {
+        $productables = ExampleProductable::factory()->count(10)->create();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/');
+        $this->response->assertOk();
+        $this->response->assertJsonCount(10, 'data');
+        $this->response->assertJsonFragment([
+            'productable_id' => $productables->get(0)->id,
+            'productable_type' => ExampleProductable::class,
+            'name' => $productables->get(0)->getName(),
+        ]);
+    }
+
     public function test_find_single_product_for_productable()
     {
         /** @var Product $product */

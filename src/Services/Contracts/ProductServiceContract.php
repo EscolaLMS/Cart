@@ -10,12 +10,14 @@ use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 interface ProductServiceContract
 {
     public function registerProductableClass(string $productableClass): void;
     public function isProductableClassRegistered(string $productableClass): bool;
     public function listRegisteredProductableClasses(): array;
+    public function listAllProductables(): Collection;
     public function canonicalProductableClass(string $productableClass): ?string;
 
     public function findSingleProductForProductable(Productable $productable): ?Product;
