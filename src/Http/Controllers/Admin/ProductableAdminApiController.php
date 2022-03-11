@@ -4,7 +4,9 @@ namespace EscolaLms\Cart\Http\Controllers\Admin;
 
 use EscolaLms\Cart\Http\Requests\Admin\ProductableAttachRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableDetachRequest;
+use EscolaLms\Cart\Http\Requests\Admin\ProductableProductRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductableRegisteredListRequest;
+use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Http\Swagger\Admin\ProductableAdminSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -36,6 +38,16 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
         $user = $request->getUser();
         $this->productService->detachProductableFromUser($productable, $user);
         return $this->sendSuccess(__('Productable detached from user'));
+    }
+
+    public function product(ProductableProductRequest $request): JsonResponse
+    {
+        $productable = $this->productService->findProductable($request->getProductableType(), $request->getProductableId());
+        $product = $this->productService->findSingleProductForProductable($productable);
+        if ($product) {
+            return $this->sendResponseForResource(ProductResource::make($product), __('Single Product for Productable found'));
+        }
+        return $this->sendError(__('Single Product for this productable does not exist'), 404);
     }
 
     public function registered(ProductableRegisteredListRequest $request): JsonResponse

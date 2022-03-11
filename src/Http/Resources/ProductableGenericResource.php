@@ -19,7 +19,7 @@ class ProductableGenericResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->getProductable()->getKey(),

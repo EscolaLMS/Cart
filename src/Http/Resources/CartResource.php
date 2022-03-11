@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Http\Resources;
 use EscolaLms\Auth\Traits\ResourceExtandable;
 use EscolaLms\Cart\Models\Cart;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class CartResource extends JsonResource
 {
@@ -23,13 +24,18 @@ class CartResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    protected function getCartItemsResourceCollection(): ResourceCollection
+    {
+        return  CartItemResource::collection($this->getCart()->items);
+    }
+
+    public function toArray($request): array
     {
         return self::apply([
             'total' => $this->getCart()->total,
             'subtotal' =>  $this->getCart()->subtotal,
             'tax' =>  $this->getCart()->getTaxAttribute($this->taxRate),
-            'items' => CartItemResource::collection($this->getCart()->items)
+            'items' => $this->getCartItemsResourceCollection()
         ], $this);
     }
 }

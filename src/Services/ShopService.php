@@ -43,7 +43,9 @@ class ShopService implements ShopServiceContract
 
     public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, ?PaymentMethodContract $paymentMethod = null): void
     {
-        $order = $this->orderService->createOrderFromCart($cart, $clientDetailsDto);
+        $cartManager =  $this->cartManagerForCart($cart);
+
+        $order = $this->orderService->createOrderFromCartManager($cartManager, $clientDetailsDto);
 
         $paymentProcessor = $order->process();
         $paymentProcessor->purchase($paymentMethod);
@@ -55,7 +57,7 @@ class ShopService implements ShopServiceContract
             $this->orderService->setCancelled($order);
         }
 
-        $this->cartManagerForCart($cart)->destroy();
+        $cartManager->destroy();
     }
 
     public function cartAsJsonResource(Cart $cart, ?int $taxRate = null): JsonResource

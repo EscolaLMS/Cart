@@ -79,14 +79,19 @@ class OrderService implements OrderServiceContract
 
     public function createOrderFromCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null): Order
     {
+        return $this->createOrderFromCartManager(new CartManager($cart), $clientDetailsDto);
+    }
+
+    public function createOrderFromCartManager(CartManager $cartManager, ?ClientDetailsDto $clientDetailsDto = null): Order
+    {
         $optionalClientDetailsDto = optional($clientDetailsDto);
+
+        $cart = $cartManager->getModel();
 
         /** @var User $user */
         $user = User::find($cart->user_id);
 
         $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
-
-        $cartManager = new CartManager($cart);
 
         $order = new Order($cart->getAttributes());
         $order->total = $cartManager->totalWithTax();

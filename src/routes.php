@@ -22,6 +22,7 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
     Route::post('/products/{id}/detach', [ProductAdminApiController::class, 'detach'])->whereNumber('id');
 
     Route::get('/productables/registered', [ProductableAdminApiController::class, 'registered']);
+    Route::get('/productables/product', [ProductableAdminApiController::class, 'product']);
     Route::post('/productables/attach', [ProductableAdminApiController::class, 'attach']);
     Route::post('/productables/detach', [ProductableAdminApiController::class, 'detach']);
 });
