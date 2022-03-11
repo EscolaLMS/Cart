@@ -65,8 +65,8 @@ class ProductService implements ProductServiceContract
             /** @var Model&Productable $model */
             $model = new $productableClass();
             $productables = $model::query()->getQuery()->select(
-                DB::raw('`id` as `productable_id`'),
-                DB::raw('`' . ($model->getNameColumn()) . '` AS `name`')
+                'id AS productable_id',
+                ($model->getNameColumn() . ' AS name'),
             )->get();
             $collection = $collection->merge($productables->map(function ($row) use ($productableClass) {
                 $row->productable_type = $productableClass;
