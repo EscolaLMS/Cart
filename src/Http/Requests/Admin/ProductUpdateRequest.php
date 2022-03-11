@@ -2,10 +2,10 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
-use EscolaLms\Categories\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
