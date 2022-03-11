@@ -29,7 +29,7 @@ class CartResource extends JsonResource
         return  CartItemResource::collection($this->getCart()->items);
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return self::apply([
             'total' => $this->getCart()->total,

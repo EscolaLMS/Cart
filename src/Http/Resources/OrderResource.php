@@ -27,7 +27,7 @@ class OrderResource extends JsonResource
         return OrderItemResource::collection($this->getOrder()->items);
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return self::apply([
             'id' => $this->resource->getKey(),

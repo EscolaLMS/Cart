@@ -21,7 +21,7 @@ class OrderItemResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return self::apply([
             'price' =>  $this->getOrderItem()->price,

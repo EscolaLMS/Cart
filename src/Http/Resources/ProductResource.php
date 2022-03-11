@@ -21,7 +21,7 @@ class ProductResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         $user = $request ? $request->user() : Auth::user();
         return [
