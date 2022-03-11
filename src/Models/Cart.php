@@ -33,8 +33,6 @@ use Treestoneit\ShoppingCart\Models\Cart as BaseCart;
  */
 class Cart extends BaseCart
 {
-    private ?CartManager $cartManager = null;
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -45,24 +43,24 @@ class Cart extends BaseCart
         return $this->hasMany(CartItem::class);
     }
 
-    public function getCartManager(): CartManager
+    public function getCartManagerAttribute(): CartManager
     {
-        return $this->cartManager ?? ($this->cartManager = app(ShopServiceContract::class)->cartManagerForCart($this));
+        return app(ShopServiceContract::class)->cartManagerForCart($this);
     }
 
     public function getSubtotalAttribute(): int
     {
-        return $this->getCartManager()->subtotalInt();
+        return $this->cartManager->subtotalInt();
     }
 
     public function getTotalAttribute(): int
     {
-        return $this->getCartManager()->total();
+        return $this->cartManager->total();
     }
 
     public function getTaxAttribute(?int $rate = null): int
     {
-        return $this->getCartManager()->taxInt($rate);
+        return $this->cartManager->taxInt($rate);
     }
 
     public function getTotalWithTaxAttribute(?int $rate = null): int

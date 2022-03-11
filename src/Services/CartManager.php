@@ -2,7 +2,6 @@
 
 namespace EscolaLms\Cart\Services;
 
-use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Contracts\Base\Buyable;
@@ -10,6 +9,7 @@ use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\CartManagerContract;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\CartManager as BaseCartManager;
+use Treestoneit\ShoppingCart\Models\Cart as BaseCart;
 
 class CartManager extends BaseCartManager implements CartManagerContract
 {
@@ -18,10 +18,16 @@ class CartManager extends BaseCartManager implements CartManagerContract
     public function __construct(Cart $cart)
     {
         parent::__construct($cart);
-        $this->removeNonexistingBuyables();
     }
 
-    private function removeNonexistingBuyables(): void
+    public function refreshCart(?BaseCart $cart = null): self
+    {
+        parent::refreshCart($cart);
+        $this->removeNonexistingBuyables();
+        return $this;
+    }
+
+    protected function removeNonexistingBuyables(): void
     {
         /** @var CartItem $item */
         foreach ($this->content() as $item) {
@@ -52,7 +58,7 @@ class CartManager extends BaseCartManager implements CartManagerContract
     }
 
     /** 
-     * CartItem total = subtotal + additional fees independen from quantity;
+     * CartItem total = subtotal + additional fees independent from quantity;
      * Tax is NOT included in this, to get total with tax use `totalWithTax()` method
      */
     public function total(): int

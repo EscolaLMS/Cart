@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Models;
 
 use EscolaLms\Cart\Models\Contracts\Base\Taxable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Config;
 use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
 
@@ -44,6 +45,11 @@ use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
  */
 class CartItem extends BaseCartItem
 {
+    public function cart(): BelongsTo
+    {
+        return $this->belongsTo(Cart::class);
+    }
+
     public function getTaxRateAttribute(?int $rate = null): int
     {
         if (!$rate && Config::get('shopping-cart.tax.mode') == 'flat') {

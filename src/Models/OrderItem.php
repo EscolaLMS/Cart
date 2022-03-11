@@ -5,6 +5,8 @@ namespace EscolaLms\Cart\Models;
 use EscolaLms\Cart\QueryBuilders\OrderItemModelQueryBuilder;
 use EscolaLms\Cart\Support\OrderItemCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * EscolaLms\Cart\Models\OrderItem
@@ -57,12 +59,12 @@ class OrderItem extends Model
 
     protected $casts = ['options' => 'array'];
 
-    public function buyable()
+    public function buyable(): MorphTo
     {
         return $this->morphTo('buyable');
     }
 
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
