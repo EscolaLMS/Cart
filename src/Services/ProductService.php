@@ -198,7 +198,7 @@ class ProductService implements ProductServiceContract
         $product->save();
 
         if ($poster instanceof UploadedFile) {
-            $poster_url = $poster->storePublicly('products/' . $product->getKey() . '/posters/');
+            $poster_url = $poster->storePublicly('products/' . $product->getKey() . '/posters');
             $product->poster_url = $poster_url;
             $product->save();
         }

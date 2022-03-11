@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;

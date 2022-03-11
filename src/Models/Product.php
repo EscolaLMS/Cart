@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * EscolaLms\Cart\Models\Product
@@ -168,5 +169,14 @@ class Product extends Model implements ProductInterface
     protected static function newFactory(): ProductFactory
     {
         return ProductFactory::new();
+    }
+
+    public function getPosterAbsoluteUrlAttribute(): ?string
+    {
+        $path = $this->getRawOriginal('poster_url');
+        if (!empty($path)) {
+            return url(Storage::url($path));
+        }
+        return null;
     }
 }
