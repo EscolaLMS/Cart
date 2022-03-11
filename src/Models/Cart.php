@@ -15,6 +15,7 @@ use Treestoneit\ShoppingCart\Models\Cart as BaseCart;
  * @property int|null $user_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read CartManager $cart_manager
  * @property-read int $subtotal
  * @property-read int $tax
  * @property-read int $total

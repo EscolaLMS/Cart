@@ -19,6 +19,7 @@ use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $buyable
+ * @property-read \EscolaLms\Cart\Models\Cart $cart
  * @property-read mixed $description
  * @property-read float|int $extra_fees
  * @property-read string $identifier
