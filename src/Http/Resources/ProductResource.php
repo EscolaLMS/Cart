@@ -28,7 +28,7 @@ class ProductResource extends JsonResource
             'id' => $this->getProduct()->getKey(),
             'type' => $this->getProduct()->type,
             'name' => $this->getProduct()->name,
-            'description' => $this->getProduct()->getBuyableDescription(),
+            'description' => $this->getProduct()->description,
             'price' => $this->getProduct()->getBuyablePrice(),
             'price_old' => $this->getProduct()->price_old,
             'tax_rate' => $this->getProduct()->getTaxRate(),

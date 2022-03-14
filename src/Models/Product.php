@@ -133,7 +133,7 @@ class Product extends Model implements ProductInterface
 
     public function getBuyableDescription(): string
     {
-        return $this->description;
+        return $this->description ?? '';
     }
 
     public function getBuyablePrice(?array $options = null): int
