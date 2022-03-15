@@ -73,8 +73,9 @@ trait ProductableTrait
             $this->users()->syncWithoutDetaching($user->getKey());
         } elseif (ModelHelper::hasRelation($user, $this->getTable()) && $user->{$this->getTable()}() instanceof BelongsToMany) {
             $user->{$this->getTable()}()->syncWithoutDetaching($this->getKey());
+        } else {
+            throw new Exception(__('Productable must implement `attachToUser` method'));
         }
-        throw new Exception(__('Productable must implement `attachToUser` method'));
     }
 
     public function detachFromUser(User $user): void
@@ -83,8 +84,9 @@ trait ProductableTrait
             $this->users()->detach($user->getKey());
         } elseif (ModelHelper::hasRelation($user, $this->getTable()) && $user->{$this->getTable()}() instanceof BelongsToMany) {
             $user->{$this->getTable()}()->detach($this->getKey());
+        } else {
+            throw new Exception(__('Productable must implement `detachFromUser` method'));
         }
-        throw new Exception(__('Productable must implement `detachFromUser` method'));
     }
 
     public function toJsonResourceForShop(): JsonResource
