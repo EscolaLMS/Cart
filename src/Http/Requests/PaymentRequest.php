@@ -28,7 +28,9 @@ class PaymentRequest extends FormRequest
         return [
             'paymentMethodId' => ['required', 'nullable'],
             'client_name' => ['sometimes', 'string'],
+            'client_email' => ['sometimes', 'email'],
             'client_street' => ['sometimes', 'string'],
+            'client_street_number' => ['sometimes', 'string'],
             'client_postal' => ['sometimes', 'string'],
             'client_city' => ['sometimes', 'string'],
             'client_country' => ['sometimes', 'string'],
@@ -41,7 +43,9 @@ class PaymentRequest extends FormRequest
     {
         return new ClientDetailsDto(
             $this->input('client_name'),
+            $this->input('client_email'),
             $this->input('client_street'),
+            $this->input('client_street_number'),
             $this->input('client_city'),
             $this->input('client_postal'),
             $this->input('client_country'),

@@ -14,6 +14,7 @@ use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -216,6 +217,10 @@ class ProductService implements ProductServiceContract
 
     private function saveProductProductables(Product $product, array $productables)
     {
+        if ($product->type === ProductType::SINGLE && count($productables) > 1) {
+            throw new Exception(__('Product with type SINGLE can contain only one single Productable'));
+        }
+
         $productablesCollection = (new Collection($productables))->keyBy('id');
 
         foreach ($product->productables as $currentProductable) {

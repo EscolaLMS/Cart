@@ -99,7 +99,9 @@ class OrderService implements OrderServiceContract
         $order->tax = $cartManager->taxInt();
         $order->status = OrderStatus::PROCESSING;
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
+        $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
+        $order->client_street_number = $optionalClientDetailsDto->getStreetNumber();
         $order->client_postal = $optionalClientDetailsDto->getPostal();
         $order->client_city = $optionalClientDetailsDto->getCity();
         $order->client_country = $optionalClientDetailsDto->getCountry();
