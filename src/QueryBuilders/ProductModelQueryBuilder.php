@@ -25,44 +25,23 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereHas('productables', fn (Builder $query) => $query->where('productable_type', $productable_type)->where('productable_id', $productable_id));
     }
 
-    public function whereOwnedByUser(?User $user = null): Builder
-    {
-        return $this->whereHas('users', fn (Builder $query) => $query->where('users.id', $user->getKey()));
-    }
-
-    public function whereHasProductablesOwnedByUser(?User $user = null): Builder
-    {
-        $user = $user ?? Auth::user();
-        return $this->whereHas('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->ownedByUser($user)));
-    }
-
-    public function whereHasProductablesNotOwnedByUser(?User $user = null): Builder
-    {
-        $user = $user ?? Auth::user();
-        return $this->whereHas('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->notOwnedByUser($user)));
-    }
-
     public function whereDoesntHaveProductablesNotOwnedByUser(?User $user = null): Builder
     {
         $user = $user ?? Auth::user();
-        return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->notOwnedByUser($user)));
-    }
-
-    public function whereHasProductablesBuyableByUser(?User $user = null): Builder
-    {
-        $user = $user ?? Auth::user();
-        return $this->whereHas('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->buyableByUser($user)));
-    }
-
-    public function whereHasProductablesNotBuyableByUser(?User $user = null): Builder
-    {
-        $user = $user ?? Auth::user();
-        return $this->whereHas('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->notBuyableByUser($user)));
+        return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', function (Builder $subquery) use ($user) {
+            // We need to change queried model to the one that implements Productable class and has NotOwnedByUser scope method
+            $class = Shop::canonicalProductableClass(get_class($subquery->getModel()));
+            return $subquery->setModel(new $class)->notOwnedByUser($user);
+        }));
     }
 
     public function whereDoesntHaveProductablesNotBuyableByUser(?User $user = null): Builder
     {
         $user = $user ?? Auth::user();
-        return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', fn (Builder $subquery) => $subquery->notBuyableByUser($user)));
+        return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', function (Builder $subquery) use ($user) {
+            // We need to change queried model to the one that implements Productable class and has NotBuyableByUser scope method
+            $class = Shop::canonicalProductableClass(get_class($subquery->getModel()));
+            return $subquery->setModel(new $class)->notBuyableByUser($user);
+        }));
     }
 }

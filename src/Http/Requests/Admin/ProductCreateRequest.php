@@ -39,7 +39,7 @@ class ProductCreateRequest extends FormRequest
             'productables.*.id' => ['integer'],
             'productables.*.class' => ['string', new ProductableRegisteredRule()],
             'categories' => ['sometimes', 'array'],
-            'categories.*' => ['integer', Rule::in(Category::class, 'id')],
+            'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
         ];
     }
 }

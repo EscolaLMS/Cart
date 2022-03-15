@@ -1,7 +1,7 @@
 <?php
 
+use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Categories\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

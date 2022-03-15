@@ -17,6 +17,7 @@ interface ProductServiceContract
     public function registerProductableClass(string $productableClass): void;
     public function isProductableClassRegistered(string $productableClass): bool;
     public function listRegisteredProductableClasses(): array;
+    public function listRegisteredMorphClasses(): array;
     public function listAllProductables(): Collection;
     public function canonicalProductableClass(string $productableClass): ?string;
 
