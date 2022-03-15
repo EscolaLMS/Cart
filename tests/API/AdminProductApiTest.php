@@ -2,12 +2,14 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
+use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
@@ -32,6 +34,7 @@ class AdminProductApiTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(AuthPermissionSeeder::class);
         $this->seed(CartPermissionSeeder::class);
         Shop::registerProductableClass(ExampleProductable::class);
 
@@ -61,6 +64,11 @@ class AdminProductApiTest extends TestCase
         $this->assertTrue($product->getOwnedByUserAttribute($student));
 
         $event->assertDispatched(ProductAttached::class);
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/products/' . $product->getKey());
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment(ProductDetailedResource::make($product)->toArray(null));
 
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/' . $product->getKey() . '/detach', [
             'user_id' => $student->getKey(),
