@@ -9,6 +9,7 @@ use EscolaLms\Cart\Http\Requests\Admin\ProductDetachRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductReadRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductSearchRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductUpdateRequest;
+use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Http\Swagger\Admin\ProductAdminSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
@@ -42,7 +43,7 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
 
     public function read(ProductReadRequest $request): JsonResponse
     {
-        return $this->sendResponseForResource(ProductResource::make($request->getProduct()), __('Product fetched'));
+        return $this->sendResponseForResource(ProductDetailedResource::make($request->getProduct()), __('Product fetched'));
     }
 
     public function update(ProductUpdateRequest $request): JsonResponse
