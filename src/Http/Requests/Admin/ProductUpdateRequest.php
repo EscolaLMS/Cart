@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
@@ -22,6 +23,7 @@ class ProductUpdateRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string'],
+            'type' => ['sometimes', Rule::in(ProductType::getValues())],
             'description' => ['sometimes', 'nullable', 'string'],
             'price' => ['sometimes', 'integer', 'min:0'],
             'price_old' => ['sometimes', 'nullable', 'integer', 'min:0'],

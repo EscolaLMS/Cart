@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Events\ProductAddedToCart;
+use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Product;
@@ -203,18 +204,52 @@ class CartApiTest extends TestCase
 
     public function test_send_payment_method_and_pay()
     {
+        $eventFake = Event::fake(ProductBought::class);
+
         $user = $this->user;
 
         /** @var Product $product */
         $product = Product::factory()->create([
-            'price' => 1000
+            'price' => 1000,
+            'purchasable' => true,
         ]);
 
         $cart = $this->shopService->cartForUser($user);
-        $this->shopService->addProductToCart($cart, $product);
+        $this->shopService->addUniqueProductToCart($cart, $product);
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
         $this->response->assertOk();
+
+        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+    }
+
+    public function test_pay_for_free_products()
+    {
+        $eventFake = Event::fake(ProductBought::class);
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 0,
+            'purchasable' => true,
+        ]);
+
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addUniqueProductToCart($cart, $product);
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => 'free']);
+        $this->response->assertOk();
+
+        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
     }
 
     public function test_get_orders()
