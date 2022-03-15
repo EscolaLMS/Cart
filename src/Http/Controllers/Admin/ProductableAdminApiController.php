@@ -58,6 +58,6 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
 
     public function registered(ProductableRegisteredListRequest $request): JsonResponse
     {
-        return $this->sendResponse($this->productService->listRegisteredProductableClasses(), __('List of registered Productable types'));
+        return $this->sendResponse($this->productService->listRegisteredMorphClasses(), __('List of registered Productable types (keys = Morph/Base classes, values = Productable classes)'));
     }
 }

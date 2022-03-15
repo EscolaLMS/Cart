@@ -48,6 +48,9 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
     {
         $productable = $this->productService->findProductable($request->getProductableType(), $request->getProductableId());
         $product = $this->productService->findSingleProductForProductable($productable);
+        if (!$product) {
+            return $this->sendError(__('Single Product for this productable does not exist'), 404);
+        }
         $cart = $this->shopService->cartForUser($request->user());
         if (!$this->productService->productIsBuyableByUser($product, $request->user())) {
             return $this->sendError(__("You can not add this product to cart"), 403);

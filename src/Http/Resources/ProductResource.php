@@ -43,7 +43,7 @@ class ProductResource extends JsonResource
             'poster_url' => $this->getProduct()->poster_absolute_url,
             'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : $this->getProduct()->purchasable,
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
-            'categories' => CategoryResource::collection($this->getProduct()->categories),
+            'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags,
         ];
     }

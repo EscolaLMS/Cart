@@ -49,7 +49,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -69,7 +69,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -178,7 +178,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 

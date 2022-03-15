@@ -64,25 +64,25 @@ class ProductApiTest extends TestCase
         $product = Product::factory()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
         /** @var Product $product2 */
         $product2 = Product::factory()->create();
         $productable2 = ExampleProductable::factory()->create();
         $product2->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable2->getKey()
         ]));
         /** @var Product $product2 */
         $product3 = Product::factory()->create(['purchasable' => false]);
         $productable3 = ExampleProductable::factory()->create();
         $product3->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable3->getKey()
         ]));
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
 
         $this->response->assertJsonFragment([
@@ -95,7 +95,7 @@ class ProductApiTest extends TestCase
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
 
         $this->response->assertJsonFragment([

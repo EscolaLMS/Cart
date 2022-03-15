@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class ProductService implements ProductServiceContract
@@ -57,6 +56,10 @@ class ProductService implements ProductServiceContract
     public function listRegisteredProductableClasses(): array
     {
         return $this->productables;
+    }
+
+    public function listRegisteredMorphClasses(): array {
+        return $this->productablesMorphs;
     }
 
     public function listAllProductables(): Collection
@@ -195,8 +198,29 @@ class ProductService implements ProductServiceContract
         $categories = $data['categories'] ?? null;
         unset($data['categories']);
 
+        if (($data['type'] ?? $product->type ?? ProductType::SINGLE)  === ProductType::SINGLE && !empty($productables)) {
+            if (count($productables) > 1) {
+                throw new Exception(__('Product with type SINGLE can contain only one single Productable'));
+            }
+            if (count($productables) === 1) {
+                $singleProductable = $this->findSingleProductForProductable($this->findProductable($productables[0]['class'], $productables[0]['id']));
+                if ($singleProductable) {
+                    throw new Exception(
+                        __(
+                            'Only one Product with type SINGLE can exist for Productable :productable_type:::productable_id',
+                            [
+                                'productable_type' => $productables[0]['class'],
+                                'productable_id' => $productables[0]['id']
+                            ]
+                        )
+                    );
+                }
+            }
+        }
+
         $product->fill($data);
         $product->save();
+        $product->refresh();
 
         if ($poster instanceof UploadedFile) {
             $poster_url = $poster->storePublicly('products/' . $product->getKey() . '/posters');
@@ -206,6 +230,11 @@ class ProductService implements ProductServiceContract
 
         if (!is_null($productables)) {
             $this->saveProductProductables($product, $productables);
+        }
+        if ($product->type === ProductType::SINGLE && $product->productables->count() > 1) {
+            $productables = $product->productables;
+            $firstProductable = $productables->shift(1);
+            $productables->each(fn (ProductProductable $productProductable) => $productProductable->delete());
         }
 
         if (!is_null($categories)) {
@@ -233,9 +262,14 @@ class ProductService implements ProductServiceContract
         }
 
         foreach ($productablesCollection as $newProductable) {
+            $class = $this->canonicalProductableClass($newProductable['class']);
+            $model = new $class();
+
+            assert($model instanceof Model);
+
             $product->productables()->save(new ProductProductable([
                 'productable_id' => $newProductable['id'],
-                'productable_type' =>  $this->canonicalProductableClass($newProductable['class']),
+                'productable_type' => $model->getMorphClass(),
             ]));
         }
     }
