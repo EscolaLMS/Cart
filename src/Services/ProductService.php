@@ -58,7 +58,8 @@ class ProductService implements ProductServiceContract
         return $this->productables;
     }
 
-    public function listRegisteredMorphClasses(): array {
+    public function listRegisteredMorphClasses(): array
+    {
         return $this->productablesMorphs;
     }
 
@@ -68,13 +69,15 @@ class ProductService implements ProductServiceContract
         foreach ($this->listRegisteredProductableClasses() as $productableClass) {
             /** @var Model&Productable $model */
             $model = new $productableClass();
+            $morphClass = $model->getMorphClass();
             $nameColumn = $model->getNameColumn() ?? ('"' . __('Unknown') . '"');
             $productables = $model::query()->getQuery()->select(
                 'id AS productable_id',
                 ($nameColumn . ' AS name'),
             )->get();
-            $collection = $collection->merge($productables->map(function ($row) use ($productableClass) {
+            $collection = $collection->merge($productables->map(function ($row) use ($productableClass, $morphClass) {
                 $row->productable_type = $productableClass;
+                $row->morph_class = $morphClass;
                 return $row;
             }));
         }
