@@ -50,7 +50,7 @@ interface CartSwagger
      *          {"passport": {}},
      *      },
      *      @OA\RequestBody(
-     *          required=false,
+     *          required=true,
      *          @OA\MediaType(
      *              mediaType="multipart/json",
      *              @OA\Schema(
@@ -59,6 +59,42 @@ interface CartSwagger
      *                  @OA\Property(
      *                      property="paymentMethodId",
      *                      type="string",
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_name",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_email",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_street",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_street_number",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_postal",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_city",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_country",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_company",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_taxid",
+     *                      type="string"
      *                  ),
      *              )
      *          )
