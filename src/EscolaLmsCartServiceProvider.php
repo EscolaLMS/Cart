@@ -18,9 +18,9 @@ use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvid
 class EscolaLmsCartServiceProvider extends ServiceProvider
 {
     public $singletons = [
-        ShopServiceContract::class => ShopService::class,
-        OrderServiceContract::class => OrderService::class,
         ProductServiceContract::class => ProductService::class,
+        OrderServiceContract::class => OrderService::class,
+        ShopServiceContract::class => ShopService::class,
     ];
 
     public function boot()
