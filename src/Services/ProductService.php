@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class ProductService implements ProductServiceContract
@@ -112,7 +113,7 @@ class ProductService implements ProductServiceContract
         $query = Product::query();
 
         if (!is_null($searchDto->getName())) {
-            $query->where('name', 'LIKE', $searchDto->getName());
+            $query->whereRaw('LOWER(name) LIKE (?)', ['%' . Str::lower($searchDto->getName()) . '%']);
         }
 
         if (!is_null($searchDto->getType())) {

@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
@@ -21,6 +22,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 class AdminProductApiTest extends TestCase
@@ -175,7 +177,9 @@ class AdminProductApiTest extends TestCase
         $user = $this->user;
 
         /** @var Product $product */
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'name' => 'First Second Third',
+        ]);
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
             'productable_type' => $productable->getMorphClass(),
@@ -196,9 +200,32 @@ class AdminProductApiTest extends TestCase
             'productable_id' => $productable3->getKey()
         ]));
 
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['name' => 'Second']);
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['type' => ProductType::SINGLE]);
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
-
         $this->response->assertJsonFragment([
             ProductResource::make($product->refresh())->toArray(null),
         ]);
@@ -211,7 +238,6 @@ class AdminProductApiTest extends TestCase
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
-
         $this->response->assertJsonFragment([
             ProductResource::make($product->refresh())->toArray(null),
         ]);
