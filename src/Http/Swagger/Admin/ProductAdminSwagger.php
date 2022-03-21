@@ -233,6 +233,11 @@ interface ProductAdminSwagger
      *                      type="array",
      *                      @OA\Items(type="integer")
      *                  ),
+     *                  @OA\Property(
+     *                      property="tags",
+     *                      type="array",
+     *                      @OA\Items(type="string")
+     *                  ),
      *              )
      *          )
      *      ),
@@ -408,6 +413,11 @@ interface ProductAdminSwagger
      *                      property="categories",
      *                      type="array",
      *                      @OA\Items(type="integer")
+     *                  ),
+     *                  @OA\Property(
+     *                      property="tags",
+     *                      type="array",
+     *                      @OA\Items(type="string")
      *                  ),
      *              )
      *          )

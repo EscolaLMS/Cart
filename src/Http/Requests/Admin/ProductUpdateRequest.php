@@ -41,6 +41,8 @@ class ProductUpdateRequest extends FormRequest
             'productables.*.class' => ['string', new ProductableRegisteredRule()],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
+            'tags' => ['sometimes', 'array'],
+            'tags.*' => ['string'],
         ];
     }
 

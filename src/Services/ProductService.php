@@ -14,6 +14,7 @@ use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Tags\Models\Tag;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -181,9 +182,26 @@ class ProductService implements ProductServiceContract
         return Product::where('products.id', $product->getKey())->whereDoesntHaveProductablesNotBuyableByUser($user)->exists();
     }
 
+    /** 
+     * Maps productable to JsonResource
+     * Returns (almost) empty JsonResource if productable does not exist in database anymore
+     * 
+     * @see \EscolaLms\Cart\Http\Resources\ProductableGenericResource
+     */
     public function mapProductProductableToJsonResource(ProductProductable $productProductable): JsonResource
     {
-        return $this->findProductable($productProductable->productable_type, $productProductable->productable_id)->toJsonResourceForShop();
+        $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
+        if ($productable) {
+            return $productable->toJsonResourceForShop();
+        }
+        return new JsonResource([
+            'id' => null,
+            'morph_class' => null,
+            'productable_id' => $productProductable->productable_id,
+            'productable_type' => $productProductable->productable_type,
+            'name' => null,
+            'description' => null,
+        ]);
     }
 
     public function create(array $data): Product
@@ -201,6 +219,9 @@ class ProductService implements ProductServiceContract
 
         $categories = $data['categories'] ?? null;
         unset($data['categories']);
+
+        $tags = $data['tags'] ?? null;
+        unset($data['tags']);
 
         if (($data['type'] ?? $product->type ?? ProductType::SINGLE)  === ProductType::SINGLE && !empty($productables)) {
             if (count($productables) > 1) {
@@ -243,6 +264,16 @@ class ProductService implements ProductServiceContract
 
         if (!is_null($categories)) {
             $product->categories()->sync($categories);
+        }
+
+        if (!is_null($tags)) {
+            $product->tags()->delete();
+
+            $tags = array_map(function ($tag) {
+                return ['title' => $tag];
+            }, $tags);
+
+            $product->tags()->createMany($tags);
         }
 
         return $product;

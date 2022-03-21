@@ -6,6 +6,7 @@ use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Categories\Http\Resources\CategoryResource;
+use EscolaLms\Tags\Models\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,7 +45,7 @@ class ProductResource extends JsonResource
             'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : $this->getProduct()->purchasable,
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
-            'tags' => $this->getProduct()->tags,
+            'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
         ];
     }
 }

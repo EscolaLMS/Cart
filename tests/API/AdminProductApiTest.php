@@ -148,6 +148,8 @@ class AdminProductApiTest extends TestCase
 
         $productData['categories'] = [$category->getKey(), $category2->getKey()];
 
+        $productData['tags'] = ['tag1', 'tag2'];
+
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
 
