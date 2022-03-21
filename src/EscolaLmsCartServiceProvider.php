@@ -9,6 +9,7 @@ use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Services\OrderService;
 use EscolaLms\Cart\Services\ProductService;
 use EscolaLms\Cart\Services\ShopService;
+use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvider;
 
@@ -38,6 +39,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/config.php', 'escolalms_cart');
 
         $this->app->register(AuthServiceProvider::class);
+        $this->app->register(EscolaLmsTemplatesServiceProvider::class);
 
         if (!$this->app->getProviders(TreestoneitCartServiceProvider::class)) {
             $this->app->register(TreestoneitCartServiceProvider::class);
