@@ -64,4 +64,9 @@ class ProductPolicy
     {
         return $user->can(CartPermissionsEnum::MANAGE_PRODUCTS);
     }
+
+    public function manuallyTrigger(User $user, Product $product)
+    {
+        return $user->can(CartPermissionsEnum::MANAGE_PRODUCTS);
+    }
 }

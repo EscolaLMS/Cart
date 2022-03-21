@@ -11,6 +11,7 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductableMigration;
 use EscolaLms\Categories\EscolaLmsCategoriesServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use EscolaLms\Tags\EscolaLmsTagsServiceProvider;
+use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -35,6 +36,7 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             EscolaLmsTagsServiceProvider::class,
             PaymentsServiceProvider::class,
             EscolaLmsCartServiceProvider::class,
+            EscolaLmsTemplatesServiceProvider::class,
         ];
     }
 

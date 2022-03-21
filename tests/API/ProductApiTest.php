@@ -12,12 +12,15 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Templates\Events\ManuallyTriggeredEvent;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
 
 class ProductApiTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, CreatesUsers;
 
     private User $user;
     private TestResponse $response;
@@ -107,5 +110,24 @@ class ProductApiTest extends TestCase
         $this->response->assertJsonMissing([
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
+    }
+
+    public function testTriggerEventManuallyForUsers(): void
+    {
+        Event::fake([ManuallyTriggeredEvent::class]);
+
+        $student = $this->makeStudent();
+        $product = Product::factory()->create();
+        $product->users()->sync($student);
+
+        $admin = $this->makeAdmin();
+        $this->response = $this->actingAs($admin, 'api')
+            ->json('GET', "/api/admin/products/{$product->getKey()}/trigger-event-manually");
+        $this->response->assertOk();
+
+        Event::assertDispatched(ManuallyTriggeredEvent::class, function (ManuallyTriggeredEvent $event) use ($student) {
+            $this->assertEquals($student->getKey(), $event->getUser()->getKey());
+            return true;
+        });
     }
 }
