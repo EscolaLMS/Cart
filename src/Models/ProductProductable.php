@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $productable_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $quantity
  * @property-read \EscolaLms\Cart\Models\Product|null $product
  * @property-read Model|\Eloquent $productable
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable newModelQuery()
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable whereProductId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable whereProductableId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable whereProductableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable whereQuantity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable whereUpdatedAt($value)
  * @mixin \Eloquent
  */

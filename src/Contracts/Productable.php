@@ -41,12 +41,12 @@ interface Productable
     /**
      * Method for attaching Productable to User (Used when Admin gifts Product/Productable to User and after buying Product)
      */
-    public function attachToUser(User $user): void;
+    public function attachToUser(User $user, int $quantity = 1): void;
 
     /**
      * Method for detaching Productable from User (Used when Admin manually removes Product/Productable from User)
      */
-    public function detachFromUser(User $user): void;
+    public function detachFromUser(User $user, int $quantity = 1): void;
 
     /**
      * Get JsonResource representing this Productable (used in listing Products)

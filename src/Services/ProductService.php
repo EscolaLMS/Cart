@@ -11,10 +11,10 @@ use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
-use EscolaLms\Tags\Models\Tag;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -169,10 +169,10 @@ class ProductService implements ProductServiceContract
 
     public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false): bool
     {
-        $limit_per_user = $product->limit_per_user ?? 1;
+        $limit_per_user = $product->limit_per_user;
         $limit_total = $product->limit_total;
         return $product->purchasable
-            && ($product->users()->where('users.id', $user->getKey())->count() < $limit_per_user)
+            && (is_null($limit_per_user) || (int) optional(ProductUser::where('user_id', '=', $user->getKey())->first())->quantity < $limit_per_user)
             && (is_null($limit_total) || $product->users()->count() < $limit_total)
             && (!$check_productables || $this->productProductablesAllBuyableByUser($product, $user));
     }
@@ -305,45 +305,90 @@ class ProductService implements ProductServiceContract
             $product->productables()->save(new ProductProductable([
                 'productable_id' => $newProductable['id'],
                 'productable_type' => $model->getMorphClass(),
+                'quantity' => $product->type === ProductType::SINGLE ? 1 : ($newProductable['quantity'] ?? 1),
             ]));
         }
     }
 
-    public function attachProductToUser(Product $product, User $user): void
+    public function attachProductToUser(Product $product, User $user, int $quantity = 1): void
     {
-        $product->users()->syncWithoutDetaching($user->getKey());
+        if ($product->limit_per_user < $quantity) {
+            $quantity = $product->limit_per_user;
+        }
+
+        if ($quantity === 0) {
+            return;
+        }
+
+        $productUserPivot = ProductUser::query()->firstOrCreate(['user_id' => $user->getKey(), 'product_id' => $product->getKey()], ['quantity' => $quantity]);
+
+        if (!$productUserPivot->wasRecentlyCreated) {
+            if ($product->limit_per_user < ($productUserPivot->quantity + $quantity)) {
+                $quantity = $product->limit_per_user - $productUserPivot->quantity;
+            }
+            $productUserPivot->quantity += $quantity;
+            $productUserPivot->save();
+        }
+
+        if ($quantity === 0) {
+            return;
+        }
+
         foreach ($product->productables as $productProductable) {
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
-                $this->attachProductableToUser($productable, $user);
+                $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
             }
         }
-        event(new ProductAttached($product, $user));
+        event(new ProductAttached($product, $user, $quantity));
     }
 
-    public function detachProductFromUser(Product $product, User $user): void
+    public function detachProductFromUser(Product $product, User $user, int $quantity = 1): void
     {
-        $product->users()->detach($user->getKey());
+        $productUserPivot = ProductUser::where(['user_id' => $user->getKey(), 'product_id' => $product->getKey()])->first();
+
+        if (!$productUserPivot) {
+            return;
+        }
+
+        $new_quantity = $productUserPivot->quantity - $quantity;
+        if ($new_quantity < 0) {
+            $new_quantity = 0;
+            $quantity = $productUserPivot->quantity;
+        }
+
+        if ($quantity === 0) {
+            return;
+        }
+
+        if ($new_quantity === 0) {
+            $productUserPivot->delete();
+        } else {
+            $productUserPivot->quantity = $new_quantity;
+            $productUserPivot->save();
+        }
+
         foreach ($product->productables as $productProductable) {
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
-                $this->detachProductableFromUser($productable, $user);
+                $this->detachProductableFromUser($productable, $user, $productProductable->quantity * $quantity);
             }
         }
-        event(new ProductDetached($product, $user));
+
+        event(new ProductDetached($product, $user, $quantity));
     }
 
-    public function attachProductableToUser(Productable $productable, User $user): void
+    public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void
     {
         assert($productable instanceof Model);
-        $productable->attachToUser($user);
-        event(new ProductableAttached($productable, $user));
+        $productable->attachToUser($user, $quantity);
+        event(new ProductableAttached($productable, $user, $quantity));
     }
 
-    public function detachProductableFromUser(Productable $productable, User $user): void
+    public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1): void
     {
         assert($productable instanceof Model);
-        $productable->detachFromUser($user);
-        event(new ProductableDetached($productable, $user));
+        $productable->detachFromUser($user, $quantity);
+        event(new ProductableDetached($productable, $user, $quantity));
     }
 }

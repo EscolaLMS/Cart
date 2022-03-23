@@ -15,11 +15,15 @@ abstract class AbstractProductCartEvent
     private Product $product;
     private User $user;
     private Cart $cart;
+    private int $quantity_change;
+    private ?int $quantity_in_cart;
 
-    public function __construct(Product $product, Cart $cart, ?User $user = null)
+    public function __construct(Product $product, Cart $cart, int $quantity_change = 1, ?int $quantity_in_cart = null, ?User $user = null)
     {
         $this->product = $product;
         $this->cart = $cart;
+        $this->quantity_change = $quantity_change;
+        $this->quantity_in_cart = $quantity_in_cart;
         $this->user = $user ?? $cart->user;
     }
 
@@ -36,5 +40,15 @@ abstract class AbstractProductCartEvent
     public function getCart(): Cart
     {
         return $this->cart;
+    }
+
+    public function getQuantityChange(): int
+    {
+        return $this->quantity_change;
+    }
+
+    public function getQuantityInCart(): ?int
+    {
+        return $this->quantity_in_cart;
     }
 }

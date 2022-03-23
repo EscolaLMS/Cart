@@ -38,6 +38,7 @@ class ProductCreateRequest extends FormRequest
             'productables' => ['array', App::make(ProductProductablesRule::class)],
             'productables.*.id' => ['integer'],
             'productables.*.class' => ['string', new ProductableRegisteredRule()],
+            'productables.*.quantity' => ['sometimes', 'integer', 'min:1'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
             'tags' => ['sometimes', 'array'],

@@ -15,6 +15,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Payments\Facades\PaymentGateway;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
@@ -144,9 +145,7 @@ class CartApiTest extends TestCase
         $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
 
-        $cartItemId = $cart->items->first()->getKey();
-
-        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/items/' . $cartItemId);
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/products/' . $product->getKey());
         $this->response->assertOk();
 
         $cart->refresh();
@@ -159,6 +158,7 @@ class CartApiTest extends TestCase
         $this->response->assertOk();
 
         $cart->refresh();
+
         $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertNotContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
@@ -202,9 +202,10 @@ class CartApiTest extends TestCase
         $this->assertContains($product->getKey(), $cartItemsId);
     }
 
-    public function test_send_payment_method_and_pay()
+    public function test_pay()
     {
         $eventFake = Event::fake(ProductBought::class);
+        $paymentsFake = PaymentGateway::fake();
 
         $user = $this->user;
 
@@ -215,10 +216,10 @@ class CartApiTest extends TestCase
         ]);
 
         $cart = $this->shopService->cartForUser($user);
-        $this->shopService->addUniqueProductToCart($cart, $product);
+        $this->shopService->addProductToCart($cart, $product);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
 
         $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
 
@@ -240,10 +241,10 @@ class CartApiTest extends TestCase
         ]);
 
         $cart = $this->shopService->cartForUser($user);
-        $this->shopService->addUniqueProductToCart($cart, $product);
+        $this->shopService->addProductToCart($cart, $product);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => 'free']);
-        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
 
         $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
 
@@ -254,6 +255,8 @@ class CartApiTest extends TestCase
 
     public function test_get_orders()
     {
+        $paymentsFake = PaymentGateway::fake();
+
         $user = $this->user;
 
         /** @var Product $product */
@@ -272,8 +275,8 @@ class CartApiTest extends TestCase
         $this->shopService->addProductToCart($cart, $product);
         $this->shopService->addProductToCart($cart, $productWithTax);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()

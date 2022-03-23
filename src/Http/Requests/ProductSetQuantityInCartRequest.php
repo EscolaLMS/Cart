@@ -6,7 +6,7 @@ use EscolaLms\Cart\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProductAddToCartRequest extends FormRequest
+class ProductSetQuantityInCartRequest extends FormRequest
 {
     public function authorize()
     {
@@ -17,6 +17,7 @@ class ProductAddToCartRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer', Rule::exists(Product::class, 'id')],
+            'quantity' => ['sometimes', 'integer', 'min:0'],
         ];
     }
 
@@ -28,5 +29,10 @@ class ProductAddToCartRequest extends FormRequest
     public function getProduct(): Product
     {
         return Product::findOrFail($this->getId());
+    }
+
+    public function getQuantity(): int
+    {
+        return $this->input('quantity', 1);
     }
 }
