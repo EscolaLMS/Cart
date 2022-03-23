@@ -32,10 +32,9 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
 
 Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function () {
     Route::get('/', [CartApiController::class, 'index']);
-    Route::post('/products', [CartApiController::class, 'add']);
+    Route::post('/products', [CartApiController::class, 'setProductQuantity']);
     Route::delete('/products/{id}', [CartApiController::class, 'remove']);
     Route::post('/add', [CartApiController::class, 'addProductable']);
-    Route::delete('/items/{id}', [CartApiController::class, 'removeCartItem']);
     Route::post('/pay', [CartApiController::class, 'pay']);
 });
 

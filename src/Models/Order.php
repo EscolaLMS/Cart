@@ -5,8 +5,8 @@ namespace EscolaLms\Cart\Models;
 use EscolaLms\Cart\Database\Factories\OrderFactory;
 use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\QueryBuilders\OrderModelQueryBuilder;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Concerns\Payable;
-use EscolaLms\Payments\Contracts\Billable;
 use EscolaLms\Payments\Contracts\Payable as PayableContract;
 use EscolaLms\Payments\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,13 +46,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $client_country
  * @property string|null $client_company
  * @property string|null $client_taxid
+ * @property string|null $client_email
+ * @property string|null $client_street_number
  * @property-read int $quantity
  * @property-read string $status_name
  * @property-read \EscolaLms\Cart\Support\OrderItemCollection|\EscolaLms\Cart\Models\OrderItem[] $items
  * @property-read int|null $items_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Payments\Models\Payment[] $payments
  * @property-read int|null $payments_count
- * @property-read \EscolaLms\Cart\Models\User|null $user
+ * @property-read User|null $user
  * @method static \EscolaLms\Cart\Database\Factories\OrderFactory factory(...$parameters)
  * @method static OrderModelQueryBuilder|Order newModelQuery()
  * @method static OrderModelQueryBuilder|Order newQuery()
@@ -60,9 +62,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static OrderModelQueryBuilder|Order whereClientCity($value)
  * @method static OrderModelQueryBuilder|Order whereClientCompany($value)
  * @method static OrderModelQueryBuilder|Order whereClientCountry($value)
+ * @method static OrderModelQueryBuilder|Order whereClientEmail($value)
  * @method static OrderModelQueryBuilder|Order whereClientName($value)
  * @method static OrderModelQueryBuilder|Order whereClientPostal($value)
  * @method static OrderModelQueryBuilder|Order whereClientStreet($value)
+ * @method static OrderModelQueryBuilder|Order whereClientStreetNumber($value)
  * @method static OrderModelQueryBuilder|Order whereClientTaxid($value)
  * @method static OrderModelQueryBuilder|Order whereCreatedAt($value)
  * @method static OrderModelQueryBuilder|Order whereHasBuyable(string $buyable_type, int $buyable_id)
@@ -106,7 +110,7 @@ class Order extends Model implements PayableContract
         return OrderStatus::getName($this->status);
     }
 
-    public function getBillable(): ?Billable
+    public function getUser(): ?User
     {
         return $this->user;
     }

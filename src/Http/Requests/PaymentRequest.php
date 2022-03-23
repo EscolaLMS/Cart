@@ -26,7 +26,6 @@ class PaymentRequest extends FormRequest
     public function rules()
     {
         return [
-            'paymentMethodId' => ['required', 'nullable'],
             'client_name' => ['sometimes', 'string'],
             'client_email' => ['sometimes', 'email'],
             'client_street' => ['sometimes', 'string'],

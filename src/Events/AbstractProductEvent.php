@@ -3,7 +3,7 @@
 namespace EscolaLms\Cart\Events;
 
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Models\User;
+use EscolaLms\Core\Models\User;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -13,11 +13,13 @@ abstract class AbstractProductEvent
 
     private Product $product;
     private User $user;
+    private int $quantity;
 
-    public function __construct(Product $product, User $user)
+    public function __construct(Product $product, User $user, int $quantity = 1)
     {
         $this->product = $product;
         $this->user = $user;
+        $this->quantity = $quantity;
     }
 
     public function getProduct(): Product
@@ -28,5 +30,10 @@ abstract class AbstractProductEvent
     public function getUser(): User
     {
         return $this->user;
+    }
+
+    public function getQuantity(): int
+    {
+        return $this->quantity;
     }
 }

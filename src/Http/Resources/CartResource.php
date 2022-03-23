@@ -26,7 +26,7 @@ class CartResource extends JsonResource
 
     protected function getCartItemsResourceCollection(): ResourceCollection
     {
-        return  CartItemResource::collection($this->getCart()->items);
+        return CartItemResource::collection($this->getCart()->items);
     }
 
     public function toArray($request): array

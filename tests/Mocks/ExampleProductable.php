@@ -12,12 +12,12 @@ class ExampleProductable extends ExampleProductableBase implements Productable
     use ProductableTrait;
     use HasFactory;
 
-    public function attachToUser(User $user): void
+    public function attachToUser(User $user, int $quantity = 1): void
     {
         $this->users()->syncWithoutDetaching($user->getKey());
     }
 
-    public function detachFromUser(User $user): void
+    public function detachFromUser(User $user, int $quantity = 1): void
     {
         $this->users()->detach($user->getKey());
     }

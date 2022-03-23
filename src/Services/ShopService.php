@@ -7,16 +7,16 @@ use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
 use EscolaLms\Cart\Models\Cart;
-use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Models\User;
-use EscolaLms\Payments\Dtos\Contracts\PaymentMethodContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
+use EscolaLms\Payments\Models\Payment;
 use Illuminate\Http\Resources\Json\JsonResource;
+use InvalidArgumentException;
 
 class ShopService implements ShopServiceContract
 {
@@ -41,14 +41,14 @@ class ShopService implements ShopServiceContract
         return new CartManager($cart);
     }
 
-    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, ?PaymentMethodContract $paymentMethod = null): void
+    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, array $parameters = []): Payment
     {
-        $cartManager =  $this->cartManagerForCart($cart);
+        $cartManager = $this->cartManagerForCart($cart);
 
         $order = $this->orderService->createOrderFromCartManager($cartManager, $clientDetailsDto);
 
         $paymentProcessor = $order->process();
-        $paymentProcessor->purchase($paymentMethod);
+        $paymentProcessor->purchase($parameters);
         $payment = $paymentProcessor->getPayment();
 
         if ($payment->status->is(PaymentStatus::PAID)) {
@@ -58,6 +58,8 @@ class ShopService implements ShopServiceContract
         }
 
         $cartManager->destroy();
+
+        return $payment;
     }
 
     public function cartAsJsonResource(Cart $cart, ?int $taxRate = null): JsonResource
@@ -65,29 +67,26 @@ class ShopService implements ShopServiceContract
         return CartResource::make($cart, $taxRate);
     }
 
-    public function removeProductFromCart(Cart $cart, Product $product): void
+    public function removeProductFromCart(Cart $cart, Product $product, int $quantity = 1): void
     {
         $cartManager = $this->cartManagerForCart($cart);
 
         $item = $cartManager->findProduct($product);
         if ($item) {
-            $cartManager->remove($item->getKey());
-            event(new ProductRemovedFromCart($product, $cart));
+            $quantity = $quantity > $item->quantity ? $item->quantity : $quantity;
+            $remaining = $item->quantity - $quantity;
+
+            if ($remaining === 0) {
+                $cartManager->remove($item->getKey());
+            } else {
+                $cartManager->updateQuantity($item->getKey(), $remaining);
+            }
+
+            event(new ProductRemovedFromCart($product, $cart, $quantity, $remaining));
         }
     }
 
-    public function removeItemFromCart(Cart $cart, int $cartItemId): void
-    {
-        $cartManager = $this->cartManagerForCart($cart);
-        $cartItem = CartItem::find($cartItemId);
-        if ($cartItem) {
-            $product = $cartItem->buyable;
-            $cartManager->remove($cartItemId);
-            event(new ProductRemovedFromCart($product, $cart));
-        }
-    }
-
-    public function addUniqueProductToCart(Cart $cart, Product $product): void
+    public function addProductToCart(Cart $cart, Product $product, int $quantity = 1): void
     {
         if (!$product->getBuyableByUserAttribute($cart->user)) {
             return;
@@ -95,30 +94,33 @@ class ShopService implements ShopServiceContract
 
         $cartManager = $this->cartManagerForCart($cart);
 
-        if (!$cartManager->hasBuyable($product)) {
-            $cartManager->add($product, 1);
+        $item = $cartManager->findBuyable($product);
 
-            event(new ProductAddedToCart($product, $cart));
-        }
-    }
-
-    public function addProductToCart(Cart $cart, Product $product): void
-    {
-        if (!$product->getBuyableByUserAttribute($cart->user)) {
-            return;
+        if ($item) {
+            $total = $item->quantity + $quantity;
+            $cartManager->updateQuantity($item->getKey(), $total);
+        } else {
+            $total = $quantity;
+            $cartManager->add($product, $quantity);
         }
 
-        $this->cartManagerForCart($cart)->add($product, 1);
-        event(new ProductAddedToCart($product, $cart));
+        event(new ProductAddedToCart($product, $cart, $quantity, $total));
     }
 
     public function updateProductQuantity(Cart $cart, Product $product, int $quantity): void
     {
-        $cartManager = $this->cartManagerForCart($cart);
+        if ($quantity < 0) {
+            throw new InvalidArgumentException(__('Quantity can not be negative'));
+        }
 
+        $cartManager = $this->cartManagerForCart($cart);
         $item = $cartManager->findBuyable($product);
-        if ($item) {
-            $cartManager->updateQuantity($item->getKey(), $quantity);
+        $current = $item ? $item->quantity : 0;
+
+        if ($current > $quantity) {
+            $this->removeProductFromCart($cart, $product, $current - $quantity);
+        } elseif ($quantity > $current) {
+            $this->addProductToCart($cart, $product, $quantity - $current);
         }
     }
 }

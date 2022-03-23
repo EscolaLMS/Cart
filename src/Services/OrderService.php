@@ -19,6 +19,8 @@ use EscolaLms\Cart\QueryBuilders\OrderModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
+use EscolaLms\Payments\Models\Payment;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use InvalidArgumentException;
@@ -134,6 +136,9 @@ class OrderService implements OrderServiceContract
 
     public function setPaid(Order $order): void
     {
+        if ($order->status === OrderStatus::PAID) {
+            return;
+        }
         $this->setOrderStatus($order, OrderStatus::PAID);
         event(new OrderPaid($order));
         $this->processOrderItems($order);
@@ -141,6 +146,9 @@ class OrderService implements OrderServiceContract
 
     public function setCancelled(Order $order): void
     {
+        if ($order->status === OrderStatus::CANCELLED) {
+            return;
+        }
         $this->setOrderStatus($order, OrderStatus::CANCELLED);
         event(new OrderCancelled($order));
     }
