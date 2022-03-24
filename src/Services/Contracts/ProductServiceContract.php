@@ -37,8 +37,8 @@ interface ProductServiceContract
     public function create(array $data): Product;
     public function update(Product $product, array $data): Product;
 
-    public function attachProductToUser(Product $product, User $user): void;
-    public function detachProductFromUser(Product $product, User $user): void;
-    public function attachProductableToUser(Productable $productable, User $user): void;
-    public function detachProductableFromUser(Productable $productable, User $user): void;
+    public function attachProductToUser(Product $product, User $user, int $quantity = 1): void;
+    public function detachProductFromUser(Product $product, User $user, int $quantity = 1): void;
+    public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void;
+    public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1): void;
 }

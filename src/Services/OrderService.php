@@ -173,7 +173,7 @@ class OrderService implements OrderServiceContract
             assert($buyable instanceof Product);
 
             event(new ProductBought($buyable, $order));
-            $this->productService->attachProductToUser($buyable, $order->user);
+            $this->productService->attachProductToUser($buyable, $order->user, $orderItem->quantity ?? 1);
         }
     }
 }
