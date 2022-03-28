@@ -53,7 +53,8 @@ class OrdersSeeder extends Seeder
                             function (Product $product) {
                                 return OrderItem::query()->make([
                                     'quantity' => 1,
-                                    'user_id' => $product->getKey(),
+                                    'buyable_id' => $product->getKey(),
+                                    'buyable_type' => $product->getMorphClass(),
                                 ]);
                             }
                         )
