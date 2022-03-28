@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Cart\Contracts\Productable;
+use EscolaLms\Cart\Facades\Shop;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,11 +20,13 @@ class ProductableGenericResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->getProductable()->getKey(),
-            'class' => $this->getProductable()->getMorphClass(),
+            'morph_class' => $this->getProductable()->getMorphClass(),
+            'productable_id' => $this->getProductable()->getKey(),
+            'productable_type' => Shop::canonicalProductableClass($this->getProductable()->getMorphClass()),
             'name' => $this->getProductable()->getName(),
             'description' => $this->getProductable()->getDescription(),
         ];

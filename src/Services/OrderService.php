@@ -19,6 +19,8 @@ use EscolaLms\Cart\QueryBuilders\OrderModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
+use EscolaLms\Payments\Models\Payment;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use InvalidArgumentException;
@@ -79,14 +81,19 @@ class OrderService implements OrderServiceContract
 
     public function createOrderFromCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null): Order
     {
+        return $this->createOrderFromCartManager(new CartManager($cart), $clientDetailsDto);
+    }
+
+    public function createOrderFromCartManager(CartManager $cartManager, ?ClientDetailsDto $clientDetailsDto = null): Order
+    {
         $optionalClientDetailsDto = optional($clientDetailsDto);
+
+        $cart = $cartManager->getModel();
 
         /** @var User $user */
         $user = User::find($cart->user_id);
 
         $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
-
-        $cartManager = new CartManager($cart);
 
         $order = new Order($cart->getAttributes());
         $order->total = $cartManager->totalWithTax();
@@ -94,7 +101,9 @@ class OrderService implements OrderServiceContract
         $order->tax = $cartManager->taxInt();
         $order->status = OrderStatus::PROCESSING;
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
+        $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
+        $order->client_street_number = $optionalClientDetailsDto->getStreetNumber();
         $order->client_postal = $optionalClientDetailsDto->getPostal();
         $order->client_city = $optionalClientDetailsDto->getCity();
         $order->client_country = $optionalClientDetailsDto->getCountry();
@@ -127,6 +136,9 @@ class OrderService implements OrderServiceContract
 
     public function setPaid(Order $order): void
     {
+        if ($order->status === OrderStatus::PAID) {
+            return;
+        }
         $this->setOrderStatus($order, OrderStatus::PAID);
         event(new OrderPaid($order));
         $this->processOrderItems($order);
@@ -134,6 +146,9 @@ class OrderService implements OrderServiceContract
 
     public function setCancelled(Order $order): void
     {
+        if ($order->status === OrderStatus::CANCELLED) {
+            return;
+        }
         $this->setOrderStatus($order, OrderStatus::CANCELLED);
         event(new OrderCancelled($order));
     }
@@ -158,7 +173,7 @@ class OrderService implements OrderServiceContract
             assert($buyable instanceof Product);
 
             event(new ProductBought($buyable, $order));
-            $this->productService->attachProductToUser($buyable, $order->user);
+            $this->productService->attachProductToUser($buyable, $order->user, $orderItem->quantity ?? 1);
         }
     }
 }

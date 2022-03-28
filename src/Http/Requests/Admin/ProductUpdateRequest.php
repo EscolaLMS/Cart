@@ -2,6 +2,8 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Enums\ProductType;
+use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
@@ -21,6 +23,7 @@ class ProductUpdateRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string'],
+            'type' => ['sometimes', Rule::in(ProductType::getValues())],
             'description' => ['sometimes', 'nullable', 'string'],
             'price' => ['sometimes', 'integer', 'min:0'],
             'price_old' => ['sometimes', 'nullable', 'integer', 'min:0'],
@@ -36,8 +39,11 @@ class ProductUpdateRequest extends FormRequest
             'productables' => ['sometimes', 'array', App::make(ProductProductablesRule::class)],
             'productables.*.id' => ['integer'],
             'productables.*.class' => ['string', new ProductableRegisteredRule()],
+            'productables.*.quantity' => ['sometimes', 'integer', 'min:1'],
             'categories' => ['sometimes', 'array'],
-            'categories.*' => ['integer', Rule::in(Category::class, 'id')],
+            'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
+            'tags' => ['sometimes', 'array'],
+            'tags.*' => ['string'],
         ];
     }
 

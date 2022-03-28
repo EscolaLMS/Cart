@@ -8,6 +8,7 @@ use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductRemoveFromCartRequest;
+use EscolaLms\Cart\Http\Requests\ProductSetQuantityInCartRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -50,7 +51,7 @@ interface CartSwagger
      *          {"passport": {}},
      *      },
      *      @OA\RequestBody(
-     *          required=false,
+     *          required=true,
      *          @OA\MediaType(
      *              mediaType="multipart/json",
      *              @OA\Schema(
@@ -59,6 +60,42 @@ interface CartSwagger
      *                  @OA\Property(
      *                      property="paymentMethodId",
      *                      type="string",
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_name",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_email",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_street",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_street_number",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_postal",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_city",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_country",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_company",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="client_taxid",
+     *                      type="string"
      *                  ),
      *              )
      *          )
@@ -84,7 +121,7 @@ interface CartSwagger
     /**
      * @OA\Post(
      *      path="/api/cart/products",
-     *      description="Add product to cart",
+     *      description="Add product to cart and/or set product quantity",
      *      tags={"Cart"},
      *      security={
      *          {"passport": {}},
@@ -100,6 +137,10 @@ interface CartSwagger
      *                      property="id",
      *                      type="integer",
      *                  ),
+     *                  @OA\Property(
+     *                      property="quantity",
+     *                      type="integer",
+     *                  )
      *              )
      *          )
      *      ),
@@ -119,7 +160,7 @@ interface CartSwagger
      *      )
      *   )
      */
-    public function add(ProductAddToCartRequest $request): JsonResponse;
+    public function setProductQuantity(ProductSetQuantityInCartRequest $request): JsonResponse;
 
     /**
      * @OA\Post(
@@ -164,41 +205,6 @@ interface CartSwagger
      *   )
      */
     public function addProductable(ProductableAddToCartRequest $request): JsonResponse;
-
-    /**
-     * @OA\Delete(
-     *      path="/api/cart/items/{id}",
-     *      description="Remove cart item from cart",
-     *      tags={"Cart"},
-     *      security={
-     *          {"passport": {}},
-     *      },
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="cart item id",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer",
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="successful operation",
-     *          @OA\MediaType(
-     *              mediaType="application/json",
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Bad request",
-     *          @OA\MediaType(
-     *              mediaType="application/json"
-     *          )
-     *      )
-     *   )
-     */
-    public function removeCartItem(CartItemRemoveFromCartRequest $request): JsonResponse;
 
     /**
      * @OA\Delete(

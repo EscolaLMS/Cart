@@ -41,12 +41,12 @@ interface Productable
     /**
      * Method for attaching Productable to User (Used when Admin gifts Product/Productable to User and after buying Product)
      */
-    public function attachToUser(User $user): void;
+    public function attachToUser(User $user, int $quantity = 1): void;
 
     /**
      * Method for detaching Productable from User (Used when Admin manually removes Product/Productable from User)
      */
-    public function detachFromUser(User $user): void;
+    public function detachFromUser(User $user, int $quantity = 1): void;
 
     /**
      * Get JsonResource representing this Productable (used in listing Products)
@@ -59,6 +59,11 @@ interface Productable
     public function getName(): string;
 
     /**
+     * Get productable name column
+     */
+    public function getNameColumn(): ?string;
+
+    /**
      * Get productable description
      */
     public function getDescription(): ?string;
@@ -69,12 +74,17 @@ interface Productable
     public function getApiReadUrl(): ?string;
 
     /** 
-     * Eloquent Model functionality required for polymorphic relations and resource listing
+     * Default Eloquent Model functionality
+     */
+    public function getTable();
+
+    /** 
+     * Default Eloquent Model functionality
      */
     public function getKey();
 
     /** 
-     * Eloquent Model functionality required for polymorphic relations and resource listing
+     * Default Eloquent Model functionality (required for polymorphic relations and resource listing)
      */
     public function getMorphClass();
 }

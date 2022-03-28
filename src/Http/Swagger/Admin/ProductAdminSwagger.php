@@ -6,6 +6,7 @@ use EscolaLms\Cart\Http\Requests\Admin\ProductAttachRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductCreateRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductDeleteRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductDetachRequest;
+use EscolaLms\Cart\Http\Requests\Admin\ProductManuallyTriggerRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductReadRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductSearchRequest;
 use EscolaLms\Cart\Http\Requests\Admin\ProductUpdateRequest;
@@ -233,6 +234,11 @@ interface ProductAdminSwagger
      *                      type="array",
      *                      @OA\Items(type="integer")
      *                  ),
+     *                  @OA\Property(
+     *                      property="tags",
+     *                      type="array",
+     *                      @OA\Items(type="string")
+     *                  ),
      *              )
      *          )
      *      ),
@@ -408,6 +414,11 @@ interface ProductAdminSwagger
      *                      property="categories",
      *                      type="array",
      *                      @OA\Items(type="integer")
+     *                  ),
+     *                  @OA\Property(
+     *                      property="tags",
+     *                      type="array",
+     *                      @OA\Items(type="string")
      *                  ),
      *              )
      *          )
@@ -609,4 +620,45 @@ interface ProductAdminSwagger
      *   )
      */
     public function detach(ProductDetachRequest $request): JsonResponse;
+
+    /**
+     * @OA\Get(
+     *     path="/api/admin/products/{id}/trigger-event-manually",
+     *     summary="Manually triggered event for users of the product",
+     *     tags={"Admin Product"},
+     *     security={
+     *         {"passport": {}},
+     *     },
+     *     @OA\Parameter(
+     *          name="id",
+     *          description="id of Product",
+     *          @OA\Schema(
+     *             type="integer",
+     *         ),
+     *          required=true,
+     *          in="path"
+     *      ),
+     *     @OA\Response(
+     *          response=200,
+     *          description="Event dispatched successfully",
+     *      ),
+     *     @OA\Response(
+     *          response=401,
+     *          description="endpoint requires authentication",
+     *      ),
+     *     @OA\Response(
+     *          response=403,
+     *          description="user doesn't have required access rights",
+     *      ),
+     *     @OA\Response(
+     *          response=422,
+     *          description="one of the parameters has invalid format",
+     *      ),
+     *     @OA\Response(
+     *          response=500,
+     *          description="server-side error",
+     *      ),
+     * )
+     */
+    public function triggerEventManuallyForUsers(ProductManuallyTriggerRequest $request): JsonResponse;
 }

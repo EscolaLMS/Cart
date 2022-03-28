@@ -12,12 +12,15 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Templates\Events\ManuallyTriggeredEvent;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
 
 class ProductApiTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, CreatesUsers;
 
     private User $user;
     private TestResponse $response;
@@ -64,25 +67,25 @@ class ProductApiTest extends TestCase
         $product = Product::factory()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
         /** @var Product $product2 */
         $product2 = Product::factory()->create();
         $productable2 = ExampleProductable::factory()->create();
         $product2->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable2->getKey()
         ]));
         /** @var Product $product2 */
         $product3 = Product::factory()->create(['purchasable' => false]);
         $productable3 = ExampleProductable::factory()->create();
         $product3->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable3->getKey()
         ]));
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
 
         $this->response->assertJsonFragment([
@@ -95,7 +98,7 @@ class ProductApiTest extends TestCase
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['productable_id' => $productable->getKey(), 'productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
 
         $this->response->assertJsonFragment([
@@ -107,5 +110,24 @@ class ProductApiTest extends TestCase
         $this->response->assertJsonMissing([
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
+    }
+
+    public function testTriggerEventManuallyForUsers(): void
+    {
+        Event::fake([ManuallyTriggeredEvent::class]);
+
+        $student = $this->makeStudent();
+        $product = Product::factory()->create();
+        $product->users()->sync($student);
+
+        $admin = $this->makeAdmin();
+        $this->response = $this->actingAs($admin, 'api')
+            ->json('GET', "/api/admin/products/{$product->getKey()}/trigger-event-manually");
+        $this->response->assertOk();
+
+        Event::assertDispatched(ManuallyTriggeredEvent::class, function (ManuallyTriggeredEvent $event) use ($student) {
+            $this->assertEquals($student->getKey(), $event->getUser()->getKey());
+            return true;
+        });
     }
 }

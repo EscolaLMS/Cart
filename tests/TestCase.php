@@ -8,8 +8,10 @@ use EscolaLms\Cart\EscolaLmsCartServiceProvider;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableMigration;
+use EscolaLms\Categories\EscolaLmsCategoriesServiceProvider;
 use EscolaLms\Payments\Providers\PaymentsServiceProvider;
 use EscolaLms\Tags\EscolaLmsTagsServiceProvider;
+use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -30,10 +32,11 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             PermissionServiceProvider::class,
             PassportServiceProvider::class,
             AuthServiceProvider::class,
-            EscolaLmsCartServiceProvider::class,
+            EscolaLmsCategoriesServiceProvider::class,
             EscolaLmsTagsServiceProvider::class,
             PaymentsServiceProvider::class,
             EscolaLmsCartServiceProvider::class,
+            EscolaLmsTemplatesServiceProvider::class,
         ];
     }
 

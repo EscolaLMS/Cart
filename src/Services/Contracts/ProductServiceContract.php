@@ -10,12 +10,15 @@ use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 interface ProductServiceContract
 {
     public function registerProductableClass(string $productableClass): void;
     public function isProductableClassRegistered(string $productableClass): bool;
     public function listRegisteredProductableClasses(): array;
+    public function listRegisteredMorphClasses(): array;
+    public function listAllProductables(): Collection;
     public function canonicalProductableClass(string $productableClass): ?string;
 
     public function findSingleProductForProductable(Productable $productable): ?Product;
@@ -34,8 +37,8 @@ interface ProductServiceContract
     public function create(array $data): Product;
     public function update(Product $product, array $data): Product;
 
-    public function attachProductToUser(Product $product, User $user): void;
-    public function detachProductFromUser(Product $product, User $user): void;
-    public function attachProductableToUser(Productable $productable, User $user): void;
-    public function detachProductableFromUser(Productable $productable, User $user): void;
+    public function attachProductToUser(Product $product, User $user, int $quantity = 1): void;
+    public function detachProductFromUser(Product $product, User $user, int $quantity = 1): void;
+    public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void;
+    public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1): void;
 }

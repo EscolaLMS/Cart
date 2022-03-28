@@ -4,7 +4,7 @@ namespace EscolaLms\Cart\Events;
 
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Models\User;
+use EscolaLms\Core\Models\User;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

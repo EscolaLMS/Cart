@@ -10,12 +10,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * @see \EscolaLms\Cart\Contracts\Productable
  */
 trait ProductableTrait
 {
+    /**
+     * Default implementation considers Productable buyable only if it is not already owned by User, effectively limiting User to owning only 1 item of a given Productable
+     * This must be modified for Productables that can be bought more than once
+     */
     public function scopeBuyableByUser(Builder $query, User $user): Builder
     {
         try {
@@ -25,6 +30,10 @@ trait ProductableTrait
         throw new Exception(__('Productable must implement `scopeBuyableByUser` method'));
     }
 
+    /**
+     * Default implementation considers Productable not buyable if it is already owned by User, effectively limiting User to owning only 1 item of a given Productable
+     * This must be modified for Productables that can be bought more than once
+     */
     public function scopeNotBuyableByUser(Builder $query, User $user): Builder
     {
         try {
@@ -56,34 +65,44 @@ trait ProductableTrait
         throw new Exception(__('Productable must implement `scopeNotOwnedByUser` method'));
     }
 
+    /**
+     * Default implementation considers Productable buyable only if it is not already owned by User, effectively limiting User to owning only 1 item of a given Productable
+     * This must be modified for Productables that can be bought more than once
+     */
     public function getBuyableByUserAttribute(?User $user = null): bool
     {
         return $this->scopeBuyableByUser($this::query()->where($this->getTable() . '.id', $this->getKey()), $user ?? Auth::user())->exists();
     }
 
+    /**
+     * Default implementation considers Productable not buyable if it is already owned by User, effectively limiting User to owning only 1 item of a given Productable
+     * This must be modified for Productables that can be bought more than once
+     */
     public function getOwnedByUserAttribute(?User $user = null): bool
     {
         return $this->scopeOwnedByUser($this::query()->where($this->getTable() . '.id', $this->getKey()), $user ?? Auth::user())->exists();
     }
 
-    public function attachToUser(User $user): void
+    public function attachToUser(User $user, int $quantity = 1): void
     {
         if (ModelHelper::hasRelation($this, 'users') && $this->users() instanceof BelongsToMany) {
             $this->users()->syncWithoutDetaching($user->getKey());
         } elseif (ModelHelper::hasRelation($user, $this->getTable()) && $user->{$this->getTable()}() instanceof BelongsToMany) {
             $user->{$this->getTable()}()->syncWithoutDetaching($this->getKey());
+        } else {
+            throw new Exception(__('Productable must implement `attachToUser` method'));
         }
-        throw new Exception(__('Productable must implement `attachToUser` method'));
     }
 
-    public function detachFromUser(User $user): void
+    public function detachFromUser(User $user, int $quantity = 1): void
     {
         if (ModelHelper::hasRelation($this, 'users') && $this->users() instanceof BelongsToMany) {
             $this->users()->detach($user->getKey());
         } elseif (ModelHelper::hasRelation($user, $this->getTable()) && $user->{$this->getTable()}() instanceof BelongsToMany) {
             $user->{$this->getTable()}()->detach($this->getKey());
+        } else {
+            throw new Exception(__('Productable must implement `detachFromUser` method'));
         }
-        throw new Exception(__('Productable must implement `detachFromUser` method'));
     }
 
     public function toJsonResourceForShop(): JsonResource
@@ -93,7 +112,21 @@ trait ProductableTrait
 
     public function getName(): string
     {
-        return $this->name ?? $this->title ?? __('No name field');
+        if (empty($this->getNameColumn())) {
+            return __('Unknown');
+        }
+        return $this->{$this->getNameColumn()};
+    }
+
+    public function getNameColumn(): ?string
+    {
+        if (Schema::hasColumn($this->getTable(), 'name')) {
+            return 'name';
+        }
+        if (Schema::hasColumn($this->getTable(), 'title')) {
+            return 'title';
+        }
+        return null;
     }
 
     public function getDescription(): ?string

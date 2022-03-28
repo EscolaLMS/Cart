@@ -21,7 +21,7 @@ class CartItemResource extends JsonResource
         return $this->resource;
     }
 
-    public function toArray($request)
+    public function toArray($request): array
     {
         return self::apply([
             'id' => $this->getCartItem()->getKey(),

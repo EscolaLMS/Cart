@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * EscolaLms\Cart\Models\Product
@@ -59,11 +60,12 @@ use Illuminate\Support\Facades\Auth;
  * @property-read int|null $categories_count
  * @property-read bool $buyable_by_user
  * @property-read bool $owned_by_user
+ * @property-read string|null $poster_absolute_url
  * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\ProductProductable[] $productables
  * @property-read int|null $productables_count
  * @property-read \Illuminate\Database\Eloquent\Collection|Tag[] $tags
  * @property-read int|null $tags_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\User[] $users
+ * @property-read \Illuminate\Database\Eloquent\Collection|User[] $users
  * @property-read int|null $users_count
  * @method static \EscolaLms\Cart\Database\Factories\ProductFactory factory(...$parameters)
  * @method static ProductModelQueryBuilder|Product newModelQuery()
@@ -78,15 +80,10 @@ use Illuminate\Support\Facades\Auth;
  * @method static ProductModelQueryBuilder|Product whereHasProductable(\Illuminate\Database\Eloquent\Model $productable)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
- * @method static ProductModelQueryBuilder|Product whereHasProductablesBuyableByUser(?\EscolaLms\Core\Models\User $user = null)
- * @method static ProductModelQueryBuilder|Product whereHasProductablesNotBuyableByUser(?\EscolaLms\Core\Models\User $user = null)
- * @method static ProductModelQueryBuilder|Product whereHasProductablesNotOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
- * @method static ProductModelQueryBuilder|Product whereHasProductablesOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereId($value)
  * @method static ProductModelQueryBuilder|Product whereLimitPerUser($value)
  * @method static ProductModelQueryBuilder|Product whereLimitTotal($value)
  * @method static ProductModelQueryBuilder|Product whereName($value)
- * @method static ProductModelQueryBuilder|Product whereOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product wherePosterUrl($value)
  * @method static ProductModelQueryBuilder|Product wherePrice($value)
  * @method static ProductModelQueryBuilder|Product wherePriceOld($value)
@@ -117,7 +114,7 @@ class Product extends Model implements ProductInterface
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'products_users');
+        return $this->belongsToMany(User::class, 'products_users')->using(ProductUser::class);
     }
 
     public function tags(): MorphMany
@@ -132,7 +129,7 @@ class Product extends Model implements ProductInterface
 
     public function getBuyableDescription(): string
     {
-        return $this->description;
+        return $this->description ?? '';
     }
 
     public function getBuyablePrice(?array $options = null): int
@@ -168,5 +165,14 @@ class Product extends Model implements ProductInterface
     protected static function newFactory(): ProductFactory
     {
         return ProductFactory::new();
+    }
+
+    public function getPosterAbsoluteUrlAttribute(): ?string
+    {
+        $path = $this->getRawOriginal('poster_url');
+        if (!empty($path)) {
+            return url(Storage::url($path));
+        }
+        return null;
     }
 }

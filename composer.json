@@ -7,8 +7,9 @@
     "escolalms/auth": "^0.1.86",
     "escolalms/categories": "^0.1.21",
     "escolalms/core": "^1.2",
-    "escolalms/payments": "^0.1.13",
+    "escolalms/payments": "^0.2.0",
     "escolalms/tags": "^0.1.14",
+    "escolalms/templates": "^0.2.5",
     "laravel/framework": "^8.0|^9.0",
     "treestoneit/shopping-cart": "^1.4"
   },

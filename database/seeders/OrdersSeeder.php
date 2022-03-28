@@ -10,6 +10,7 @@ use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User as ModelsUser;
 use EscolaLms\Payments\Models\Payment;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Testing\WithFaker;
 
@@ -33,14 +34,18 @@ class OrdersSeeder extends Seeder
 
         /** @var User $student */
         foreach ($students as $student) {
-            $products = Product::factory()->count(rand(1, 5))->create();
+            /** @var Collection $products */
+            $products = Product::inRandomOrder()->take(rand(1, 5))->get();
+            if ($products->count() === 0) {
+                $this->call(ProductsSeeder::class);
+                $products = Product::inRandomOrder()->take(rand(1, 5))->get();
+            }
             $price = $products->reduce(fn ($acc, Product $product) => $acc + $product->getBuyablePrice(), 0);
 
             /** @var Order $order */
             $order = Order::factory()->has(Payment::factory()->state([
                 'amount' => $price,
-                'billable_id' => $student->getKey(),
-                'billable_type' => ModelsUser::class,
+                'user_id' => $student->getKey(),
             ]))
                 ->afterCreating(
                     fn (Order $order) => $order->items()->saveMany(

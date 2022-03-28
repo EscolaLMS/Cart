@@ -2,28 +2,30 @@
 
 namespace EscolaLms\Cart\Tests\API;
 
+use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
-use EscolaLms\Cart\Models\Order;
-use EscolaLms\Cart\Models\OrderItem;
+use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
+use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
-use EscolaLms\Core\Models\User;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
-class AdminApiTest extends TestCase
+class AdminProductApiTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -34,97 +36,13 @@ class AdminApiTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(AuthPermissionSeeder::class);
         $this->seed(CartPermissionSeeder::class);
         Shop::registerProductableClass(ExampleProductable::class);
 
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::ADMIN);
-    }
-
-    public function test_list_orders()
-    {
-        $products = [
-            ...Product::factory()->count(5)->create(),
-        ];
-        foreach ($products as $product) {
-            $productable = ExampleProductable::factory()->create();
-            $product->productables()->save(new ProductProductable([
-                'productable_type' => ExampleProductable::class,
-                'productable_id' => $productable->getKey()
-            ]));
-        }
-
-        $orders = [];
-        foreach ($products as $product) {
-            /** @var Order $order */
-            $order = Order::factory()->for(User::factory()->create())->create();
-            $orderItem = new OrderItem();
-            $orderItem->buyable()->associate($product);
-            $orderItem->quantity = 1;
-            $orderItem->order_id = $order->getKey();
-            $orderItem->save();
-            $orders[] = $order;
-        }
-
-        $totalCount = min(15, Order::count());
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders');
-        $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, $totalCount);
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'user_id' => $orders[0]->user_id,
-        ]);
-        $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, 1);
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'productable_type' => ExampleProductable::class,
-            'productable_id' => $productable->id,
-        ]);
-        $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, 1);
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'date_from' => Carbon::now()->addDay(1)->toISOString(),
-        ]);
-        $this->response->assertStatus(200);
-        $this->response->assertJsonCount(0, 'data');
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'date_to' => Carbon::now()->addDay(1)->toISOString(),
-        ]);
-        $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, 10);
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
-            'date_to' => Carbon::now()->subDay(1)->toISOString(),
-        ]);
-        $this->response->assertStatus(200);
-        $this->assertDataCountLessThanOrEqual($this->response, 0);
-    }
-
-    private function assertDataCountLessThanOrEqual($response, $count)
-    {
-        $this->assertLessThanOrEqual($count, count($response->getData()->data));
-    }
-
-    public function test_fetch_order()
-    {
-        $product = Product::factory()->create();
-
-        /** @var Order $order */
-        $order = Order::factory()->for(User::factory()->create())->create();
-        $orderItem = new OrderItem();
-        $orderItem->buyable()->associate($product);
-        $orderItem->quantity = 1;
-        $orderItem->order_id = $order->getKey();
-        $orderItem->save();
-
-        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/' . $order->id);
-        $this->response->assertStatus(200);
-
-        $this->assertEquals($this->response->getData()->data->id, $order->id);
     }
 
     public function test_attach_and_detach_product()
@@ -149,6 +67,11 @@ class AdminApiTest extends TestCase
 
         $event->assertDispatched(ProductAttached::class);
 
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/products/' . $product->getKey());
+        $this->response->assertOk();
+
+        $this->response->assertJsonFragment(ProductDetailedResource::make($product)->toArray(null));
+
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products/' . $product->getKey() . '/detach', [
             'user_id' => $student->getKey(),
         ]);
@@ -169,7 +92,7 @@ class AdminApiTest extends TestCase
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -182,7 +105,7 @@ class AdminApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/attach', [
             'user_id' => $student->getKey(),
             'productable_id' => $productable->getKey(),
-            'productable_type' => ExampleProductable::class
+            'productable_type' => ExampleProductable::class,
         ]);
         $this->response->assertOk();
 
@@ -195,7 +118,7 @@ class AdminApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/detach', [
             'user_id' => $student->getKey(),
             'productable_id' => $productable->getKey(),
-            'productable_type' => ExampleProductable::class
+            'productable_type' => ExampleProductable::class,
         ]);
         $this->response->assertOk();
 
@@ -217,6 +140,16 @@ class AdminApiTest extends TestCase
                 'id' => $productable->getKey()
             ]
         ];
+
+        /** @var Category $category */
+        $category = Category::create(['name' => 'test']);
+        /** @var Category $category2 */
+        $category2 = Category::create(['name' => 'test2']);
+
+        $productData['categories'] = [$category->getKey(), $category2->getKey()];
+
+        $productData['tags'] = ['tag1', 'tag2'];
+
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
 
@@ -246,30 +179,43 @@ class AdminApiTest extends TestCase
         $user = $this->user;
 
         /** @var Product $product */
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'name' => 'First Second Third',
+        ]);
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
         /** @var Product $product2 */
         $product2 = Product::factory()->create();
         $productable2 = ExampleProductable::factory()->create();
         $product2->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable2->getKey()
         ]));
         /** @var Product $product2 */
         $product3 = Product::factory()->create(['purchasable' => false]);
         $productable3 = ExampleProductable::factory()->create();
         $product3->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable3->getKey()
         ]));
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['name' => 'Second']);
         $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
 
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['type' => ProductType::SINGLE]);
+        $this->response->assertOk();
         $this->response->assertJsonFragment([
             ProductResource::make($product->refresh())->toArray(null),
         ]);
@@ -280,9 +226,20 @@ class AdminApiTest extends TestCase
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_type' => ExampleProductable::class]);
         $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonFragment([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
 
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => ExampleProductable::class]);
+        $this->response->assertOk();
         $this->response->assertJsonFragment([
             ProductResource::make($product->refresh())->toArray(null),
         ]);
@@ -300,8 +257,51 @@ class AdminApiTest extends TestCase
         $this->response->assertOk();
         $this->response->assertJsonFragment([
             'data' => [
-                ExampleProductable::class
+                ExampleProductableBase::class => ExampleProductable::class
             ]
+        ]);
+    }
+
+    public function test_list_productables()
+    {
+        $productables = ExampleProductable::factory()->count(10)->create();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/');
+        $this->response->assertOk();
+        $this->response->assertJsonCount(10, 'data');
+        $this->response->assertJsonFragment([
+            'productable_id' => $productables->get(0)->id,
+            'productable_type' => ExampleProductable::class,
+            'name' => $productables->get(0)->getName(),
+        ]);
+    }
+
+    public function test_find_single_product_for_productable()
+    {
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/product', [
+            'productable_type' => ExampleProductable::class,
+            'productable_id' => $productable->getKey(),
+        ]);
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            'data' => ProductResource::make($product->refresh())->toArray(null)
+        ]);
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/product', [
+            'productable_type' => ExampleProductableBase::class,
+            'productable_id' => $productable->getKey(),
+        ]);
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            'data' => ProductResource::make($product->refresh())->toArray(null)
         ]);
     }
 }

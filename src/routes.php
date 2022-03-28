@@ -18,20 +18,23 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
     Route::put('/products/{id}', [ProductAdminApiController::class, 'update'])->whereNumber('id');
     Route::delete('/products/{id}', [ProductAdminApiController::class, 'delete'])->whereNumber('id');
 
+    Route::get('/products/{id}/trigger-event-manually', [ProductAdminApiController::class, 'triggerEventManuallyForUsers'])->whereNumber('id');
+
     Route::post('/products/{id}/attach', [ProductAdminApiController::class, 'attach'])->whereNumber('id');
     Route::post('/products/{id}/detach', [ProductAdminApiController::class, 'detach'])->whereNumber('id');
 
+    Route::get('/productables', [ProductableAdminApiController::class, 'index']);
     Route::get('/productables/registered', [ProductableAdminApiController::class, 'registered']);
+    Route::get('/productables/product', [ProductableAdminApiController::class, 'product']);
     Route::post('/productables/attach', [ProductableAdminApiController::class, 'attach']);
     Route::post('/productables/detach', [ProductableAdminApiController::class, 'detach']);
 });
 
 Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function () {
     Route::get('/', [CartApiController::class, 'index']);
-    Route::post('/products', [CartApiController::class, 'add']);
+    Route::post('/products', [CartApiController::class, 'setProductQuantity']);
     Route::delete('/products/{id}', [CartApiController::class, 'remove']);
     Route::post('/add', [CartApiController::class, 'addProductable']);
-    Route::delete('/items/{id}', [CartApiController::class, 'removeCartItem']);
     Route::post('/pay', [CartApiController::class, 'pay']);
 });
 

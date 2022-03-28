@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Events\ProductAddedToCart;
+use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Product;
@@ -14,6 +15,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Payments\Facades\PaymentGateway;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
@@ -48,7 +50,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -68,7 +70,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -143,9 +145,7 @@ class CartApiTest extends TestCase
         $this->assertContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
 
-        $cartItemId = $cart->items->first()->getKey();
-
-        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/items/' . $cartItemId);
+        $this->response = $this->actingAs($user, 'api')->json('DELETE', '/api/cart/products/' . $product->getKey());
         $this->response->assertOk();
 
         $cart->refresh();
@@ -158,6 +158,7 @@ class CartApiTest extends TestCase
         $this->response->assertOk();
 
         $cart->refresh();
+
         $this->assertNotContains($product->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertNotContains($product2->getKey(), $cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $cart->items->pluck('buyable_id')->toArray());
@@ -177,7 +178,7 @@ class CartApiTest extends TestCase
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
-            'productable_type' => ExampleProductable::class,
+            'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
 
@@ -201,24 +202,61 @@ class CartApiTest extends TestCase
         $this->assertContains($product->getKey(), $cartItemsId);
     }
 
-    public function test_send_payment_method_and_pay()
+    public function test_pay()
     {
+        $eventFake = Event::fake(ProductBought::class);
+        $paymentsFake = PaymentGateway::fake();
+
         $user = $this->user;
 
         /** @var Product $product */
         $product = Product::factory()->create([
-            'price' => 1000
+            'price' => 1000,
+            'purchasable' => true,
         ]);
 
         $cart = $this->shopService->cartForUser($user);
         $this->shopService->addProductToCart($cart, $product);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+    }
+
+    public function test_pay_for_free_products()
+    {
+        $eventFake = Event::fake(ProductBought::class);
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 0,
+            'purchasable' => true,
+        ]);
+
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addProductToCart($cart, $product);
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
     }
 
     public function test_get_orders()
     {
+        $paymentsFake = PaymentGateway::fake();
+
         $user = $this->user;
 
         /** @var Product $product */
@@ -237,8 +275,8 @@ class CartApiTest extends TestCase
         $this->shopService->addProductToCart($cart, $product);
         $this->shopService->addProductToCart($cart, $productWithTax);
 
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay', ['paymentMethodId' => $this->getPaymentMethodId()]);
-        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/orders');
         $this->response->assertOk()

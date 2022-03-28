@@ -3,12 +3,14 @@
 namespace EscolaLms\Cart;
 
 use EscolaLms\Cart\Providers\AuthServiceProvider;
+use EscolaLms\Cart\Providers\EventServiceProvider;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Services\OrderService;
 use EscolaLms\Cart\Services\ProductService;
 use EscolaLms\Cart\Services\ShopService;
+use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvider;
 
@@ -18,9 +20,9 @@ use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvid
 class EscolaLmsCartServiceProvider extends ServiceProvider
 {
     public $singletons = [
-        ShopServiceContract::class => ShopService::class,
-        OrderServiceContract::class => OrderService::class,
         ProductServiceContract::class => ProductService::class,
+        OrderServiceContract::class => OrderService::class,
+        ShopServiceContract::class => ShopService::class,
     ];
 
     public function boot()
@@ -38,7 +40,11 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/config.php', 'escolalms_cart');
 
         $this->app->register(AuthServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
 
+        if (!$this->app->getProviders(EscolaLms\Cart\EscolaLmsTemplatesServiceProvider::class)) {
+            $this->app->register(EscolaLmsTemplatesServiceProvider::class);
+        }
         if (!$this->app->getProviders(TreestoneitCartServiceProvider::class)) {
             $this->app->register(TreestoneitCartServiceProvider::class);
         }
