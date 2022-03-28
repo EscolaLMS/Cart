@@ -45,8 +45,7 @@ class OrdersSeeder extends Seeder
             /** @var Order $order */
             $order = Order::factory()->has(Payment::factory()->state([
                 'amount' => $price,
-                'billable_id' => $student->getKey(),
-                'billable_type' => ModelsUser::class,
+                'user_id' => $student->getKey(),
             ]))
                 ->afterCreating(
                     fn (Order $order) => $order->items()->saveMany(
@@ -54,8 +53,7 @@ class OrdersSeeder extends Seeder
                             function (Product $product) {
                                 return OrderItem::query()->make([
                                     'quantity' => 1,
-                                    'buyable_id' => $product->getKey(),
-                                    'buyable_type' => $product->getMorphClass(),
+                                    'user_id' => $product->getKey(),
                                 ]);
                             }
                         )

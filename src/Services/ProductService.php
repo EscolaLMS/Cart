@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -171,10 +172,18 @@ class ProductService implements ProductServiceContract
     {
         $limit_per_user = $product->limit_per_user;
         $limit_total = $product->limit_total;
-        return $product->purchasable
-            && (is_null($limit_per_user) || (int) optional(ProductUser::where('user_id', '=', $user->getKey())->first())->quantity < $limit_per_user)
-            && (is_null($limit_total) || $product->users()->count() < $limit_total)
-            && (!$check_productables || $this->productProductablesAllBuyableByUser($product, $user));
+
+        $is_purchasable = $product->purchasable;
+        $is_under_limit_per_user = is_null($limit_per_user) || ((int) optional($product->users->where('id', '=', $user->getKey())->first())->quantity < $limit_per_user);
+        $is_under_limit_total = is_null($limit_total) || ($product->users()->count() < $limit_total);
+        $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
+        Log::debug(__('Checking if product is buyable'), [
+            'purchasable' => $is_purchasable,
+            'limit_per_user' => $is_under_limit_per_user,
+            'limit_total' => $is_under_limit_total,
+            'productables' => $is_productables_buyable,
+        ]);
+        return $is_purchasable && $is_under_limit_per_user && $is_under_limit_total && $is_productables_buyable;
     }
 
     public function productProductablesAllBuyableByUser(Product $product, User $user): bool
