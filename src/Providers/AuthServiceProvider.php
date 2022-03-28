@@ -6,6 +6,7 @@ use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Policies\OrderPolicy;
 use EscolaLms\Cart\Policies\ProductPolicy;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -33,5 +34,10 @@ class AuthServiceProvider extends ServiceProvider
         if (!$this->app->routesAreCached()) {
             Passport::routes();
         }
+
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('applications:export')->dailyAt('1:00');
+        });
     }
 }

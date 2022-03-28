@@ -2,12 +2,13 @@
 
 namespace EscolaLms\Cart\Services;
 
-use EscolaLms\Cart\Facades\Shop;
+use Carbon\Carbon;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Contracts\Base\Buyable;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\Contracts\CartManagerContract;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Treestoneit\ShoppingCart\CartManager as BaseCartManager;
 
@@ -51,7 +52,7 @@ class CartManager extends BaseCartManager implements CartManagerContract
         return (int) self::tax($rate);
     }
 
-    /** 
+    /**
      * CartItem total = subtotal + additional fees independen from quantity;
      * Tax is NOT included in this, to get total with tax use `totalWithTax()` method
      */
@@ -89,5 +90,17 @@ class CartManager extends BaseCartManager implements CartManagerContract
     public function findProduct(Product $product): ?CartItem
     {
         return $this->findBuyable($product);
+    }
+
+    public function getAbandonedCarts(Carbon $from, Carbon $to): Collection
+    {
+        return Cart::query()
+            ->where([
+                ['updated_at', '>=', $from],
+                ['updated_at', '<=', $to],
+            ])
+            ->whereRaw("(SELECT count(cart_items.id) FROM cart_items WHERE cart_items.cart_id = carts.id AND cart_items.updated_at > '{$to}' GROUP BY cart_items.cart_id) is null
+                and (SELECT count(cart_items.id) FROM cart_items WHERE cart_items.cart_id = carts.id AND cart_items.updated_at >= '{$from}' and cart_items.updated_at <= '{$to}' GROUP BY cart_items.cart_id) > 0")
+            ->get();
     }
 }
