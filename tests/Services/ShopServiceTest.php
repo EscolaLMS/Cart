@@ -7,7 +7,7 @@ use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
-use EscolaLms\Cart\Services\CartManager;
+use EscolaLms\Cart\Services\ShopService;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
@@ -16,14 +16,14 @@ use EscolaLms\Core\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Testing\TestResponse;
 
-class CartManagerTest extends TestCase
+class ShopServiceTest extends TestCase
 {
     use DatabaseTransactions;
     use CreatesPaymentMethods;
 
     private User $user;
     private TestResponse $response;
-    private CartManager $cartManager;
+    private ShopService $shopService;
 
     public function setUp(): void
     {
@@ -32,7 +32,7 @@ class CartManagerTest extends TestCase
         $this->seed(CartPermissionSeeder::class);
         Shop::registerProductableClass(ExampleProductable::class);
 
-        $this->cartManager = app(CartManager::class);
+        $this->shopService = app(ShopService::class);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::STUDENT);
@@ -57,7 +57,7 @@ class CartManagerTest extends TestCase
         $this->assertNotNull($user->cart->getKey());
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
 
-        $abandonedCarts = $this->cartManager->getAbandonedCarts(Carbon::now()->subHours(48), Carbon::now());
+        $abandonedCarts = $this->shopService->getAbandonedCarts(Carbon::now()->subHours(48), Carbon::now());
 
         $this->assertEquals(1, $abandonedCarts->count());
     }
@@ -81,7 +81,7 @@ class CartManagerTest extends TestCase
         $this->assertNotNull($user->cart->getKey());
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
 
-        $abandonedCarts = $this->cartManager->getAbandonedCarts(Carbon::now()->subHours(48), Carbon::now()->subHours(24));
+        $abandonedCarts = $this->shopService->getAbandonedCarts(Carbon::now()->subHours(48), Carbon::now()->subHours(24));
 
         $this->assertEquals(0, $abandonedCarts->count());
     }

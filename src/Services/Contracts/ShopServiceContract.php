@@ -2,12 +2,14 @@
 
 namespace EscolaLms\Cart\Services\Contracts;
 
+use Carbon\Carbon;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Models\Payment;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 interface ShopServiceContract
@@ -23,4 +25,6 @@ interface ShopServiceContract
     public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void;
 
     public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDeails = null, array $parameters = []): Payment;
+
+    public function getAbandonedCarts(Carbon $from, Carbon $to): Collection;
 }
