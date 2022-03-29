@@ -321,7 +321,17 @@ class ProductService implements ProductServiceContract
 
     public function attachProductToUser(Product $product, User $user, int $quantity = 1): void
     {
-        if ($product->limit_per_user < $quantity) {
+        Log::debug(__('Attaching product to user'), [
+            'product' => [
+                'id' => $product->getKey(),
+                'name' => $product->name,
+            ],
+            'user' => [
+                'id' => $user->getKey(),
+                'email' => $user->email,
+            ],
+        ]);
+        if (!is_null($product->limit_per_user) && $product->limit_per_user < $quantity) {
             $quantity = $product->limit_per_user;
         }
 
@@ -331,7 +341,7 @@ class ProductService implements ProductServiceContract
 
         $productUserPivot = ProductUser::query()->firstOrCreate(['user_id' => $user->getKey(), 'product_id' => $product->getKey()], ['quantity' => $quantity]);
 
-        if (!$productUserPivot->wasRecentlyCreated) {
+        if (!$productUserPivot->wasRecentlyCreated && !is_null($product->limit_per_user)) {
             if ($product->limit_per_user < ($productUserPivot->quantity + $quantity)) {
                 $quantity = $product->limit_per_user - $productUserPivot->quantity;
             }
@@ -344,6 +354,7 @@ class ProductService implements ProductServiceContract
         }
 
         foreach ($product->productables as $productProductable) {
+            Log::debug(__('Checking if productable can be processed'));
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
                 $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
@@ -389,8 +400,25 @@ class ProductService implements ProductServiceContract
 
     public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void
     {
+        Log::debug(__('Attaching productable to user'), [
+            'product' => [
+                'id' => $productable->getKey(),
+                'name' => $productable->getName(),
+            ],
+            'user' => [
+                'id' => $user->getKey(),
+                'email' => $user->email,
+            ],
+            'quantity' => $quantity,
+        ]);
         assert($productable instanceof Model);
-        $productable->attachToUser($user, $quantity);
+        try {
+            $productable->attachToUser($user, $quantity);
+        } catch (Exception $ex) {
+            Log::error(__('Failed to attach productable to user'), [
+                'exception' => $ex->getMessage(),
+            ]);
+        }
         event(new ProductableAttached($productable, $user, $quantity));
     }
 

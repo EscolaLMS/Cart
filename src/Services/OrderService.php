@@ -23,6 +23,7 @@ use EscolaLms\Payments\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 class OrderService implements OrderServiceContract
@@ -165,6 +166,9 @@ class OrderService implements OrderServiceContract
 
     public function processOrderItems(Order $order): void
     {
+        Log::debug(__('Processing order items'), [
+            'order' => $order->getKey(),
+        ]);
         foreach ($order->items as $orderItem) {
             assert($orderItem instanceof OrderItem);
 
