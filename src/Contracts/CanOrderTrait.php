@@ -15,7 +15,7 @@ trait CanOrderTrait
 {
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'products_users')->using(ProductUser::class);
+        return $this->belongsToMany(Product::class, 'products_users')->using(ProductUser::class)->withPivot('quantity');
     }
 
     public function orders(): HasMany
