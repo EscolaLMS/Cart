@@ -185,7 +185,7 @@ class ProductService implements ProductServiceContract
                 'limit_per_user' => $limit_per_user,
                 'limit_total' => $limit_total,
             ],
-            'owned_quantity' => !is_null($limit_per_user) ? $product->getOwnedByUserQuantityAttribute($user) : 'not fetched',
+            'owned_quantity' => !is_null($limit_per_user) ? $product->getOwnedByUserQuantityAttribute($user) : 'not counted (unlimited product)',
             'purchasable' => $is_purchasable,
             'limit_per_user' => $is_under_limit_per_user,
             'limit_total' => $is_under_limit_total,
