@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Services;
 
+use Carbon\Carbon;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
@@ -15,6 +16,7 @@ use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Payments\Models\Payment;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use InvalidArgumentException;
 
@@ -122,5 +124,17 @@ class ShopService implements ShopServiceContract
         } elseif ($quantity > $current) {
             $this->addProductToCart($cart, $product, $quantity - $current);
         }
+    }
+
+    public function getAbandonedCarts(Carbon $from, Carbon $to): Collection
+    {
+        return Cart::query()
+            ->where([
+                ['updated_at', '>=', $from],
+                ['updated_at', '<=', $to],
+            ])
+            ->whereRaw("(SELECT count(cart_items.id) FROM cart_items WHERE cart_items.cart_id = carts.id AND cart_items.updated_at > '{$to}' GROUP BY cart_items.cart_id) is null
+                and (SELECT count(cart_items.id) FROM cart_items WHERE cart_items.cart_id = carts.id AND cart_items.updated_at >= '{$from}' and cart_items.updated_at <= '{$to}' GROUP BY cart_items.cart_id) > 0")
+            ->get();
     }
 }

@@ -57,7 +57,7 @@ class CartManager extends BaseCartManager implements CartManagerContract
         return (int) self::tax($rate);
     }
 
-    /** 
+    /**
      * CartItem total = subtotal + additional fees independent from quantity;
      * Tax is NOT included in this, to get total with tax use `totalWithTax()` method
      */
