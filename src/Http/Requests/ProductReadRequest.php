@@ -31,7 +31,7 @@ class ProductReadRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->validated()['id'];
+        return $this->input('id');
     }
 
     public function getProduct(): Product

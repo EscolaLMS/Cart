@@ -114,7 +114,7 @@ class Product extends Model implements ProductInterface
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'products_users')->using(ProductUser::class);
+        return $this->belongsToMany(User::class, 'products_users')->using(ProductUser::class)->withPivot('quantity');
     }
 
     public function tags(): MorphMany
@@ -155,6 +155,12 @@ class Product extends Model implements ProductInterface
     public function getOwnedByUserAttribute(?CoreUser $user = null): bool
     {
         return app(ProductServiceContract::class)->productIsOwnedByUser($this, $user ?? Auth::user());
+    }
+
+    public function getOwnedByUserQuantityAttribute(?CoreUser $user = null): int
+    {
+        $user = $user ?? Auth::user();
+        return optional(optional($this->users->where('id', '=', $user->getKey())->first())->pivot)->quantity ?? 0;
     }
 
     public function newEloquentBuilder($query): ProductModelQueryBuilder

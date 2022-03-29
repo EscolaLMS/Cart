@@ -19,6 +19,7 @@ use EscolaLms\Payments\Facades\PaymentGateway;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 
 class CartApiTest extends TestCase
@@ -297,5 +298,51 @@ class CartApiTest extends TestCase
         $order_id = $this->response->json('data.0.id');
         $payment = Payment::where('payable_id', $order_id)->first();
         $this->assertEquals(2100, $payment->amount);
+    }
+
+    public function test_limit_per_user()
+    {
+        $paymentsFake = PaymentGateway::fake();
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+            'limit_per_user' => 1,
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', true)
+                ->where('data.owned', false)
+                ->where('data.limit_per_user', 1)
+                ->etc()
+        );
+
+        $this->assertFalse($product->getOwnedByUserAttribute($user));
+
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addProductToCart($cart, $product);
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', false)
+                ->where('data.owned', true)
+                ->where('data.limit_per_user', 1)
+                ->etc()
+        );
     }
 }

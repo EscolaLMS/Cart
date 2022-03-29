@@ -174,8 +174,9 @@ class ProductService implements ProductServiceContract
         $limit_total = $product->limit_total;
 
         $is_purchasable = $product->purchasable;
-        $is_under_limit_per_user = is_null($limit_per_user) || ((int) optional($product->users()->withPivot('quantity')->where('users.id', '=', $user->getKey())->first())->quantity < $limit_per_user);
-        $is_under_limit_total = is_null($limit_total) || ($product->users()->count() < $limit_total);
+
+        $is_under_limit_per_user = is_null($limit_per_user) || ($product->getOwnedByUserQuantityAttribute($user) < $limit_per_user);
+        $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) < $limit_total);
         $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
         Log::debug(__('Checking if product is buyable'), [
             'product' => [
@@ -184,7 +185,7 @@ class ProductService implements ProductServiceContract
                 'limit_per_user' => $limit_per_user,
                 'limit_total' => $limit_total,
             ],
-            'owned_quantity' => !is_null($limit_per_user) ? optional($product->users()->withPivot('quantity')->where('users.id', '=', $user->getKey())->first())->quantity : 'not fetched',
+            'owned_quantity' => !is_null($limit_per_user) ? $product->getOwnedByUserQuantityAttribute($user) : 'not fetched',
             'purchasable' => $is_purchasable,
             'limit_per_user' => $is_under_limit_per_user,
             'limit_total' => $is_under_limit_total,
