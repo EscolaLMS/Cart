@@ -174,10 +174,17 @@ class ProductService implements ProductServiceContract
         $limit_total = $product->limit_total;
 
         $is_purchasable = $product->purchasable;
-        $is_under_limit_per_user = is_null($limit_per_user) || ((int) optional($product->users->where('id', '=', $user->getKey())->first())->quantity < $limit_per_user);
+        $is_under_limit_per_user = is_null($limit_per_user) || ((int) optional($product->users()->withPivot('quantity')->where('id', '=', $user->getKey())->first())->quantity < $limit_per_user);
         $is_under_limit_total = is_null($limit_total) || ($product->users()->count() < $limit_total);
         $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
         Log::debug(__('Checking if product is buyable'), [
+            'product' => [
+                'id' => $product->getKey(),
+                'name' => $product->name,
+                'limit_per_user' => $limit_per_user,
+                'limit_total' => $limit_total,
+            ],
+            'owned_quantity' => !is_null($limit_per_user) ? optional($product->users()->withPivot('quantity')->where('id', '=', $user->getKey())->first())->quantity : 'not fetched',
             'purchasable' => $is_purchasable,
             'limit_per_user' => $is_under_limit_per_user,
             'limit_total' => $is_under_limit_total,
@@ -325,12 +332,14 @@ class ProductService implements ProductServiceContract
             'product' => [
                 'id' => $product->getKey(),
                 'name' => $product->name,
+                'limit_per_user' => $product->limit_per_user,
             ],
             'user' => [
                 'id' => $user->getKey(),
                 'email' => $user->email,
             ],
         ]);
+
         if (!is_null($product->limit_per_user) && $product->limit_per_user < $quantity) {
             $quantity = $product->limit_per_user;
         }
