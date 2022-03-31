@@ -246,7 +246,7 @@ class ProductService implements ProductServiceContract
             }
             if (count($productables) === 1) {
                 $singleProductable = $this->findSingleProductForProductable($this->findProductable($productables[0]['class'], $productables[0]['id']));
-                if ($singleProductable) {
+                if ($singleProductable && $singleProductable->getKey() !== $product->getKey()) {
                     throw new Exception(
                         __(
                             'Only one Product with type SINGLE can exist for Productable :productable_type:::productable_id',
