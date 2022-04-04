@@ -18,7 +18,7 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
     Route::put('/products/{id}', [ProductAdminApiController::class, 'update'])->whereNumber('id');
     Route::delete('/products/{id}', [ProductAdminApiController::class, 'delete'])->whereNumber('id');
 
-    Route::get('/products/{id}/trigger-event-manually', [ProductAdminApiController::class, 'triggerEventManuallyForUsers'])->whereNumber('id');
+    Route::post('/products/{id}/trigger-event-manually/{idTemplate}', [ProductAdminApiController::class, 'triggerEventManuallyForUsers'])->whereNumber(['id', 'idTemplate']);
 
     Route::post('/products/{id}/attach', [ProductAdminApiController::class, 'attach'])->whereNumber('id');
     Route::post('/products/{id}/detach', [ProductAdminApiController::class, 'detach'])->whereNumber('id');
