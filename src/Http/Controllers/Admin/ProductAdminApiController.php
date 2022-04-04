@@ -80,7 +80,13 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
     public function triggerEventManuallyForUsers(ProductManuallyTriggerRequest $request): JsonResponse
     {
         $userIds = $request->getProduct()->users->pluck('id');
-        $this->eventService->dispatchEventManuallyForUsers($userIds->toArray());
+        $template = $request->getTemplate();
+
+        if (!$template->is_valid) {
+            return $this->sendError(__('Template is invalid.'), 400);
+        }
+
+        $this->eventService->dispatchEventManuallyForUsers($userIds->toArray(), $template);
 
         return $this->sendSuccess(__('Event triggered successfully for users of the product'));
     }

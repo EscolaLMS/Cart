@@ -622,8 +622,8 @@ interface ProductAdminSwagger
     public function detach(ProductDetachRequest $request): JsonResponse;
 
     /**
-     * @OA\Get(
-     *     path="/api/admin/products/{id}/trigger-event-manually",
+     * @OA\Post(
+     *     path="/api/admin/products/{id}/trigger-event-manually/{idTemplate}",
      *     summary="Manually triggered event for users of the product",
      *     tags={"Admin Product"},
      *     security={
@@ -632,6 +632,15 @@ interface ProductAdminSwagger
      *     @OA\Parameter(
      *          name="id",
      *          description="id of Product",
+     *          @OA\Schema(
+     *             type="integer",
+     *         ),
+     *          required=true,
+     *          in="path"
+     *      ),
+     *     @OA\Parameter(
+     *          name="idTemplate",
+     *          description="id of Template",
      *          @OA\Schema(
      *             type="integer",
      *         ),

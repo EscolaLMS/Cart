@@ -14,6 +14,11 @@ use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Templates\Events\ManuallyTriggeredEvent;
+use EscolaLms\Templates\Facades\Template as FacadesTemplate;
+use EscolaLms\Templates\Models\Template;
+use EscolaLms\Templates\Models\TemplateSection;
+use EscolaLms\Templates\Tests\Mock\TestChannel;
+use EscolaLms\Templates\Tests\Mock\TestUserVariables;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
@@ -112,22 +117,44 @@ class ProductApiTest extends TestCase
         ]);
     }
 
-    public function testTriggerEventManuallyForUsers(): void
+    public function testTriggerEventManuallyForProductUsers(): void
     {
         Event::fake([ManuallyTriggeredEvent::class]);
 
         $student = $this->makeStudent();
         $product = Product::factory()->create();
         $product->users()->sync($student);
+        FacadesTemplate::register(ManuallyTriggeredEvent::class, TestChannel::class, TestUserVariables::class);
+        $template = Template::factory()->create([
+            'channel' => TestChannel::class,
+            'event' => ManuallyTriggeredEvent::class,
+        ]);
+
+        TemplateSection::factory(['key' => 'title', 'template_id' => $template->getKey()])->create();
+        TemplateSection::factory(['key' => 'content', 'template_id' => $template->getKey(), 'content' => TestUserVariables::VAR_USER_EMAIL])->create();
 
         $admin = $this->makeAdmin();
         $this->response = $this->actingAs($admin, 'api')
-            ->json('GET', "/api/admin/products/{$product->getKey()}/trigger-event-manually");
+            ->json('POST', "/api/admin/products/{$product->getKey()}/trigger-event-manually/{$template->getKey()}");
         $this->response->assertOk();
+    }
 
-        Event::assertDispatched(ManuallyTriggeredEvent::class, function (ManuallyTriggeredEvent $event) use ($student) {
-            $this->assertEquals($student->getKey(), $event->getUser()->getKey());
-            return true;
-        });
+    public function testTriggerEventManuallyForProductUsersInvalidTemplate(): void
+    {
+        Event::fake([ManuallyTriggeredEvent::class]);
+
+        $student = $this->makeStudent();
+        $product = Product::factory()->create();
+        $product->users()->sync($student);
+        FacadesTemplate::register(ManuallyTriggeredEvent::class, TestChannel::class, TestUserVariables::class);
+        $template = Template::factory()->create([
+            'channel' => TestChannel::class,
+            'event' => ManuallyTriggeredEvent::class,
+        ]);
+
+        $admin = $this->makeAdmin();
+        $this->response = $this->actingAs($admin, 'api')
+            ->json('POST', "/api/admin/products/{$product->getKey()}/trigger-event-manually/{$template->getKey()}");
+        $this->response->assertStatus(400);
     }
 }
