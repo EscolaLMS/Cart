@@ -31,8 +31,7 @@ class ProductPolicy
 
     public function view(User $user, Product $product)
     {
-        return $user->can(CartPermissionsEnum::LIST_ALL_PRODUCTS)
-            || ($user->can(CartPermissionsEnum::LIST_PURCHASABLE_PRODUCTS) && $this->productService->productIsBuyableOrOwnedByUser($product, $user));
+        return $user->can(CartPermissionsEnum::LIST_ALL_PRODUCTS) || ($user->can(CartPermissionsEnum::LIST_PURCHASABLE_PRODUCTS) && $this->productService->productIsPurchasableOrOwnedByUser($product, $user));
     }
 
     public function buy(User $user, Product $product)
