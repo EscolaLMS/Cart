@@ -152,9 +152,9 @@ class ProductService implements ProductServiceContract
         return $query->paginate($searchDto->getPerPage() ?? 15);
     }
 
-    public function productIsBuyableOrOwnedByUser(Product $product, User $user, bool $check_productables = false): bool
+    public function productIsPurchasableOrOwnedByUser(Product $product, User $user): bool
     {
-        return $this->productIsBuyableByUser($product, $user, $check_productables) || $this->productIsOwnedByUser($product, $user, $check_productables);
+        return $product->purchasable || $this->productIsOwnedByUser($product, $user);
     }
 
     public function productIsOwnedByUser(Product $product, User $user, bool $check_productables = false): bool
@@ -179,6 +179,7 @@ class ProductService implements ProductServiceContract
         $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) < $limit_total);
         $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
         Log::debug(__('Checking if product is buyable'), [
+            'user' => $user->getKey(),
             'product' => [
                 'id' => $product->getKey(),
                 'name' => $product->name,
