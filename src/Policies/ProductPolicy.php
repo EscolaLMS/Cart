@@ -26,7 +26,7 @@ class ProductPolicy
 
     public function viewPurchasable(User $user)
     {
-        return $this->viewAny($user) || $user->can(CartPermissionsEnum::LIST_PURCHASABLE_PRODUCTS);
+        return true;
     }
 
     public function view(User $user, Product $product)
