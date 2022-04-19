@@ -13,6 +13,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Tags\Models\Tag;
 use EscolaLms\Templates\Events\ManuallyTriggeredEvent;
 use EscolaLms\Templates\Facades\Template as FacadesTemplate;
 use EscolaLms\Templates\Models\Template;
@@ -75,6 +76,8 @@ class ProductApiTest extends TestCase
             'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
+        $product->tags()->save(new Tag(['title' => 'test-tag']));
+
         /** @var Product $product2 */
         $product2 = Product::factory()->create();
         $productable2 = ExampleProductable::factory()->create();
@@ -107,6 +110,30 @@ class ProductApiTest extends TestCase
         $this->response->assertOk();
 
         $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['tags' => ['test-tag']]);
+        $this->response->assertOk();
+        $this->response->assertJsonFragment([
+            ProductResource::make($product->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product2->refresh())->toArray(null),
+        ]);
+        $this->response->assertJsonMissing([
+            ProductResource::make($product3->refresh())->toArray(null),
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products', ['tags' => ['test-negative']]);
+        $this->response->assertOk();
+        $this->response->assertJsonMissing([
             ProductResource::make($product->refresh())->toArray(null),
         ]);
         $this->response->assertJsonMissing([

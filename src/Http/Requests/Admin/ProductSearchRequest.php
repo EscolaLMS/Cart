@@ -26,6 +26,8 @@ class ProductSearchRequest extends FormRequest
             'name' => ['sometimes', 'string'],
             'free' => ['sometimes', 'boolean'],
             'purchasable' => ['sometimes', 'boolean'],
+            'tags' => ['sometimes', 'array'],
+            'tags.*' => ['string'],
             'per_page' => ['sometimes', 'integer'],
             'page' => ['sometimes', 'integer'],
             'order_by' => ['sometimes', Rule::in(['name', 'created_at', 'updated_at'])],
@@ -68,6 +70,11 @@ class ProductSearchRequest extends FormRequest
         return $this->validated()['per_page'] ?? null;
     }
 
+    public function getTags(): ?array
+    {
+        return $this->validated()['tags'] ?? null;
+    }
+
     public function toDto(): ProductsSearchDto
     {
         return new ProductsSearchDto(
@@ -78,6 +85,7 @@ class ProductSearchRequest extends FormRequest
             $this->getProductableId(),
             $this->getPurchasable(),
             $this->getPerPage(),
+            $this->getTags(),
         );
     }
 }
