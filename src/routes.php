@@ -38,11 +38,10 @@ Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function ()
     Route::post('/pay', [CartApiController::class, 'pay']);
 });
 
-Route::group(['prefix' => 'api/products', 'middleware' => ['auth:api']], function () {
+Route::group(['prefix' => 'api/products'], function () {
     Route::get('/{id}', [ProductApiController::class, 'read']);
+    Route::get('/', [ProductApiController::class, 'index']);
 });
-
-Route::get('api/products/', [ProductApiController::class, 'index']);
 
 Route::group(['prefix' => 'api/orders', 'middleware' => ['auth:api']], function () {
     Route::get('/', [OrderApiController::class, 'index']);
