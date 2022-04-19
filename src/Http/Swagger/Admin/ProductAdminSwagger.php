@@ -114,6 +114,16 @@ interface ProductAdminSwagger
      *              type="boolean",
      *          ),
      *      ),
+     *      @OA\Parameter(
+     *          name="tags",
+     *          description="Tags",
+     *          required=false,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="array",
+     *              @OA\Items(type="string")
+     *          ),
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="successful operation",

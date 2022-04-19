@@ -17,6 +17,7 @@ use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
@@ -143,6 +144,10 @@ class ProductService implements ProductServiceContract
             } else {
                 $query = $query->whereHasProductableClass($model->getMorphClass());
             }
+        }
+
+        if (!is_null($searchDto->getTags())) {
+            $query->whereHas('tags', fn (Builder $query) => $query->whereIn('title', $searchDto->getTags()));
         }
 
         if (!is_null($orderDto) && !is_null($orderDto->getOrder())) {

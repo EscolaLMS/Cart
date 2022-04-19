@@ -13,8 +13,9 @@ class ProductsSearchDto implements DtoContract
     protected $productable_id;
     protected ?bool $purchasable = true;
     protected ?int $per_page;
+    protected ?array $tags;
 
-    public function __construct(?string $name = null, ?string $type = null, ?bool $free = null, ?string $productable_type  = null, ?int $productable_id = null, ?bool $purchasable = true, ?int $per_page = null)
+    public function __construct(?string $name = null, ?string $type = null, ?bool $free = null, ?string $productable_type  = null, ?int $productable_id = null, ?bool $purchasable = true, ?int $per_page = null, ?array $tags)
     {
         $this->name = $name;
         $this->type = $type;
@@ -23,6 +24,7 @@ class ProductsSearchDto implements DtoContract
         $this->productable_id = $productable_id;
         $this->purchasable = $purchasable;
         $this->per_page = $per_page;
+        $this->tags = $tags;
     }
 
     public function toArray(): array
@@ -35,6 +37,7 @@ class ProductsSearchDto implements DtoContract
             'productable_id' => $this->productable_id,
             'purchasable' => $this->purchasable,
             'per_page' => $this->per_page,
+            'tags' => $this->tags,
         ];
     }
 
@@ -71,5 +74,10 @@ class ProductsSearchDto implements DtoContract
     public function getPerPage(): ?int
     {
         return $this->per_page;
+    }
+
+    public function getTags(): ?array
+    {
+        return $this->tags;
     }
 }
