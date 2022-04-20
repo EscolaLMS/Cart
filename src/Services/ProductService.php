@@ -373,9 +373,7 @@ class ProductService implements ProductServiceContract
             Log::debug(__('Checking if productable can be processed'));
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
-                if ($productable ?? false) {
-                    $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
-                } else {
+                if (is_null($productable)) {
                     Log::debug([
                         'product' => [
                             'id' => $product->getKey(),
@@ -387,6 +385,8 @@ class ProductService implements ProductServiceContract
                     ]);
                     throw new Exception(__('Attached product is not exists'));
                 }
+                $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
+
             }
         }
         event(new ProductAttached($product, $user, $quantity));
