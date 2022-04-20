@@ -11,7 +11,7 @@ class ProductReadRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('view', $this->getProduct());
+        return true;
     }
 
     protected function prepareForValidation()

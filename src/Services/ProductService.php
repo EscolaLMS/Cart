@@ -205,10 +205,10 @@ class ProductService implements ProductServiceContract
         return Product::where('products.id', $product->getKey())->whereDoesntHaveProductablesNotBuyableByUser($user)->exists();
     }
 
-    /** 
+    /**
      * Maps productable to JsonResource
      * Returns (almost) empty JsonResource if productable does not exist in database anymore
-     * 
+     *
      * @see \EscolaLms\Cart\Http\Resources\ProductableGenericResource
      */
     public function mapProductProductableToJsonResource(ProductProductable $productProductable): JsonResource
@@ -373,7 +373,20 @@ class ProductService implements ProductServiceContract
             Log::debug(__('Checking if productable can be processed'));
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
+                if (is_null($productable)) {
+                    Log::debug([
+                        'product' => [
+                            'id' => $product->getKey(),
+                            'name' => $product->name,
+                            'extended_model' => $productProductable->productable_type,
+                            'extended_model_id' => $productProductable->productable_id,
+                        ],
+                        'message' => __('Attached product is not exists')
+                    ]);
+                    throw new Exception(__('Attached product is not exists'));
+                }
                 $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
+
             }
         }
         event(new ProductAttached($product, $user, $quantity));
