@@ -46,6 +46,7 @@ class ProductResource extends JsonResource
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'updated_at' => $this->getProduct()->updated_at,
         ];
     }
 }
