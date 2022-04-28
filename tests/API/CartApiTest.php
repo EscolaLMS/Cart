@@ -44,16 +44,22 @@ class CartApiTest extends TestCase
         $this->user->assignRole(UserRole::STUDENT);
     }
 
-    public function test_add_product_to_cart()
+    protected function createProductForTesting(): Product
     {
-        $user = $this->user;
-        /** @var Product $product */
         $product = Product::factory()->single()->create();
         $productable = ExampleProductable::factory()->create();
         $product->productables()->save(new ProductProductable([
             'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey()
         ]));
+        return $product;
+    }
+
+    public function test_add_product_to_cart()
+    {
+        $user = $this->user;
+
+        $product = $this->createProductForTesting();
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
             'id' => $product->getKey()
@@ -67,13 +73,9 @@ class CartApiTest extends TestCase
     public function test_add_productable_to_cart()
     {
         $user = $this->user;
-        /** @var Product $product */
-        $product = Product::factory()->single()->create();
-        $productable = ExampleProductable::factory()->create();
-        $product->productables()->save(new ProductProductable([
-            'productable_type' => $productable->getMorphClass(),
-            'productable_id' => $productable->getKey()
-        ]));
+
+        $product = $this->createProductForTesting();
+        $productable = $product->productables->first()->productable;
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
             'productable_type' => ExampleProductable::class,
@@ -175,13 +177,9 @@ class CartApiTest extends TestCase
     public function test_cart_items_list()
     {
         $user = $this->user;
-        /** @var Product $product */
-        $product = Product::factory()->single()->create();
-        $productable = ExampleProductable::factory()->create();
-        $product->productables()->save(new ProductProductable([
-            'productable_type' => $productable->getMorphClass(),
-            'productable_id' => $productable->getKey()
-        ]));
+
+        $product = $this->createProductForTesting();
+        $productable = $product->productables->first()->productable;
 
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/add', [
             'productable_type' => ExampleProductable::class,
@@ -344,5 +342,35 @@ class CartApiTest extends TestCase
                 ->where('data.limit_per_user', 1)
                 ->etc()
         );
+    }
+
+    public function test_add_missing_products()
+    {
+        $user = $this->user;
+
+        $product = $this->createProductForTesting();
+        $product2 = $this->createProductForTesting();
+        $product3 = $this->createProductForTesting();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product->getKey()
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+        $this->assertNotContains($product2->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+        $this->assertNotContains($product3->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/missing', [
+            'products' => [$product2->getKey(), $product3->getKey()]
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+        $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product2->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+        $this->assertContains($product3->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
     }
 }

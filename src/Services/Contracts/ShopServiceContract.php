@@ -24,6 +24,8 @@ interface ShopServiceContract
     public function removeProductFromCart(Cart $cart, Product $buyable, int $quantity = 1): void;
     public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void;
 
+    public function addMissingProductsToCart(Cart $cart, array $products): void;
+
     public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDeails = null, array $parameters = []): Payment;
 
     public function getAbandonedCarts(Carbon $from, Carbon $to): Collection;
