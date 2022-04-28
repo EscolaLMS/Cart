@@ -368,7 +368,7 @@ class CartApiTest extends TestCase
         ]);
         $this->response->assertOk();
 
-        $this->assertNotNull($user->cart->getKey());
+        $this->assertNotNull($user->cart->refresh());
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product2->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
