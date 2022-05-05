@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Models;
 
+use EscolaLms\Cart\Contracts\Productable;
 use EscolaLms\Cart\Database\Factories\ProductFactory;
 use EscolaLms\Cart\Models\Contracts\ProductInterface;
 use EscolaLms\Cart\Models\Contracts\ProductTrait;
@@ -10,6 +11,7 @@ use EscolaLms\Cart\QueryBuilders\ProductModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Models\User as CoreUser;
 use EscolaLms\Tags\Models\Tag;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -180,5 +182,29 @@ class Product extends Model implements ProductInterface
             return url(Storage::url($path));
         }
         return null;
+    }
+
+    public function getAuthorsAttribute(): Collection
+    {
+        $authors = new Collection();
+        foreach ($this->productables as $productable) {
+            $productableModel = $productable->productable;
+            if ($productableModel instanceof Productable) {
+                $authors = $authors->merge($productableModel->getProductableAuthors());
+            }
+        }
+        return $authors->unique('id');
+    }
+
+    public function getCalculatedDurationAttribute(): int
+    {
+        $duration = 0;
+        foreach ($this->productables as $productable) {
+            $productableModel = $productable->productable;
+            if ($productableModel instanceof Productable) {
+                $duration += $productableModel->getProductableDuration();
+            }
+        }
+        return $duration;
     }
 }

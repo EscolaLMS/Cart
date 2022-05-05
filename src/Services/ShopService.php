@@ -137,4 +137,15 @@ class ShopService implements ShopServiceContract
                 and (SELECT count(cart_items.id) FROM cart_items WHERE cart_items.cart_id = carts.id AND cart_items.updated_at >= '{$from}' and cart_items.updated_at <= '{$to}' GROUP BY cart_items.cart_id) > 0")
             ->get();
     }
+
+    public function addMissingProductsToCart(Cart $cart, array $products): void
+    {
+        $cartManager = $this->cartManagerForCart($cart);
+        foreach ($products as $product) {
+            $productModel = Product::find($product);
+            if (!$cartManager->hasProduct($productModel) && $this->productService->productIsBuyableByUser($productModel, $cart->user)) {
+                $cartManager->add($productModel, 1);
+            }
+        }
+    }
 }

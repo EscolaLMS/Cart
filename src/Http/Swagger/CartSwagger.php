@@ -3,6 +3,7 @@
 
 namespace EscolaLms\Cart\Http\Swagger;
 
+use EscolaLms\Cart\Http\Requests\AddMissingProductsRequest;
 use EscolaLms\Cart\Http\Requests\CartItemRemoveFromCartRequest;
 use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
@@ -161,6 +162,47 @@ interface CartSwagger
      *   )
      */
     public function setProductQuantity(ProductSetQuantityInCartRequest $request): JsonResponse;
+
+    /**
+     * @OA\Post(
+     *      path="/api/cart/missing",
+     *      description="Add missing products to Cart",
+     *      tags={"Cart"},
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *              mediaType="multipart/json",
+     *              @OA\Schema(
+     *                  type="object",
+     *                  required={"id"},
+     *                  @OA\Property(
+     *                      property="products",
+     *                      type="array",
+     *                      @OA\Items(type="integer")
+     *                  ),
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json",
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=422,
+     *          description="Bad request",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          )
+     *      )
+     *   )
+     */
+    public function addMissingProducts(AddMissingProductsRequest $request): JsonResponse;
 
     /**
      * @OA\Post(
