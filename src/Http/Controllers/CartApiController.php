@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Controllers;
 
+use EscolaLms\Cart\Http\Requests\AddMissingProductsRequest;
 use EscolaLms\Cart\Http\Requests\CartItemRemoveFromCartRequest;
 use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
@@ -42,6 +43,14 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         }
         $this->shopService->updateProductQuantity($cart, $product, $request->getQuantity());
         return $this->sendSuccess(__('Product quantity changed'));
+    }
+
+    public function addMissingProducts(AddMissingProductsRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addMissingProductsToCart($cart, $request->input('products', []));
+        return $this->sendSuccess(__('Missing (buyable) products added to Cart'));
     }
 
     public function addProductable(ProductableAddToCartRequest $request): JsonResponse

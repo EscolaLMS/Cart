@@ -5,8 +5,9 @@ namespace EscolaLms\Cart\Services\Contracts;
 use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Contracts\Base\Buyable;
 use EscolaLms\Cart\Models\Product;
+use Treestoneit\ShoppingCart\CartContract;
 
-interface CartManagerContract
+interface CartManagerContract extends CartContract
 {
     public function subtotalInt(): int;
     public function taxInt(?int $rate = null): int;

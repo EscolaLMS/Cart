@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Contracts;
 
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 interface Productable
@@ -87,4 +88,14 @@ interface Productable
      * Default Eloquent Model functionality (required for polymorphic relations and resource listing)
      */
     public function getMorphClass();
+
+    /**
+     * Get productable Authors collection
+     */
+    public function getProductableAuthors(): Collection;
+
+    /**
+     * Get productable duration in seconds
+     */
+    public function getProductableDuration(): int;
 }

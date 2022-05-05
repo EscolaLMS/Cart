@@ -36,6 +36,7 @@ class ProductResource extends JsonResource
             'extra_fees' => $this->getProduct()->getExtraFees(),
             'purchasable' => $this->getProduct()->purchasable,
             'duration' => $this->getProduct()->duration,
+            'calculated_duration' => $this->getProduct()->getCalculatedDurationAttribute(),
             'limit_per_user' => $this->getProduct()->limit_per_user,
             'limit_total' => $this->getProduct()->limit_total,
             'productables' => $this->getProduct()->productables->map(fn (ProductProductable $productProductable) => app(ProductServiceContract::class)->mapProductProductableToJsonResource($productProductable)->toArray($request))->toArray(),
@@ -46,6 +47,8 @@ class ProductResource extends JsonResource
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'updated_at' => $this->getProduct()->updated_at,
+            'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute()),
         ];
     }
 }
