@@ -7,6 +7,7 @@ use EscolaLms\Cart\Support\ModelHelper;
 use EscolaLms\Core\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -137,5 +138,18 @@ trait ProductableTrait
     public function getApiReadUrl(): ?string
     {
         return null;
+    }
+
+    public function getProductableAuthors(): Collection
+    {
+        if (ModelHelper::hasRelation($this, 'authors')) {
+            return $this->authors;
+        }
+        return new Collection();
+    }
+
+    public function getProductableDuration(): int
+    {
+        return (int) ($this->duration ?? 0);
     }
 }
