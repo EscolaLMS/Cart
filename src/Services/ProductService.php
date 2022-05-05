@@ -386,7 +386,6 @@ class ProductService implements ProductServiceContract
                     throw new Exception(__('Attached product is not exists'));
                 }
                 $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
-
             }
         }
         event(new ProductAttached($product, $user, $quantity));
