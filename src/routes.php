@@ -6,8 +6,7 @@ use EscolaLms\Cart\Http\Controllers\Admin\ProductAdminApiController;
 use EscolaLms\Cart\Http\Controllers\CartApiController;
 use EscolaLms\Cart\Http\Controllers\OrderApiController;
 use EscolaLms\Cart\Http\Controllers\ProductApiController;
-use Illuminate\Support\Facades\Route;
-
+use EscolaLms\Core\Http\Facades\Route;
 
 Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function () {
     Route::get('/orders', [OrderAdminApiController::class, 'index']);
@@ -31,7 +30,7 @@ Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function (
     Route::post('/productables/detach', [ProductableAdminApiController::class, 'detach']);
 });
 
-Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function () {
+Route::group(['prefix' => 'api/cart', 'middleware' => Route::apply(['auth:api'])], function () {
     Route::get('/', [CartApiController::class, 'index']);
     Route::post('/products', [CartApiController::class, 'setProductQuantity']);
     Route::post('/missing', [CartApiController::class, 'addMissingProducts']);
@@ -45,7 +44,7 @@ Route::group(['prefix' => 'api/products'], function () {
     Route::get('/', [ProductApiController::class, 'index']);
 });
 
-Route::group(['prefix' => 'api/orders', 'middleware' => ['auth:api']], function () {
+Route::group(['prefix' => 'api/orders', 'middleware' => Route::apply(['auth:api'])], function () {
     Route::get('/', [OrderApiController::class, 'index']);
     Route::get('/{id}', [OrderApiController::class, 'read']);
 });
