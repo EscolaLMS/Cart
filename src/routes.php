@@ -8,6 +8,7 @@ use EscolaLms\Cart\Http\Controllers\OrderApiController;
 use EscolaLms\Cart\Http\Controllers\ProductApiController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::group(['prefix' => 'api/admin', 'middleware' => ['auth:api']], function () {
     Route::get('/orders', [OrderAdminApiController::class, 'index']);
     Route::get('/orders/{id}', [OrderAdminApiController::class, 'read']);
