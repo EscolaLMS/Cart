@@ -98,7 +98,7 @@ class ProductService implements ProductServiceContract
         if (array_key_exists($model->getMorphClass(), $this->productablesMorphs)) {
             return $this->productablesMorphs[$model->getMorphClass()];
         }
-        throw new InvalidArgumentException(__('Unregistered Productable Class'));
+        throw new InvalidArgumentException(__('Unregistered Productable Class: :class', ['class' => $productableClass]));
     }
 
     public function findProductable(string $productableClass, $productableId): ?Productable
