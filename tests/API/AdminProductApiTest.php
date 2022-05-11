@@ -11,6 +11,7 @@ use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
+use EscolaLms\Cart\Http\Resources\BaseProductResource;
 use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Models\Category;
@@ -225,10 +226,7 @@ class AdminProductApiTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
         $this->response->assertOk();
-
-        $this->response->assertJsonFragment([
-            ProductResource::make($product)->toArray(null),
-        ]);
+        $this->response->assertJsonFragment(json_decode(ProductResource::make($product)->toJson(null), true));
     }
 
     public function test_update_product()
