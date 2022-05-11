@@ -463,4 +463,14 @@ class ProductService implements ProductServiceContract
         $productable->detachFromUser($user, $quantity);
         event(new ProductableDetached($productable, $user, $quantity));
     }
+
+    public function productableIsOwnedByUserThroughProduct(Productable $productable, User $user): bool
+    {
+        return Product::query()->whereHasProductable($productable)->whereHasUser($user)->exists();
+    }
+
+    public function canDetachProductableFromUser(Productable $productable, User $user): bool
+    {
+        return !$this->productableIsOwnedByUserThroughProduct($productable, $user);
+    }
 }

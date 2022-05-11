@@ -25,6 +25,11 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereHas('productables', fn (Builder $query) => $query->where('productable_type', $productable_type)->where('productable_id', $productable_id));
     }
 
+    public function whereHasUser(User $user): ProductModelQueryBuilder
+    {
+        return $this->whereHas('users', fn (Builder $query) => $query->where('users.id', $user->getKey()));
+    }
+
     public function whereDoesntHaveProductablesNotOwnedByUser(?User $user = null): Builder
     {
         $user = $user ?? Auth::user();
