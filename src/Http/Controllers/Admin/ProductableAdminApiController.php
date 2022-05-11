@@ -42,6 +42,9 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
     {
         $productable = $this->productService->findProductable($request->getProductableType(), $request->getProductableId());
         $user = $request->getUser();
+        if (!$this->productService->canDetachProductableFromUser($productable, $user)) {
+            return $this->sendError(__('Unable to detach productable that was bought by User'), 403);
+        }
         $this->productService->detachProductableFromUser($productable, $user);
         return $this->sendSuccess(__('Productable detached from user'));
     }

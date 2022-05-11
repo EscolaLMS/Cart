@@ -41,4 +41,7 @@ interface ProductServiceContract
     public function detachProductFromUser(Product $product, User $user, int $quantity = 1): void;
     public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void;
     public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1): void;
+
+    public function productableIsOwnedByUserThroughProduct(Productable $productable, User $user): bool;
+    public function canDetachProductableFromUser(Productable $productable, User $user): bool;
 }

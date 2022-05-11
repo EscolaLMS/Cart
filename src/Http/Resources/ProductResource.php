@@ -50,7 +50,7 @@ class ProductResource extends JsonResource
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
             'updated_at' => $this->getProduct()->updated_at,
-            'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute())
+            'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute())->toArray($request),
         ];
         if (self::$hasRelatedProducts) {
             self::$hasRelatedProducts = false;
