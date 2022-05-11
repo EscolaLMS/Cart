@@ -249,6 +249,11 @@ interface ProductAdminSwagger
      *                      type="array",
      *                      @OA\Items(type="string")
      *                  ),
+     *                  @OA\Property(
+     *                      property="related_products",
+     *                      type="array",
+     *                      @OA\Items(type="integer")
+     *                  ),
      *              )
      *          )
      *      ),
@@ -429,6 +434,11 @@ interface ProductAdminSwagger
      *                      property="tags",
      *                      type="array",
      *                      @OA\Items(type="string")
+     *                  ),
+     *                  @OA\Property(
+     *                      property="related_products",
+     *                      type="array",
+     *                      @OA\Items(type="integer")
      *                  ),
      *              )
      *          )
