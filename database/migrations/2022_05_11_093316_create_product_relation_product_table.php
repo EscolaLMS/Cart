@@ -15,11 +15,9 @@ class CreateProductRelationProductTable extends Migration
     {
         Schema::create('related_product', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('product_id')->index();
-            $table->bigInteger('related_product_id')->index();
+            $table->bigInteger('product_id')->unsigned()->index();
+            $table->bigInteger('related_product_id')->unsigned()->index();
             $table->timestamps();
-        });
-        Schema::table('related_product', function (Blueprint $table) {
             $table->foreign('product_id')->on('products')->references('id')->cascadeOnDelete();
             $table->foreign('related_product_id')->on('products')->references('id')->cascadeOnDelete();
         });
