@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Storage;
  *          type="integer"
  *      )
  * )
- * 
+ *
  * @property int $id
  * @property string $name
  * @property string $type
@@ -127,6 +127,11 @@ class Product extends Model implements ProductInterface
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'products_categories');
+    }
+
+    public function relatedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'related_product', 'product_id', 'related_product_id');
     }
 
     public function getBuyableDescription(): string

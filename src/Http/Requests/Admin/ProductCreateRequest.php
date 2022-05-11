@@ -43,6 +43,8 @@ class ProductCreateRequest extends FormRequest
             'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['string'],
+            'related_products' => ['sometimes', 'array'],
+            'related_products.*' => ['integer'],
         ];
     }
 }
