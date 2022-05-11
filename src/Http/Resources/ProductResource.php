@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductResource extends JsonResource
 {
+    private static bool $hasRelatedProducts = true;
+
     public function __construct(Product $product)
     {
         parent::__construct($product);
@@ -25,7 +27,7 @@ class ProductResource extends JsonResource
     public function toArray($request): array
     {
         $user = $request ? $request->user() : Auth::user();
-        return [
+        $data = [
             'id' => $this->getProduct()->getKey(),
             'type' => $this->getProduct()->type,
             'name' => $this->getProduct()->name,
@@ -48,7 +50,12 @@ class ProductResource extends JsonResource
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
             'updated_at' => $this->getProduct()->updated_at,
-            'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute()),
+            'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute())
         ];
+        if (self::$hasRelatedProducts) {
+            self::$hasRelatedProducts = false;
+            $data['related_products'] = self::collection($this->getProduct()->relatedProducts);
+        }
+        return $data;
     }
 }

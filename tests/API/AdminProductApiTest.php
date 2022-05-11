@@ -22,8 +22,8 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 class AdminProductApiTest extends TestCase
 {
@@ -134,6 +134,13 @@ class AdminProductApiTest extends TestCase
         $productable = ExampleProductable::factory()->create();
 
         $productData = Product::factory()->make()->toArray();
+
+        $productSecoond = Product::factory()->single()->create();
+        $productSecoond->relatedProducts()->sync(Product::factory(5)->create()->pluck('id')->toArray());
+
+        $productData = Product::factory()->single()->make()->toArray();
+        $productData['related_products'] = array_merge(Product::factory(5)->create()->pluck('id')->toArray(), [$productSecoond->getKey()]);
+
         $productData['productables'] = [
             [
                 'class' => ExampleProductable::class,
@@ -152,6 +159,19 @@ class AdminProductApiTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
+        $this->response->assertJson(fn (AssertableJson $json) =>
+        $json->has('data', fn (AssertableJson $json) =>
+            $json
+                ->has('related_products', fn (AssertableJson $json) =>
+                    $json->each(fn (AssertableJson $json) =>
+                        $json
+                            ->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                            ->missing('related_products')
+                            ->etc()
+                    )->etc()
+                )->etc()
+            )->etc()
+        );
 
         $productId = $this->response->json()['data']['id'];
         $product = Product::find($productId);
@@ -167,11 +187,28 @@ class AdminProductApiTest extends TestCase
     public function test_update_product()
     {
         $product = Product::factory()->single()->create();
+        $productSecoond = Product::factory()->single()->create();
+        $productSecoond->relatedProducts()->sync(Product::factory(5)->create()->pluck('id')->toArray());
 
         $productData = Product::factory()->single()->make()->toArray();
-
+        $productData['related_products'] = array_merge(Product::factory(5)->create()->pluck('id')->toArray(), [$productSecoond->getKey()]);
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
         $this->response->assertOk();
+        $this->response->assertJson(fn (AssertableJson $json) =>
+            $json->has('data', fn (AssertableJson $json) =>
+                $json
+                    ->where('id', fn (int $id) => $id === $product->getKey())
+                    ->has('related_products', fn (AssertableJson $json) =>
+                        $json->each(fn (AssertableJson $json) =>
+                            $json
+                                ->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                                ->missing('related_products')
+                                ->etc()
+                        )
+                        ->etc()
+                    )->etc()
+            )->etc()
+        );
     }
 
     public function test_search_products()

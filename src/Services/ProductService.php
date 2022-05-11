@@ -234,6 +234,9 @@ class ProductService implements ProductServiceContract
 
     public function update(Product $product, array $data): Product
     {
+        $relatedProducts = $data['related_products'] ?? null;
+        unset($data['related_products']);
+
         $poster = $data['poster'] ?? null;
         unset($data['poster']);
 
@@ -297,6 +300,10 @@ class ProductService implements ProductServiceContract
             }, $tags);
 
             $product->tags()->createMany($tags);
+        }
+
+        if (!is_null($relatedProducts)) {
+            $product->relatedProducts()->sync($relatedProducts);
         }
 
         return $product;
