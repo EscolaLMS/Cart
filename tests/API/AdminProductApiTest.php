@@ -8,6 +8,7 @@ use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
+use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
@@ -16,10 +17,12 @@ use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
+use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
@@ -126,6 +129,50 @@ class AdminProductApiTest extends TestCase
         $this->assertFalse($productable->getOwnedByUserAttribute($student));
 
         $eventFake->assertDispatched(ProductableDetached::class, fn (ProductableDetached $event) => $event->getProductable()->getKey() === $productable->getKey());
+    }
+
+    public function test_detach_bought_productable()
+    {
+        $eventFake = Event::fake(ProductBought::class, ProductableDetached::class);
+        $paymentsFake = PaymentGateway::fake();
+
+        $student = config('auth.providers.users.model')::factory()->create();
+        $student->guard_name = 'api';
+        $student->assignRole(UserRole::STUDENT);
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+        ]);
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $shopService = app(ShopServiceContract::class);
+        $cart = $shopService->cartForUser($student);
+        $shopService->addProductToCart($cart, $product);
+
+        $this->response = $this->actingAs($student, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($student));
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/detach', [
+            'user_id' => $student->getKey(),
+            'productable_id' => $productable->getKey(),
+            'productable_type' => ExampleProductable::class,
+        ]);
+        $this->response->assertForbidden();
+
+        $eventFake->assertNotDispatched(ProductableDetached::class);
     }
 
     public function test_create_product()
