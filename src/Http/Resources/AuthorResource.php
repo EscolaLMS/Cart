@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Core\Models\User;
+use EscolaLms\ModelFields\Enum\MetaFieldVisibilityEnum;
+use EscolaLms\ModelFields\Facades\ModelFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthorResource extends JsonResource
