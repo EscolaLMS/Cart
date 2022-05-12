@@ -360,6 +360,12 @@
                                         "items": {
                                             "type": "string"
                                         }
+                                    },
+                                    "related_products": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -499,6 +505,12 @@
                                         "type": "array",
                                         "items": {
                                             "type": "string"
+                                        }
+                                    },
+                                    "related_products": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
                                         }
                                     }
                                 },
