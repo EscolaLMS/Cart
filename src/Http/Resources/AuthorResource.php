@@ -26,6 +26,6 @@ class AuthorResource extends JsonResource
             ['categories' => $this->categories],
             ModelFields::getExtraAttributesValues($this->getAuthor(), MetaFieldVisibilityEnum::PUBLIC)
         );
-        return self::apply($fields, $this);
+        return $fields;
     }
 }
