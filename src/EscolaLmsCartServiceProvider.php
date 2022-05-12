@@ -62,7 +62,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         $this->commands(AbandonedCart::class);
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            $schedule->command('cart:abandoned-event')->dailyAt('1:00');
+            $schedule->command(AbandonedCart::class)->dailyAt('1:00');
         });
     }
 }
