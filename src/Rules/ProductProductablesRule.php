@@ -30,7 +30,6 @@ class ProductProductablesRule implements Rule, DataAwareRule
             $this->message = __('Product with type `single` can have only one Productable');
             return false;
         }
-
         foreach ($value as $productable) {
             if (!Arr::has($productable, ['id', 'class'])) {
                 $this->message = __('Each productable must be an array with keys `id` and `class`');
