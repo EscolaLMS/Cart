@@ -67,6 +67,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read int|null $productables_count
  * @property-read \Illuminate\Database\Eloquent\Collection|Tag[] $tags
  * @property-read int|null $tags_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\Product[] $related_products
  * @property-read \Illuminate\Database\Eloquent\Collection|User[] $users
  * @property-read int|null $users_count
  * @method static \EscolaLms\Cart\Database\Factories\ProductFactory factory(...$parameters)
