@@ -2,21 +2,22 @@
 
 namespace EscolaLms\Cart\Http\Resources;
 
-use EscolaLms\Core\Models\User;
+use EscolaLms\Auth\Models\User as UserAuth;
+use EscolaLms\Core\Models\User as UserCore;
 use EscolaLms\ModelFields\Enum\MetaFieldVisibilityEnum;
 use EscolaLms\ModelFields\Facades\ModelFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthorResource extends JsonResource
 {
-    public function __construct(User $user)
+    public function __construct(UserCore $user)
     {
         parent::__construct($user);
     }
 
-    protected function getAuthor(): User
+    protected function getAuthor(): UserAuth
     {
-        return $this->resource;
+        return new UserAuth($this->resource);
     }
 
     public function toArray($request): array
