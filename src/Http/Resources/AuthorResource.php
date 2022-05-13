@@ -15,8 +15,11 @@ class AuthorResource extends JsonResource
         parent::__construct($user);
     }
 
-    protected function getAuthor(): UserAuth
+    protected function getAuthor(): UserCore
     {
+        if ($this->resource instanceof UserAuth) {
+            return $this->resource;
+        }
         return new UserAuth($this->resource->toArray());
     }
 
