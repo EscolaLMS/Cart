@@ -17,7 +17,7 @@ class AuthorResource extends JsonResource
 
     protected function getAuthor(): UserAuth
     {
-        return new UserAuth($this->resource);
+        return new UserAuth($this->resource->toArray());
     }
 
     public function toArray($request): array
