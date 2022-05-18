@@ -57,9 +57,10 @@ class ProductProductable extends Model
             return $productable;
         }
         try {
-            app(ProductServiceContract::class)->findProductable(get_class($productable), $productable->getKey());
+            return app(ProductServiceContract::class)->findProductable(get_class($productable), $productable->getKey());
         } catch (Exception $ex) {
-            return null;
+            // do nothing
         }
+        return null;
     }
 }
