@@ -2,6 +2,9 @@
 
 namespace EscolaLms\Cart\Models;
 
+use EscolaLms\Cart\Contracts\Productable;
+use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -16,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $quantity
+ * @property-read Productable|null $canonical_productable
  * @property-read \EscolaLms\Cart\Models\Product|null $product
  * @property-read Model|\Eloquent $productable
  * @method static \Illuminate\Database\Eloquent\Builder|ProductProductable newModelQuery()
@@ -44,5 +48,19 @@ class ProductProductable extends Model
     public function productable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function getCanonicalProductableAttribute(): ?Productable
+    {
+        $productable = $this->productable;
+        if ($productable instanceof Productable) {
+            return $productable;
+        }
+        try {
+            return app(ProductServiceContract::class)->findProductable(get_class($productable), $productable->getKey());
+        } catch (Exception $ex) {
+            // do nothing
+        }
+        return null;
     }
 }

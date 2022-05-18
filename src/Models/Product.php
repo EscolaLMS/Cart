@@ -58,17 +58,21 @@ use Illuminate\Support\Facades\Storage;
  * @property int|null $limit_total
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\Category[] $categories
+ * @property-read Collection|\EscolaLms\Cart\Models\Category[] $categories
  * @property-read int|null $categories_count
+ * @property-read Collection $authors
  * @property-read bool $buyable_by_user
+ * @property-read int $calculated_duration
  * @property-read bool $owned_by_user
+ * @property-read int $owned_by_user_quantity
  * @property-read string|null $poster_absolute_url
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\ProductProductable[] $productables
+ * @property-read Collection|\EscolaLms\Cart\Models\ProductProductable[] $productables
  * @property-read int|null $productables_count
- * @property-read \Illuminate\Database\Eloquent\Collection|Tag[] $tags
+ * @property-read Collection|Product[] $relatedProducts
+ * @property-read int|null $related_products_count
+ * @property-read Collection|Tag[] $tags
  * @property-read int|null $tags_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\EscolaLms\Cart\Models\Product[] $related_products
- * @property-read \Illuminate\Database\Eloquent\Collection|User[] $users
+ * @property-read Collection|User[] $users
  * @property-read int|null $users_count
  * @method static \EscolaLms\Cart\Database\Factories\ProductFactory factory(...$parameters)
  * @method static ProductModelQueryBuilder|Product newModelQuery()
@@ -83,6 +87,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static ProductModelQueryBuilder|Product whereHasProductable(\Illuminate\Database\Eloquent\Model $productable)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
+ * @method static ProductModelQueryBuilder|Product whereHasUser(\EscolaLms\Core\Models\User $user)
  * @method static ProductModelQueryBuilder|Product whereId($value)
  * @method static ProductModelQueryBuilder|Product whereLimitPerUser($value)
  * @method static ProductModelQueryBuilder|Product whereLimitTotal($value)
@@ -194,7 +199,7 @@ class Product extends Model implements ProductInterface
     {
         $authors = new Collection();
         foreach ($this->productables as $productable) {
-            $productableModel = $productable->productable;
+            $productableModel = $productable->getCanonicalProductableAttribute();
             if ($productableModel instanceof Productable) {
                 $authors = $authors->merge($productableModel->getProductableAuthors());
             }
