@@ -53,12 +53,15 @@ class ProductProductable extends Model
     public function getCanonicalProductableAttribute(): ?Productable
     {
         $productable = $this->productable;
+        if (is_null($productable)){
+            return null;
+        }
         if ($productable instanceof Productable) {
             return $productable;
         }
         try {
             return app(ProductServiceContract::class)->findProductable(get_class($productable), $productable->getKey());
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             // do nothing
         }
         return null;
