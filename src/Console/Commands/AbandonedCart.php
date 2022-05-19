@@ -23,9 +23,9 @@ class AbandonedCart extends Command
 
     public function handle()
     {
-        $abandonedCarts = $this->shopService->getAbandonedCarts(Carbon::now()->subHours(24), Carbon::now()->subHours(48));
+        $abandonedCarts = $this->shopService->getAbandonedCarts(Carbon::now()->subHours(24), Carbon::now());
         foreach ($abandonedCarts as $abandonedCart) {
-            AbandonedCartEvent::dispatch($abandonedCart);
+            event(new AbandonedCartEvent($abandonedCart));
         }
     }
 }
