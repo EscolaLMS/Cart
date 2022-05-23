@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Services;
 
 use EscolaLms\Cart\Contracts\Productable;
 use EscolaLms\Cart\Dtos\ProductsSearchDto;
+use EscolaLms\Cart\Enums\ConstantEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
@@ -15,6 +16,7 @@ use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Files\Helpers\FileHelper;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -273,9 +275,8 @@ class ProductService implements ProductServiceContract
         $product->save();
         $product->refresh();
 
-        if ($poster instanceof UploadedFile) {
-            $poster_url = $poster->storePublicly('products/' . $product->getKey() . '/posters');
-            $product->poster_url = $poster_url;
+        if ($poster) {
+            $product->poster_url = FileHelper::getFilePath($poster, ConstantEnum::DIRECTORY . "/{$product->getKey()}/posters");
             $product->save();
         }
 

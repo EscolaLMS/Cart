@@ -2,11 +2,13 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Enums\ConstantEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
+use EscolaLms\Files\Rules\FileOrStringRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +23,8 @@ class ProductUpdateRequest extends FormRequest
 
     public function rules(): array
     {
+        $prefixPath = ConstantEnum::DIRECTORY . '/' . $this->getId();
+
         return [
             'name' => ['sometimes', 'string'],
             'type' => ['sometimes', Rule::in(ProductType::getValues())],
@@ -32,7 +36,7 @@ class ProductUpdateRequest extends FormRequest
             'purchasable' => ['sometimes', 'boolean'],
             'teaser_url' => ['sometimes', 'nullable', 'string'],
             'poster_url' => ['sometimes', 'nullable', 'string'],
-            'poster' => ['sometimes', 'nullable', 'file', 'image'],
+            'poster' => [new FileOrStringRule(['image'], $prefixPath)],
             'duration' => ['sometimes', 'nullable', 'string'],
             'limit_per_user' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'limit_total' => ['sometimes', 'nullable', 'integer', 'min:1'],

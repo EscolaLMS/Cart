@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\ConstantEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
@@ -26,6 +27,8 @@ use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Testing\Fluent\AssertableJson;
 
@@ -385,5 +388,22 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJsonFragment([
             'data' => ProductResource::make($product->refresh())->toArray(null)
         ]);
+    }
+
+    public function test_update_product_poster_from_existing_file(): void
+    {
+        Storage::fake();
+
+        $product = Product::factory()->single()->create();
+        $directoryPath = ConstantEnum::DIRECTORY . "/{$product->getKey()}/posters";
+        UploadedFile::fake()->image('poster.jpg')->storeAs($directoryPath, 'poster.jpg');
+        $posterPath = "{$directoryPath}/poster.jpg";
+
+        $response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), [
+            'poster' => $posterPath,
+        ])->assertOk();
+
+        $data = $response->getData()->data;
+        Storage::assertExists($data->poster_path);
     }
 }
