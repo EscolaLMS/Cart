@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Contracts;
 
+use EscolaLms\Cart\Models\Product;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,12 +43,12 @@ interface Productable
     /**
      * Method for attaching Productable to User (Used when Admin gifts Product/Productable to User and after buying Product)
      */
-    public function attachToUser(User $user, int $quantity = 1): void;
+    public function attachToUser(User $user, int $quantity = 1, ?Product $product = null): void;
 
     /**
      * Method for detaching Productable from User (Used when Admin manually removes Product/Productable from User)
      */
-    public function detachFromUser(User $user, int $quantity = 1): void;
+    public function detachFromUser(User $user, int $quantity = 1, ?Product $product = null): void;
 
     /**
      * Get JsonResource representing this Productable (used in listing Products)

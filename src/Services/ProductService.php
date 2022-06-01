@@ -393,7 +393,7 @@ class ProductService implements ProductServiceContract
                     ]);
                     throw new Exception(__('Attached product is not exists'));
                 }
-                $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity);
+                $this->attachProductableToUser($productable, $user, $productProductable->quantity * $quantity, $product);
             }
         }
         event(new ProductAttached($product, $user, $quantity));
@@ -427,17 +427,17 @@ class ProductService implements ProductServiceContract
         foreach ($product->productables as $productProductable) {
             if ($this->isProductableClassRegistered($productProductable->productable_type)) {
                 $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
-                $this->detachProductableFromUser($productable, $user, $productProductable->quantity * $quantity);
+                $this->detachProductableFromUser($productable, $user, $productProductable->quantity * $quantity, $product);
             }
         }
 
         event(new ProductDetached($product, $user, $quantity));
     }
 
-    public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1): void
+    public function attachProductableToUser(Productable $productable, User $user, int $quantity = 1, ?Product $product = null): void
     {
         Log::debug(__('Attaching productable to user'), [
-            'product' => [
+            'productable' => [
                 'id' => $productable->getKey(),
                 'name' => $productable->getName(),
             ],
@@ -449,7 +449,14 @@ class ProductService implements ProductServiceContract
         ]);
         assert($productable instanceof Model);
         try {
-            $productable->attachToUser($user, $quantity);
+            $productable->attachToUser($user, $quantity, $product);
+            Log::debug(
+                'Productable (should be) attached to user.',
+                [
+                    'productable_owned' => $productable->getOwnedByUserAttribute($user),
+                    'productable_owned_through_product' => $this->productableIsOwnedByUserThroughProduct($productable, $user),
+                ]
+            );
         } catch (Exception $ex) {
             Log::error(__('Failed to attach productable to user'), [
                 'exception' => $ex->getMessage(),
@@ -458,10 +465,10 @@ class ProductService implements ProductServiceContract
         event(new ProductableAttached($productable, $user, $quantity));
     }
 
-    public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1): void
+    public function detachProductableFromUser(Productable $productable, User $user, int $quantity = 1, ?Product $product = null): void
     {
         assert($productable instanceof Model);
-        $productable->detachFromUser($user, $quantity);
+        $productable->detachFromUser($user, $quantity, $product);
         event(new ProductableDetached($productable, $user, $quantity));
     }
 
