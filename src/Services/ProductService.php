@@ -103,14 +103,13 @@ class ProductService implements ProductServiceContract
                 return $row;
             });
 
-            $uniqueCollection = Collection::empty();
+            $uniqueCollection = [];
             foreach ($resultsCollection as $row) {
-                $existingRow = $uniqueCollection->search(fn ($element) => $element->productable_id === $row->productable_id);
-
+                $existingRow = isset($uniqueCollection[$row->productable_id]);
                 if (false === $existingRow) {
-                    $uniqueCollection->push($row);
+                    $uniqueCollection[$row->productable_id] = $row;
                 } elseif ($row->single_product_id) {
-                    $uniqueCollection->get($existingRow)->single_product_id = $row->single_product_id;
+                    $uniqueCollection[$row->productable_id]->single_product_id = $row->single_product_id;
                 }
             }
 
