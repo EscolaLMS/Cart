@@ -366,17 +366,17 @@ class AdminProductApiTest extends TestCase
         /** @var ExampleProductable $productable */
         $productable = $productables->get(0);
 
-        /** @var Product $product */
-        $product = Product::factory()->single()->create();
-        $product->productables()->create([
+        /** @var Product $bundle */
+        $bundle = Product::factory()->bundle()->create();
+        $bundle->productables()->create([
             'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey(),
             'quantity' => 1,
         ]);
 
-        /** @var Product $bundle */
-        $bundle = Product::factory()->bundle()->create();
-        $bundle->productables()->create([
+        /** @var Product $product */
+        $product = Product::factory()->single()->create();
+        $product->productables()->create([
             'productable_type' => $productable->getMorphClass(),
             'productable_id' => $productable->getKey(),
             'quantity' => 1,
