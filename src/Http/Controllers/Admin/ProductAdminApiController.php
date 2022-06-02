@@ -18,6 +18,7 @@ use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
 use EscolaLms\Templates\Services\Contracts\EventServiceContract;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class ProductAdminApiController extends EscolaLmsBaseController implements ProductAdminSwagger
@@ -26,11 +27,11 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
     protected ShopServiceContract $shopService;
     protected EventServiceContract $eventService;
 
-    public function __construct(ProductServiceContract $productService,
-                                ShopServiceContract $shopService,
-                                EventServiceContract $eventService
-    )
-    {
+    public function __construct(
+        ProductServiceContract $productService,
+        ShopServiceContract $shopService,
+        EventServiceContract $eventService
+    ) {
         $this->productService = $productService;
         $this->shopService = $shopService;
         $this->eventService = $eventService;
@@ -44,7 +45,11 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
 
     public function create(ProductCreateRequest $request): JsonResponse
     {
-        $product = $this->productService->create($request->validated());
+        try {
+            $product = $this->productService->create($request->validated());
+        } catch (Exception $ex) {
+            return $this->sendError($ex->getMessage(), 400);
+        }
         return $this->sendResponseForResource(ProductResource::make($product), __('Product created'));
     }
 
@@ -55,7 +60,11 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
 
     public function update(ProductUpdateRequest $request): JsonResponse
     {
-        $product = $this->productService->update($request->getProduct(), $request->validated());
+        try {
+            $product = $this->productService->update($request->getProduct(), $request->validated());
+        } catch (Exception $ex) {
+            return $this->sendError($ex->getMessage(), 400);
+        }
         return $this->sendResponseForResource(ProductResource::make($product), __('Product updated'));
     }
 

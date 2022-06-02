@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Contracts;
 
 use EscolaLms\Cart\Http\Resources\ProductableGenericResource;
 use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Support\ModelHelper;
 use EscolaLms\Core\Models\User;
 use Exception;
@@ -107,9 +108,9 @@ trait ProductableTrait
         }
     }
 
-    public function toJsonResourceForShop(): JsonResource
+    public function toJsonResourceForShop(?ProductProductable $productProductable = null): JsonResource
     {
-        return ProductableGenericResource::make($this);
+        return ProductableGenericResource::make($this, $productProductable);
     }
 
     public function getName(): string

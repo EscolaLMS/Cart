@@ -210,17 +210,23 @@ class AdminProductApiTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
-        $this->response->assertJson(fn (AssertableJson $json) =>
-        $json->has('data', fn (AssertableJson $json) =>
-            $json
-                ->has('related_products', fn (AssertableJson $json) =>
-                    $json->each(fn (AssertableJson $json) =>
-                        $json
-                            ->where('id', fn ($id) => in_array($id, $productData['related_products']))
-                            ->missing('related_products')
-                            ->etc()
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->has(
+                'data',
+                fn (AssertableJson $json) =>
+                $json
+                    ->has(
+                        'related_products',
+                        fn (AssertableJson $json) =>
+                        $json->each(
+                            fn (AssertableJson $json) =>
+                            $json
+                                ->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                                ->missing('related_products')
+                                ->etc()
+                        )->etc()
                     )->etc()
-                )->etc()
             )->etc()
         );
 
@@ -242,18 +248,24 @@ class AdminProductApiTest extends TestCase
         $productData['related_products'] = array_merge(Product::factory(5)->create()->pluck('id')->toArray(), [$productSecoond->getKey()]);
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
         $this->response->assertOk();
-        $this->response->assertJson(fn (AssertableJson $json) =>
-            $json->has('data', fn (AssertableJson $json) =>
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->has(
+                'data',
+                fn (AssertableJson $json) =>
                 $json
                     ->where('id', fn (int $id) => $id === $product->getKey())
-                    ->has('related_products', fn (AssertableJson $json) =>
-                        $json->each(fn (AssertableJson $json) =>
+                    ->has(
+                        'related_products',
+                        fn (AssertableJson $json) =>
+                        $json->each(
+                            fn (AssertableJson $json) =>
                             $json
                                 ->where('id', fn ($id) => in_array($id, $productData['related_products']))
                                 ->missing('related_products')
                                 ->etc()
                         )
-                        ->etc()
+                            ->etc()
                     )->etc()
             )->etc()
         );
@@ -351,13 +363,39 @@ class AdminProductApiTest extends TestCase
     {
         $productables = ExampleProductable::factory()->count(10)->create();
 
+        /** @var ExampleProductable $productable */
+        $productable = $productables->get(0);
+
+        /** @var Product $bundle */
+        $bundle = Product::factory()->bundle()->create();
+        $bundle->productables()->create([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey(),
+            'quantity' => 1,
+        ]);
+
+        /** @var Product $product */
+        $product = Product::factory()->single()->create();
+        $product->productables()->create([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey(),
+            'quantity' => 1,
+        ]);
+
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/');
         $this->response->assertOk();
         $this->response->assertJsonCount(10, 'data');
         $this->response->assertJsonFragment([
-            'productable_id' => $productables->get(0)->id,
+            'productable_id' => $productable->getKey(),
             'productable_type' => ExampleProductable::class,
-            'name' => $productables->get(0)->getName(),
+            'single_product_id' => $product->getKey(),
+            'name' => $productable->getName(),
+        ]);
+        $this->response->assertJsonFragment([
+            'productable_id' => $productables->get(1)->getKey(),
+            'productable_type' => ExampleProductable::class,
+            'single_product_id' => null,
+            'name' => $productables->get(1)->getName(),
         ]);
     }
 
