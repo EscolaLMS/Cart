@@ -86,7 +86,7 @@ trait ProductableTrait
         return $this->scopeOwnedByUser($this::query()->where($this->getTable() . '.id', $this->getKey()), $user ?? Auth::user())->exists();
     }
 
-    public function attachToUser(User $user, int $quantity = 1): void
+    public function attachToUser(User $user, int $quantity = 1, ?Product $product = null): void
     {
         if (ModelHelper::hasRelation($this, 'users') && $this->users() instanceof BelongsToMany) {
             $this->users()->syncWithoutDetaching($user->getKey());
@@ -97,7 +97,7 @@ trait ProductableTrait
         }
     }
 
-    public function detachFromUser(User $user, int $quantity = 1): void
+    public function detachFromUser(User $user, int $quantity = 1, ?Product $product = null): void
     {
         if (ModelHelper::hasRelation($this, 'users') && $this->users() instanceof BelongsToMany) {
             $this->users()->detach($user->getKey());
