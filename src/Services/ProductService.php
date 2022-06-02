@@ -21,6 +21,8 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -75,17 +77,43 @@ class ProductService implements ProductServiceContract
         foreach ($this->listRegisteredProductableClasses() as $productableClass) {
             /** @var Model&Productable $model */
             $model = new $productableClass();
+            $table = $model->getTable();
             $morphClass = $model->getMorphClass();
-            $nameColumn = $model->getNameColumn() ?? ('"' . __('Unknown') . '"');
+
+            $nameColumn = $model->getNameColumn() ? ($table . '.' . $model->getNameColumn()) : ('"' . __('Unknown') . '"');
             $productables = $model::query()->getQuery()->select(
-                'id AS productable_id',
+                $table . '.id AS productable_id',
                 ($nameColumn . ' AS name'),
-            )->get();
-            $collection = $collection->merge($productables->map(function ($row) use ($productableClass, $morphClass) {
+                'products.id as single_product_id',
+            )->leftJoin(
+                'products_productables',
+                fn (JoinClause $join) => $join
+                    ->on('products_productables.productable_id', '=', $table . '.id')
+                    ->where('products_productables.productable_type', '=', $morphClass)
+            )->leftJoin(
+                'products',
+                fn (JoinClause $join) => $join
+                    ->on('products.id', '=', 'products_productables.product_id')
+                    ->where('products.type', '=', ProductType::SINGLE)
+            )->distinct()->get();
+
+            $resultsCollection = $productables->map(function ($row) use ($productableClass, $morphClass) {
                 $row->productable_type = $productableClass;
                 $row->morph_class = $morphClass;
                 return $row;
-            }));
+            });
+
+            $uniqueCollection = [];
+            foreach ($resultsCollection as $row) {
+                $existingRow = isset($uniqueCollection[$row->productable_id]);
+                if (false === $existingRow) {
+                    $uniqueCollection[$row->productable_id] = $row;
+                } elseif ($row->single_product_id) {
+                    $uniqueCollection[$row->productable_id]->single_product_id = $row->single_product_id;
+                }
+            }
+
+            $collection = $collection->merge($uniqueCollection);
         }
         return $collection;
     }
@@ -217,13 +245,14 @@ class ProductService implements ProductServiceContract
     {
         $productable = $this->findProductable($productProductable->productable_type, $productProductable->productable_id);
         if ($productable) {
-            return $productable->toJsonResourceForShop();
+            return $productable->toJsonResourceForShop($productProductable);
         }
         return new JsonResource([
             'id' => null,
             'morph_class' => null,
             'productable_id' => $productProductable->productable_id,
             'productable_type' => $productProductable->productable_type,
+            'quantity' => $productProductable->quantity,
             'name' => null,
             'description' => null,
         ]);

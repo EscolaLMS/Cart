@@ -2,6 +2,8 @@
 
 namespace EscolaLms\Cart\Contracts;
 
+use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,7 +54,7 @@ interface Productable
     /**
      * Get JsonResource representing this Productable (used in listing Products)
      */
-    public function toJsonResourceForShop(): JsonResource;
+    public function toJsonResourceForShop(?ProductProductable $productProductable = null): JsonResource;
 
     /**
      * Get productable name
