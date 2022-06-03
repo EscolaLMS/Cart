@@ -352,6 +352,10 @@ class ProductService implements ProductServiceContract
             if (is_null($existing)) {
                 $currentProductable->delete();
             } else {
+                $currentProductable->quantity = ($product->type === ProductType::SINGLE) ? 1 : ($existing['quantity'] ?? 1);
+                if ($currentProductable->isDirty('quantity')) {
+                    $currentProductable->save();
+                }
                 $productablesCollection->forget($existing['id']);
             }
         }
