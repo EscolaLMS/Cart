@@ -271,6 +271,73 @@ class AdminProductApiTest extends TestCase
         );
     }
 
+    public function test_update_product_quantity()
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        /** @var ExampleProductable $productable */
+        $productable2 = ExampleProductable::factory()->create();
+
+        /** @var Product $product */
+        $product = Product::factory()->bundle()->create();
+
+        $product->productables()->create([
+            'productable_id' => $productable->getKey(),
+            'productable_type' => $productable->getMorphClass(),
+        ]);
+        $product->productables()->create([
+            'productable_id' => $productable2->getKey(),
+            'productable_type' => $productable2->getMorphClass(),
+        ]);
+
+        $productSecond = Product::factory()->bundle()->create();
+        $productSecond->relatedProducts()->sync(Product::factory(5)->create()->pluck('id')->toArray());
+
+        $productData = Product::factory()->bundle()->make()->toArray();
+        $productData['related_products'] = array_merge(Product::factory(5)->create()->pluck('id')->toArray(), [$productSecond->getKey()]);
+        $productData['productables'] = [
+            [
+                'id' => $productable->getKey(),
+                'class' => ExampleProductable::class,
+                'quantity' => 2
+            ]
+        ];
+
+        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
+        $this->response->assertOk();
+
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->has(
+                'data',
+                fn (AssertableJson $json) =>
+                $json->where('id', fn (int $id) => $id === $product->getKey())
+                    ->has(
+                        'productables',
+                        fn (AssertableJson $json) =>
+                        $json->first(
+                            fn (AssertableJson $json) =>
+                            $json->where('productable_id', $productable->getKey())
+                                ->where('quantity', 2)
+                                ->etc()
+                        )->etc()
+                    )
+                    ->has(
+                        'related_products',
+                        fn (AssertableJson $json) =>
+                        $json->each(
+                            fn (AssertableJson $json) =>
+                            $json->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                                ->missing('related_products')
+                                ->etc()
+                        )
+                            ->etc()
+                    )->etc()
+            )->etc()
+        );
+    }
+
     public function test_search_products()
     {
         $user = $this->user;

@@ -347,12 +347,20 @@ class ProductService implements ProductServiceContract
 
         $productablesCollection = (new Collection($productables))->keyBy('id');
 
-        foreach ($product->productables as $currentProductable) {
-            $existing = $productablesCollection->first(fn (array $productable) => $productable['id'] === $currentProductable->productable_id && $this->canonicalProductableClass($productable['class']) ===  $this->canonicalProductableClass($currentProductable->productable_type));
-            if (is_null($existing)) {
-                $currentProductable->delete();
+        foreach ($product->productables as $existingProductable) {
+            $productableInUpdateData = $productablesCollection->first(
+                fn (array $productable) => $productable['id'] === $existingProductable->productable_id
+                    && $this->canonicalProductableClass($productable['class']) === $this->canonicalProductableClass($existingProductable->productable_type)
+            );
+
+            if (is_null($productableInUpdateData)) {
+                $existingProductable->delete();
             } else {
-                $productablesCollection->forget($existing['id']);
+                $existingProductable->quantity = ($product->type === ProductType::SINGLE) ? 1 : ($productableInUpdateData['quantity'] ?? 1);
+                if ($existingProductable->isDirty('quantity')) {
+                    $existingProductable->save();
+                }
+                $productablesCollection->forget($productableInUpdateData['id']);
             }
         }
 
