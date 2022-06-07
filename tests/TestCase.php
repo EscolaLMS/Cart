@@ -14,6 +14,7 @@ use EscolaLms\Tags\EscolaLmsTagsServiceProvider;
 use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
+use PacerIT\LaravelPolishValidationRules\Providers\LaravelPolishValidationRulesServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 
 class TestCase extends \EscolaLms\Core\Tests\TestCase
@@ -37,6 +38,7 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
             PaymentsServiceProvider::class,
             EscolaLmsCartServiceProvider::class,
             EscolaLmsTemplatesServiceProvider::class,
+            LaravelPolishValidationRulesServiceProvider::class
         ];
     }
 

@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Http\Requests;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Enums\CartPermissionsEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use PacerIT\LaravelPolishValidationRules\Rules\NIPRule;
 
 class PaymentRequest extends FormRequest
 {
@@ -34,7 +35,12 @@ class PaymentRequest extends FormRequest
             'client_city' => ['sometimes', 'string'],
             'client_country' => ['sometimes', 'string'],
             'client_company' => ['sometimes', 'string'],
-            'client_taxid' => ['sometimes', 'string', 'required_with:client_company'],
+            'client_taxid' => ['sometimes', 'string', 'required_with:client_company', function($attribute, $value, $fail) {
+                if (!$this->input('nip_disable', false) && !(new NIPRule())->passes($attribute, $value)) {
+                    $fail('The '.$attribute.' is invalid.');
+                }
+                return true;
+            }],
         ];
     }
 

@@ -14,6 +14,7 @@ use EscolaLms\Cart\Services\ShopService;
 use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use PacerIT\LaravelPolishValidationRules\Providers\LaravelPolishValidationRulesServiceProvider;
 use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvider;
 
 /**
@@ -43,6 +44,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
 
         $this->app->register(AuthServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+        $this->app->register(LaravelPolishValidationRulesServiceProvider::class);
 
         if (!$this->app->getProviders(EscolaLms\Cart\EscolaLmsTemplatesServiceProvider::class)) {
             $this->app->register(EscolaLmsTemplatesServiceProvider::class);

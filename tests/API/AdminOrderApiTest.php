@@ -15,6 +15,7 @@ use EscolaLms\Core\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
+use PacerIT\LaravelPolishValidationRules\Rules\NIPRule;
 
 class AdminOrderApiTest extends TestCase
 {
