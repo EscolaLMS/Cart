@@ -56,7 +56,6 @@ class OrderService implements OrderServiceContract
             $query = $query->whereHasBuyable(Product::class, $searchDto->getProductId());
         }
 
-
         if (!is_null($searchDto->getProductableType())) {
             $class = $searchDto->getProductableType();
             /** @var Model $model */
@@ -66,6 +65,10 @@ class OrderService implements OrderServiceContract
             } else {
                 $query = $query->whereHasProductableClass($model->getMorphClass());
             }
+        }
+
+        if (!is_null($searchDto->getStatus())) {
+            $query = $query->where('status', $searchDto->getStatus());
         }
 
         if (!is_null($sortDto) && !is_null($sortDto->getOrder())) {

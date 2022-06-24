@@ -13,6 +13,7 @@ class OrdersSearchDto implements DtoContract
     protected ?int $product_id;
     protected ?int $productable_id;
     protected ?string $productable_type;
+    protected ?int $status;
     protected ?int $per_page;
 
     public function __construct(
@@ -22,7 +23,8 @@ class OrdersSearchDto implements DtoContract
         ?int $product_id = null,
         ?int $productable_id = null,
         ?string $productable_type = null,
-        ?int $per_page = null
+        ?int $status = null,
+        ?int $per_page = null,
     ) {
         $this->date_from = $date_from;
         $this->date_to = $date_to;
@@ -30,6 +32,7 @@ class OrdersSearchDto implements DtoContract
         $this->product_id = $product_id;
         $this->productable_id = $productable_id;
         $this->productable_type = $productable_type;
+        $this->status = $status;
         $this->per_page = $per_page;
     }
 
@@ -42,6 +45,7 @@ class OrdersSearchDto implements DtoContract
             'product_id' => $this->product_id,
             'productable_id' => $this->productable_id,
             'productable_type' => $this->productable_type,
+            'status' => $this->status,
             'per_page' => $this->per_page,
         ];
     }
@@ -79,5 +83,10 @@ class OrdersSearchDto implements DtoContract
     public function getPerPage(): ?int
     {
         return $this->per_page;
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
     }
 }

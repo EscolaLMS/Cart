@@ -91,6 +91,15 @@ interface OrderAdminSwagger
      *              type="string",
      *          ),
      *      ),
+     *      @OA\Parameter(
+     *          name="status",
+     *          description="Status (0 = PROCESSING, 1 = PAID, 2 = CANCELLED)",
+     *          required=false,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="integer",
+     *          ),
+     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="successful operation",

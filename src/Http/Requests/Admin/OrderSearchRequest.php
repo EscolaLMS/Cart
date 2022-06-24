@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
 use EscolaLms\Cart\Dtos\OrdersSearchDto;
+use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
@@ -31,6 +32,7 @@ class OrderSearchRequest extends FormRequest
             'page' => ['sometimes', 'integer'],
             'order_by' => ['sometimes', Rule::in(['created_at', 'updated_at', 'user_id'])],
             'order' => ['sometimes', Rule::in(['ASC', 'DESC'])],
+            'status' => ['sometimes', Rule::in(OrderStatus::getValues())]
         ];
     }
 
@@ -69,6 +71,11 @@ class OrderSearchRequest extends FormRequest
         return $this->validated()['per_page'] ?? null;
     }
 
+    public function getStatus(): ?int
+    {
+        return $this->validated()['status'] ?? null;
+    }
+
     public function toDto(): OrdersSearchDto
     {
         return new OrdersSearchDto(
@@ -78,6 +85,7 @@ class OrderSearchRequest extends FormRequest
             $this->getProductId(),
             $this->getProductableId(),
             $this->getProductableType(),
+            $this->getStatus(),
             $this->getPerPage(),
         );
     }

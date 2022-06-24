@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Models\OrderItem;
@@ -60,6 +61,9 @@ class AdminOrderApiTest extends TestCase
             $orders[] = $order;
         }
 
+        $order->status = OrderStatus::CANCELLED;
+        $order->save();
+
         $totalCount = min(15, Order::count());
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders');
         $this->response->assertStatus(200);
@@ -95,6 +99,12 @@ class AdminOrderApiTest extends TestCase
         ]);
         $this->response->assertStatus(200);
         $this->assertDataCountLessThanOrEqual($this->response, 0);
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'status' => OrderStatus::CANCELLED,
+        ]);
+        $this->response->assertStatus(200);
+        $this->assertJsonCount(1, 'data');
     }
 
     private function assertDataCountLessThanOrEqual($response, $count)
