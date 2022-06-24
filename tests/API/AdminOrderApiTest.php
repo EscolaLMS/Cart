@@ -104,7 +104,7 @@ class AdminOrderApiTest extends TestCase
             'status' => OrderStatus::CANCELLED,
         ]);
         $this->response->assertStatus(200);
-        $this->assertJsonCount(1, 'data');
+        $this->response->assertJsonCount(1, 'data');
     }
 
     private function assertDataCountLessThanOrEqual($response, $count)
