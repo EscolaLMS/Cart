@@ -24,7 +24,7 @@ class OrdersSearchDto implements DtoContract
         ?int $productable_id = null,
         ?string $productable_type = null,
         ?int $status = null,
-        ?int $per_page = null,
+        ?int $per_page = null
     ) {
         $this->date_from = $date_from;
         $this->date_to = $date_to;
