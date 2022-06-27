@@ -23,7 +23,11 @@ class ProductUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $prefixPath = ConstantEnum::DIRECTORY . '/' . $this->getId();
+        if ($this->route('id')) {
+            $prefixPath = ConstantEnum::DIRECTORY . '/' . $this->getId();
+        } else {
+            $prefixPath = ConstantEnum::DIRECTORY . '/null';
+        }
 
         return [
             'name' => ['sometimes', 'string'],
