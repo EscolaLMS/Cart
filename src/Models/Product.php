@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Models;
 
 use EscolaLms\Cart\Contracts\Productable;
 use EscolaLms\Cart\Database\Factories\ProductFactory;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Contracts\ProductInterface;
 use EscolaLms\Cart\Models\Contracts\ProductTrait;
 use EscolaLms\Cart\Models\User;
@@ -186,9 +187,31 @@ class Product extends Model implements ProductInterface
         return ProductFactory::new();
     }
 
-    public function getPosterAbsoluteUrlAttribute(): ?string
+    public function getPosterUrlOrProductableThumbnailAttribute(): ?string
     {
         $path = $this->getRawOriginal('poster_url');
+
+        if (!empty($path)) {
+            return $path;
+        }
+
+        if ($this->type === ProductType::SINGLE) {
+            /** @var ProductProductable $first */
+            $first = $this->productables->first();
+            if ($first) {
+                $productable = $first->getCanonicalProductableAttribute();
+                if ($productable) {
+                    return $productable->getThumbnail();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getPosterAbsoluteUrlAttribute(): ?string
+    {
+        $path = $this->getPosterUrlOrProductableThumbnailAttribute();
         if (!empty($path)) {
             return url(Storage::url($path));
         }

@@ -41,7 +41,7 @@ class BaseProductResource extends JsonResource
             'limit_total' => $this->getProduct()->limit_total,
             'productables' => $this->getProduct()->productables->map(fn (ProductProductable $productProductable) => app(ProductServiceContract::class)->mapProductProductableToJsonResource($productProductable)->toArray($request))->toArray(),
             'teaser_url' => $this->getProduct()->teaser_url,
-            'poster_path' => $this->getProduct()->poster_url,
+            'poster_path' => $this->getProduct()->getPosterUrlOrProductableThumbnailAttribute(),
             'poster_url' => $this->getProduct()->poster_absolute_url,
             'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : false,
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
@@ -52,5 +52,4 @@ class BaseProductResource extends JsonResource
         ];
         return $data;
     }
-
 }
