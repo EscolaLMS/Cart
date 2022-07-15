@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Throwable;
 
 /**
  * EscolaLms\Cart\Models\ProductProductable
@@ -53,7 +54,7 @@ class ProductProductable extends Model
     public function getCanonicalProductableAttribute(): ?Productable
     {
         $productable = $this->productable;
-        if (is_null($productable)){
+        if (is_null($productable)) {
             return null;
         }
         if ($productable instanceof Productable) {

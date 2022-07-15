@@ -142,6 +142,17 @@ trait ProductableTrait
         return null;
     }
 
+    public function getThumbnail(): ?string
+    {
+        $attributes = $this->attributesToArray();
+        foreach (['thumbnail', 'poster_url', 'image_path'] as $possible_key) {
+            if (array_key_exists($possible_key, $attributes)) {
+                return $this->{$possible_key};
+            }
+        }
+        return null;
+    }
+
     public function getProductableAuthors(): Collection
     {
         if (ModelHelper::hasRelation($this, 'authors')) {

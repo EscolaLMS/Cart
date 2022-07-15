@@ -76,6 +76,11 @@ interface Productable
      */
     public function getApiReadUrl(): ?string;
 
+    /**
+     * Get productable thumbnail
+     */
+    public function getThumbnail(): ?string;
+
     /** 
      * Default Eloquent Model functionality
      */
