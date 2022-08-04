@@ -25,11 +25,17 @@ class AuthorResource extends JsonResource
 
     public function toArray($request): array
     {
-        $fields = array_merge(
-            $this->getAuthor()->toArray(),
-            ['categories' => $this->categories],
-            ModelFields::getExtraAttributesValues($this->getAuthor(), MetaFieldVisibilityEnum::PUBLIC)
+        $author = $this->getAuthor();
+
+        return array_merge(
+            [
+                'id' => $author->getKey(),
+                'first_name' => $author->first_name,
+                'last_name' => $author->last_name,
+                'path_avatar' => $author->path_avatar,
+                'categories' => $author->categories,
+            ],
+            ModelFields::getExtraAttributesValues($author, MetaFieldVisibilityEnum::PUBLIC)
         );
-        return $fields;
     }
 }
