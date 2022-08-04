@@ -26,7 +26,7 @@ use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
  * @property-read float|null $price
  * @property-read mixed $subtotal
  * @property-read int $tax
- * @property-read int $tax_rate
+ * @property-read float $tax_rate
  * @property-read mixed $total
  * @property-read int $total_with_tax
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] all($columns = ['*'])

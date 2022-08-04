@@ -28,7 +28,7 @@ class ProductUpdateRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'price' => ['sometimes', 'integer', 'min:0'],
             'price_old' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'tax_rate' => ['sometimes', 'integer', 'min:0'],
+            'tax_rate' => ['sometimes', 'numeric', 'between:0.00,100.00'],
             'extra_fees' => ['sometimes', 'integer', 'min:0'],
             'purchasable' => ['sometimes', 'boolean'],
             'teaser_url' => ['sometimes', 'nullable', 'string'],

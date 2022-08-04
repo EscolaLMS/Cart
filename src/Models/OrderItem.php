@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $price
  * @property int $extra_fees
- * @property int $tax_rate
+ * @property float $tax_rate
  * @property string|null $name
  * @property-read Model|\Eloquent $buyable
  * @property-read string|null $description
