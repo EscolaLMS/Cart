@@ -476,7 +476,7 @@
                                         "type": "integer"
                                     },
                                     "tax_rate": {
-                                        "type": "integer"
+                                        "type": "float"
                                     },
                                     "extra_fees": {
                                         "type": "integer"
