@@ -377,7 +377,7 @@ interface ProductAdminSwagger
      *                  ),
      *                  @OA\Property(
      *                      property="tax_rate",
-     *                      type="integer",
+     *                      type="float",
      *                  ),
      *                  @OA\Property(
      *                      property="extra_fees",
