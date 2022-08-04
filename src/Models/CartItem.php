@@ -51,7 +51,7 @@ class CartItem extends BaseCartItem
         return $this->belongsTo(Cart::class);
     }
 
-    public function getTaxRateAttribute(?int $rate = null): int
+    public function getTaxRateAttribute(?float $rate = null): float
     {
         if (!$rate && Config::get('shopping-cart.tax.mode') == 'flat') {
             $rate = Config::get('shopping-cart.tax.rate');
@@ -64,7 +64,7 @@ class CartItem extends BaseCartItem
         return $rate;
     }
 
-    public function getTaxAttribute(?int $rate = null): int
+    public function getTaxAttribute(?float $rate = null): int
     {
         return (int) round($this->getSubtotalAttribute() * ($this->getTaxRateAttribute($rate) / 100), 0);
     }

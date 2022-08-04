@@ -6,5 +6,5 @@ use Treestoneit\ShoppingCart\Taxable as BaseTaxable;
 
 interface Taxable extends BaseTaxable
 {
-    public function getTaxRate(): int;
+    public function getTaxRate(): float;
 }
