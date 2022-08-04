@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string $type
  * @property int $price
  * @property int|null $price_old
- * @property int $tax_rate
+ * @property float $tax_rate
  * @property int $extra_fees
  * @property bool $purchasable
  * @property string|null $teaser_url
@@ -156,7 +156,7 @@ class Product extends Model implements ProductInterface
         return $this->extra_fees ?? 0;
     }
 
-    public function getTaxRate(): int
+    public function getTaxRate(): float
     {
         return $this->tax_rate ?? 0;
     }

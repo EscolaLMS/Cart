@@ -26,7 +26,7 @@ use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
  * @property-read float|null $price
  * @property-read mixed $subtotal
  * @property-read int $tax
- * @property-read int $tax_rate
+ * @property-read float $tax_rate
  * @property-read mixed $total
  * @property-read int $total_with_tax
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] all($columns = ['*'])
@@ -51,7 +51,7 @@ class CartItem extends BaseCartItem
         return $this->belongsTo(Cart::class);
     }
 
-    public function getTaxRateAttribute(?int $rate = null): int
+    public function getTaxRateAttribute(?float $rate = null): float
     {
         if (!$rate && Config::get('shopping-cart.tax.mode') == 'flat') {
             $rate = Config::get('shopping-cart.tax.rate');
@@ -64,7 +64,7 @@ class CartItem extends BaseCartItem
         return $rate;
     }
 
-    public function getTaxAttribute(?int $rate = null): int
+    public function getTaxAttribute(?float $rate = null): int
     {
         return (int) round($this->getSubtotalAttribute() * ($this->getTaxRateAttribute($rate) / 100), 0);
     }
