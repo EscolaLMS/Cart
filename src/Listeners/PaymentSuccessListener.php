@@ -19,7 +19,7 @@ class PaymentSuccessListener
     {
         $payment = $event->getPayment();
         if ($payment->payable instanceof Order) {
-            $this->orderService->setPaid($payment->payable);
+            $this->orderService->setPaid($payment->payable->refresh());
         }
     }
 }
