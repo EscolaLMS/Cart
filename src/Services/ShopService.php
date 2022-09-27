@@ -54,7 +54,7 @@ class ShopService implements ShopServiceContract
         $payment = $paymentProcessor->getPayment();
 
         if ($payment->status->is(PaymentStatus::PAID)) {
-            $this->orderService->setPaid($order);
+            // Do nothing, PaymentSuccessListener is enough for handling this
         } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
             $this->orderService->setCancelled($order);
         }
