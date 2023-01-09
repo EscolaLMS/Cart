@@ -29,4 +29,9 @@ abstract class AbstractOrderEvent
     {
         return $this->user;
     }
+
+    public function getEmail(): ?string
+    {
+        return $this->getOrder()->client_email ?? $this->getUser()->email;
+    }
 }
