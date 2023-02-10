@@ -213,7 +213,7 @@ class Product extends Model implements ProductInterface
     {
         $path = $this->getPosterUrlOrProductableThumbnailAttribute();
         if (!empty($path)) {
-            return url(Storage::url($path));
+            return preg_match('/^(http|https):.*$/', $path) ? $path : url(Storage::url($path));
         }
         return null;
     }
