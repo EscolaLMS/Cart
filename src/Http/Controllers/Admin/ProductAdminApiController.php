@@ -95,7 +95,7 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
             return $this->sendError(__('Template is invalid.'), 400);
         }
 
-        $this->eventService->dispatchEventManuallyForUsers($userIds->toArray(), $template);
+        $this->eventService->dispatchEventManuallyForUsers($userIds->toArray(), $template, null, $request->getId());
 
         return $this->sendSuccess(__('Event triggered successfully for users of the product'));
     }
