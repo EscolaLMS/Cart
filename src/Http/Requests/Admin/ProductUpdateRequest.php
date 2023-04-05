@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Http\Requests\Admin;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Rules\MinPrice;
 use EscolaLms\Cart\Rules\PosterRule;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
@@ -26,8 +27,8 @@ class ProductUpdateRequest extends FormRequest
             'name' => ['sometimes', 'string'],
             'type' => ['sometimes', Rule::in(ProductType::getValues())],
             'description' => ['sometimes', 'nullable', 'string'],
-            'price' => ['sometimes', 'integer', 'min:0'],
-            'price_old' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'price' => ['sometimes', 'integer', new MinPrice()],
+            'price_old' => ['sometimes', 'nullable', 'integer', new MinPrice()],
             'tax_rate' => ['sometimes', 'numeric', 'between:0.00,100.00'],
             'extra_fees' => ['sometimes', 'integer', 'min:0'],
             'purchasable' => ['sometimes', 'boolean'],

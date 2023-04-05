@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Http\Requests\Admin;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
+use EscolaLms\Cart\Rules\MinPrice;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,8 +26,8 @@ class ProductCreateRequest extends FormRequest
             'name' => ['required', 'string'],
             'type' => ['required', Rule::in(ProductType::getValues())],
             'description' => ['sometimes', 'nullable', 'string'],
-            'price' => ['required', 'integer', 'min:0'],
-            'price_old' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'price' => ['required', 'integer', new MinPrice()],
+            'price_old' => ['sometimes', 'nullable', 'integer', new MinPrice()],
             'tax_rate' => ['sometimes', 'numeric', 'between:0.00,100.00'],
             'extra_fees' => ['sometimes', 'integer', 'min:0'],
             'purchasable' => ['sometimes', 'boolean'],
