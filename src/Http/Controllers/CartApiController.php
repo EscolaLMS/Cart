@@ -38,11 +38,13 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         $product = $request->getProduct();
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
-        if (!$this->productService->productIsBuyableByUser($product, $user)) {
+        if (!$this->productService->productIsBuyableByUser($product, $user, false, $request->getQuantity())) {
             return $this->sendError(__("You can not add this product to cart"), 403);
         }
-        $this->shopService->updateProductQuantity($cart, $product, $request->getQuantity());
-        return $this->sendSuccess(__('Product quantity changed'));
+        return $this->sendResponse(
+            $this->shopService->updateProductQuantity($cart, $product, $request->getQuantity()),
+            __('Product quantity changed')
+        );
     }
 
     public function addMissingProducts(AddMissingProductsRequest $request): JsonResponse
@@ -73,8 +75,10 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         $product = $request->getProduct();
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
-        $this->shopService->updateProductQuantity($cart, $product, 0);
-        return $this->sendSuccess(__("Product removed from cart"));
+        return $this->sendResponse(
+            $this->shopService->updateProductQuantity($cart, $product, 0),
+            __('Product removed from cart')
+        );
     }
 
     public function pay(PaymentRequest $request): JsonResponse

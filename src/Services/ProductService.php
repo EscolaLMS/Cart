@@ -203,15 +203,15 @@ class ProductService implements ProductServiceContract
         return Product::where('products.id', $product->getKey())->whereDoesntHaveProductablesNotOwnedByUser($user)->exists();
     }
 
-    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false): bool
+    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false, int $quantity = 1): bool
     {
         $limit_per_user = $product->limit_per_user;
         $limit_total = $product->limit_total;
 
         $is_purchasable = $product->purchasable;
 
-        $is_under_limit_per_user = is_null($limit_per_user) || ($product->getOwnedByUserQuantityAttribute($user) < $limit_per_user);
-        $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) < $limit_total);
+        $is_under_limit_per_user = is_null($limit_per_user) || ($product->getOwnedByUserQuantityAttribute($user) + $quantity <= $limit_per_user);
+        $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) + $quantity <= $limit_total);
         $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
         Log::debug(__('Checking if product is buyable'), [
             'user' => $user->getKey(),

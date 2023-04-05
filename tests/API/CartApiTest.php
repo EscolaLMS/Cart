@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\QuantityOperationEnum;
 use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
@@ -340,6 +341,172 @@ class CartApiTest extends TestCase
                 ->where('data.buyable', false)
                 ->where('data.owned', true)
                 ->where('data.limit_per_user', 1)
+                ->etc()
+        );
+    }
+
+    public function test_added_more_than_limit_per_user()
+    {
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+            'limit_per_user' => 1,
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', true)
+                ->where('data.owned', false)
+                ->where('data.limit_per_user', 1)
+                ->etc()
+        );
+
+        $this->assertFalse($product->getOwnedByUserAttribute($user));
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
+        $this->response->assertUnprocessable();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'The given data was invalid.')
+                ->where('errors.quantity', ['The quantity must not be greater than 1.'])
+                ->etc()
+        );
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
+        $this->response->assertCreated();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json
+                ->where('data.total', 0)
+                ->where('data.subtotal', 0)
+                ->where('data.tax', 0)
+                ->where('data.items', [])
+                ->etc()
+        );
+    }
+
+    public function test_user_had_and_add_more_than_limit_per_user()
+    {
+        $paymentsFake = PaymentGateway::fake();
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+            'limit_per_user' => 3,
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', true)
+                ->where('data.owned', false)
+                ->where('data.limit_per_user', 3)
+                ->etc()
+        );
+
+        $this->assertFalse($product->getOwnedByUserAttribute($user));
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
+        $this->response->assertOk();
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
+        $this->response->assertForbidden();
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json
+                ->where('data.total', 0)
+                ->where('data.subtotal', 0)
+                ->where('data.tax', 0)
+                ->where('data.items', [])
+                ->etc()
+        );
+    }
+
+    public function test_quantity_change_message()
+    {
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+            'limit_per_user' => 3,
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', true)
+                ->where('data.owned', false)
+                ->where('data.limit_per_user', 3)
+                ->etc()
+        );
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'Product quantity changed')
+                ->where('data', [
+                    'operation' => QuantityOperationEnum::INCREMENT,
+                    'difference' => 2,
+                ])
+                ->etc()
+        );
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'Product quantity changed')
+                ->where('data', [
+                    'operation' => QuantityOperationEnum::DECREMENT,
+                    'difference' => 1,
+                ])
+                ->etc()
+        );
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'Product quantity changed')
+                ->where('data', [
+                    'operation' => QuantityOperationEnum::UNCHANGED,
+                    'difference' => 0,
+                ])
                 ->etc()
         );
     }
