@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Services;
 
 use Carbon\Carbon;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
+use EscolaLms\Cart\Enums\QuantityOperationEnum;
 use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
@@ -109,7 +110,7 @@ class ShopService implements ShopServiceContract
         event(new ProductAddedToCart($product, $cart, $quantity, $total));
     }
 
-    public function updateProductQuantity(Cart $cart, Product $product, int $quantity): void
+    public function updateProductQuantity(Cart $cart, Product $product, int $quantity): array
     {
         if ($quantity < 0) {
             throw new InvalidArgumentException(__('Quantity can not be negative'));
@@ -120,10 +121,18 @@ class ShopService implements ShopServiceContract
         $current = $item ? $item->quantity : 0;
 
         if ($current > $quantity) {
-            $this->removeProductFromCart($cart, $product, $current - $quantity);
+            $difference = $current - $quantity;
+            $operation = QuantityOperationEnum::DECREMENT;
+            $this->removeProductFromCart($cart, $product, $difference);
         } elseif ($quantity > $current) {
-            $this->addProductToCart($cart, $product, $quantity - $current);
+            $difference = $quantity - $current;
+            $operation = QuantityOperationEnum::INCREMENT;
+            $this->addProductToCart($cart, $product, $difference);
         }
+        return [
+            'operation' => $operation ?? QuantityOperationEnum::UNCHANGED,
+            'difference' => $difference ?? 0,
+        ];
     }
 
     public function getAbandonedCarts(Carbon $from, Carbon $to): Collection

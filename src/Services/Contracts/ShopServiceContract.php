@@ -22,7 +22,7 @@ interface ShopServiceContract
 
     public function addProductToCart(Cart $cart, Product $buyable, int $quantity = 1): void;
     public function removeProductFromCart(Cart $cart, Product $buyable, int $quantity = 1): void;
-    public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): void;
+    public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): array;
 
     public function addMissingProductsToCart(Cart $cart, array $products): void;
 

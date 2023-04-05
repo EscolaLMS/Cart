@@ -17,7 +17,7 @@ class ProductSetQuantityInCartRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer', Rule::exists(Product::class, 'id')],
-            'quantity' => ['sometimes', 'integer', 'min:0'],
+            'quantity' => ['sometimes', 'integer', 'min:0', 'max:' . $this->getProduct()->limit_per_user],
         ];
     }
 
