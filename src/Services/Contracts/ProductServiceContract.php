@@ -29,7 +29,7 @@ interface ProductServiceContract
     public function searchAndPaginateProducts(ProductsSearchDto $searchDto, ?OrderDto $orderDto = null): LengthAwarePaginator;
 
     public function productIsPurchasableOrOwnedByUser(Product $product, User $user): bool;
-    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false);
+    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false, int $quantity = 1);
     public function productIsOwnedByUser(Product $product, User $user, bool $check_productables = false);
     public function productProductablesAllOwnedByUser(Product $product, User $user): bool;
     public function productProductablesAllBuyableByUser(Product $product, User $user): bool;

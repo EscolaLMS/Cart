@@ -132,6 +132,11 @@ class ShopService implements ShopServiceContract
         return [
             'operation' => $operation ?? QuantityOperationEnum::UNCHANGED,
             'difference' => $difference ?? 0,
+            'quantity_owned' => $product->getOwnedByUserQuantityAttribute($cart->user),
+            'quantity_in_cart' => $quantity,
+            'limit' => $product->limit_per_user,
+            // quantity + 1 to check if it is possible to add another one to cart
+            'buyable' => $product->getBuyableByUserAttribute($cart->user, $quantity + 1),
         ];
     }
 

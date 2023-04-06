@@ -478,6 +478,10 @@ class CartApiTest extends TestCase
                 ->where('data', [
                     'operation' => QuantityOperationEnum::INCREMENT,
                     'difference' => 2,
+                    'buyable' => true,
+                    'limit' => 3,
+                    'quantity_owned' => 0,
+                    'quantity_in_cart' => 2,
                 ])
                 ->etc()
         );
@@ -492,6 +496,10 @@ class CartApiTest extends TestCase
                 ->where('data', [
                     'operation' => QuantityOperationEnum::DECREMENT,
                     'difference' => 1,
+                    'buyable' => true,
+                    'limit' => 3,
+                    'quantity_owned' => 0,
+                    'quantity_in_cart' => 1,
                 ])
                 ->etc()
         );
@@ -506,6 +514,75 @@ class CartApiTest extends TestCase
                 ->where('data', [
                     'operation' => QuantityOperationEnum::UNCHANGED,
                     'difference' => 0,
+                    'buyable' => true,
+                    'limit' => 3,
+                    'quantity_owned' => 0,
+                    'quantity_in_cart' => 1,
+                ])
+                ->etc()
+        );
+    }
+
+    public function test_quantity_change_buyable()
+    {
+        $paymentsFake = PaymentGateway::fake();
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+            'limit_per_user' => 3,
+        ]);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('data.id', $product->getKey())
+                ->where('data.buyable', true)
+                ->where('data.owned', false)
+                ->where('data.limit_per_user', 3)
+                ->etc()
+        );
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'Product quantity changed')
+                ->where('data', [
+                    'operation' => QuantityOperationEnum::INCREMENT,
+                    'difference' => 2,
+                    'buyable' => true,
+                    'limit' => 3,
+                    'quantity_owned' => 0,
+                    'quantity_in_cart' => 2,
+                ])
+                ->etc()
+        );
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
+        $this->response->assertCreated();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+
+        $this->response = $this
+            ->actingAs($user, 'api')
+            ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
+        $this->response->assertOk();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json->where('message', 'Product quantity changed')
+                ->where('data', [
+                    'operation' => QuantityOperationEnum::INCREMENT,
+                    'difference' => 1,
+                    'buyable' => false,
+                    'limit' => 3,
+                    'quantity_owned' => 2,
+                    'quantity_in_cart' => 1,
                 ])
                 ->etc()
         );
