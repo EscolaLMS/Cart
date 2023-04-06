@@ -6,6 +6,7 @@ use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
 use EscolaLms\Cart\Enums\ConstantEnum;
 use EscolaLms\Cart\Enums\ProductType;
+use EscolaLms\Cart\EscolaLmsCartServiceProvider;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
@@ -28,6 +29,7 @@ use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -236,6 +238,77 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/products', ['productable_id' => $productable->getKey(), 'productable_type' => $productable->getMorphClass()]);
         $this->response->assertOk();
         $this->response->assertJsonFragment(json_decode(ProductResource::make($product)->toJson(null), true));
+    }
+
+    public function test_create_product_min_price()
+    {
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 10);
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $productData = Product::factory()->single()->make(['price' => 5, 'price_old' => 8])->toArray();
+
+        $productData['productables'] = [
+            [
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]
+        ];
+
+        /** @var Category $category */
+        $category = Category::create(['name' => 'test']);
+
+        $productData['categories'] = [$category->getKey()];
+
+        $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
+        $this->response->assertUnprocessable();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json
+                ->where('message', 'The given data was invalid.')
+                ->where('errors', [
+                    'price' => ['Field price must be greater or equal than 10.'],
+                    'price_old' => ['Field price old must be greater or equal than 10.'],
+                ])
+                ->etc()
+        );
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 0);
+    }
+
+    public function test_update_product_min_price()
+    {
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 10);
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $product = Product::factory()->single()->create();
+        $productData = Product::factory()->single()->make(['price' => 5, 'price_old' => 8])->toArray();
+
+        $productData['productables'] = [
+            [
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]
+        ];
+
+        /** @var Category $category */
+        $category = Category::create(['name' => 'test']);
+
+        $productData['categories'] = [$category->getKey()];
+
+        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
+        $this->response->assertUnprocessable();
+        $this->response->assertJson(
+            fn (AssertableJson $json) =>
+            $json
+                ->where('message', 'The given data was invalid.')
+                ->where('errors', [
+                    'price' => ['Field price must be greater or equal than 10.'],
+                    'price_old' => ['Field price old must be greater or equal than 10.'],
+                ])
+                ->etc()
+        );
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 0);
     }
 
     public function test_update_product()

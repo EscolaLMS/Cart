@@ -5,6 +5,7 @@ namespace EscolaLms\Cart;
 use EscolaLms\Cart\Console\Commands\AbandonedCart;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Cart\Providers\EventServiceProvider;
+use EscolaLms\Cart\Providers\SettingsServiceProvider;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -21,6 +22,8 @@ use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvid
  */
 class EscolaLmsCartServiceProvider extends ServiceProvider
 {
+    const CONFIG_KEY = 'escolalms_cart';
+
     public $singletons = [
         ProductServiceContract::class => ProductService::class,
         OrderServiceContract::class => OrderService::class,
@@ -44,6 +47,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
 
         $this->app->register(AuthServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class);
 
         if (!$this->app->getProviders(EscolaLms\Cart\EscolaLmsTemplatesServiceProvider::class)) {
             $this->app->register(EscolaLmsTemplatesServiceProvider::class);
