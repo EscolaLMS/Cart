@@ -492,7 +492,6 @@ class AdminProductApiTest extends TestCase
     public function test_search_products_with_sort()
     {
         $user = $this->user;
-        Product::truncate();
         $productable = ExampleProductable::factory()->create();
 
         /** @var Product $product */
