@@ -30,7 +30,7 @@ class ProductSearchRequest extends FormRequest
             'tags.*' => ['string'],
             'per_page' => ['sometimes', 'integer'],
             'page' => ['sometimes', 'integer'],
-            'order_by' => ['sometimes', Rule::in(['name', 'created_at', 'updated_at'])],
+            'order_by' => ['sometimes', Rule::in(['name', 'created_at', 'updated_at', 'price', 'price_old', 'tax_rate', 'type', 'purchasable'])],
             'order' => ['sometimes', Rule::in(['ASC', 'DESC'])],
         ];
     }

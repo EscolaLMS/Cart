@@ -25,6 +25,7 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
+use EscolaLms\Courses\Models\Course;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -486,6 +487,72 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJsonMissing([
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
+    }
+
+    public function test_search_products_with_sort()
+    {
+        $user = $this->user;
+        $productable = ExampleProductable::factory()->create();
+
+        /** @var Product $product */
+        $productOne = Product::factory()->create([
+            'name' => 'First',
+            'price' => 300,
+            'price_old' => 310,
+            'tax_rate' => 30,
+        ]);
+        $productOne->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $productTwo = Product::factory()->create([
+            'name' => 'Second',
+            'price' => 100,
+            'price_old' => 110,
+            'tax_rate' => 10,
+        ]);
+        $productTwo->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $productThree = Product::factory()->create([
+            'name' => 'Third',
+            'price' => 200,
+            'price_old' => 210,
+            'tax_rate' => 20,
+        ]);
+
+        $productThree->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.price') === $productTwo->price);
+        $this->assertTrue($this->response->json('data.1.price') === $productThree->price);
+        $this->assertTrue($this->response->json('data.2.price') === $productOne->price);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price_old', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.price_old') === $productTwo->price_old);
+        $this->assertTrue($this->response->json('data.1.price_old') === $productThree->price_old);
+        $this->assertTrue($this->response->json('data.2.price_old') === $productOne->price_old);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'tax_rate', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.tax_rate') === $productTwo->tax_rate);
+        $this->assertTrue($this->response->json('data.1.tax_rate') === $productThree->tax_rate);
+        $this->assertTrue($this->response->json('data.2.tax_rate') === $productOne->tax_rate);
+
+        $this->markTestIncomplete('Fix sorting with null values, NULL has different order for MySQL and Postgres.');
     }
 
     public function test_get_registered_productables_list()
