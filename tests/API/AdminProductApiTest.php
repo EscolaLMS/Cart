@@ -545,7 +545,7 @@ class AdminProductApiTest extends TestCase
         $this->assertTrue($this->response->json('data.1.price_old') === $productOne->price_old);
         $this->assertTrue($this->response->json('data.2.price_old') === $productThree->price_old);
 
-        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price_old', 'order' => 'ASC']);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'tax_rate', 'order' => 'ASC']);
 
         $this->response->assertOk();
 
