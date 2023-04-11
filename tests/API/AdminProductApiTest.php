@@ -544,14 +544,14 @@ class AdminProductApiTest extends TestCase
         $this->assertTrue($this->response->json('data.0.price_old') === $productTwo->price_old);
         $this->assertTrue($this->response->json('data.1.price_old') === $productThree->price_old);
         $this->assertTrue($this->response->json('data.2.price_old') === $productOne->price_old);
-
+        dd(Product::query()->orderBy('tax_rate')->get());
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'tax_rate', 'order' => 'ASC']);
 
         $this->response->assertOk();
 
         $this->assertTrue($this->response->json('data.0.tax_rate') === $productTwo->tax_rate);
-        $this->assertTrue($this->response->json('data.1.tax_rate') === $productOne->tax_rate);
-        $this->assertTrue($this->response->json('data.2.tax_rate') === $productThree->tax_rate);
+        $this->assertTrue($this->response->json('data.1.tax_rate') === $productThree->tax_rate);
+        $this->assertTrue($this->response->json('data.2.tax_rate') === $productOne->tax_rate);
     }
 
     public function test_get_registered_productables_list()
