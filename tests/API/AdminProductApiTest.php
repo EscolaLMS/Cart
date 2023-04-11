@@ -527,9 +527,9 @@ class AdminProductApiTest extends TestCase
 
         $this->response->assertOk();
 
-        $this->assertTrue($this->response->json('data.0.amount') === $productTwo->price);
-        $this->assertTrue($this->response->json('data.1.amount') === $productThree->price);
-        $this->assertTrue($this->response->json('data.2.amount') === $productOne->price);
+        $this->assertTrue($this->response->json('data.0.price') === $productTwo->price);
+        $this->assertTrue($this->response->json('data.1.price') === $productThree->price);
+        $this->assertTrue($this->response->json('data.2.price') === $productOne->price);
     }
 
     public function test_get_registered_productables_list()
