@@ -183,7 +183,7 @@ class ProductService implements ProductServiceContract
         if (!is_null($orderDto) && !is_null($orderDto->getOrder())) {
             $query = $query->orderBy($orderDto->getOrderBy(), $orderDto->getOrder());
         }
-
+        var_dump($query->toSql());
         return $query->paginate($searchDto->getPerPage() ?? 15);
     }
 
