@@ -521,7 +521,7 @@ class AdminProductApiTest extends TestCase
         $productThree = Product::factory()->create([
             'name' => 'Third',
             'price' => 200,
-            'price_old' => null,
+            'price_old' => 210,
             'tax_rate' => 20,
         ]);
 
