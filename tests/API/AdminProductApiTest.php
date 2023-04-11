@@ -25,6 +25,7 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
+use EscolaLms\Courses\Models\Course;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -486,6 +487,49 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJsonMissing([
             ProductResource::make($product3->refresh())->toArray(null),
         ]);
+    }
+
+    public function test_search_products_with_sort()
+    {
+        $user = $this->user;
+
+        $productable = ExampleProductable::factory()->create();
+
+        /** @var Product $product */
+        $productOne = Product::factory()->create([
+            'name' => 'First',
+            'price' => 300
+        ]);
+        $productOne->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $productTwo = Product::factory()->create([
+            'name' => 'Second',
+            'price' => 100
+        ]);
+        $productTwo->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $productThree = Product::factory()->create([
+            'name' => 'Third',
+            'price' => 200
+        ]);
+        $productThree->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.amount') === $productTwo->price);
+        $this->assertTrue($this->response->json('data.1.amount') === $productThree->price);
+        $this->assertTrue($this->response->json('data.2.amount') === $productOne->price);
     }
 
     public function test_get_registered_productables_list()
