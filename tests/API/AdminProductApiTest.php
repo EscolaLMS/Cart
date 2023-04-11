@@ -551,6 +551,8 @@ class AdminProductApiTest extends TestCase
         $this->assertTrue($this->response->json('data.0.tax_rate') === $productTwo->tax_rate);
         $this->assertTrue($this->response->json('data.1.tax_rate') === $productThree->tax_rate);
         $this->assertTrue($this->response->json('data.2.tax_rate') === $productOne->tax_rate);
+
+        $this->markTestIncomplete('Fix sorting with null values, NULL has different order for MySQL and Postgres.');
     }
 
     public function test_get_registered_productables_list()
