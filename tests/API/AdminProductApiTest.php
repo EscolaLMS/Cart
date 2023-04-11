@@ -520,7 +520,7 @@ class AdminProductApiTest extends TestCase
         $productThree = Product::factory()->create([
             'name' => 'Third',
             'price' => 200,
-            'price_old' => null,
+            'price_old' => 210,
             'tax_rate' => 20,
         ]);
 
@@ -529,29 +529,29 @@ class AdminProductApiTest extends TestCase
             'productable_id' => $productable->getKey()
         ]));
 
-//        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price', 'order' => 'ASC']);
-//
-//        $this->response->assertOk();
-//
-//        $this->assertTrue($this->response->json('data.0.price') === $productTwo->price);
-//        $this->assertTrue($this->response->json('data.1.price') === $productThree->price);
-//        $this->assertTrue($this->response->json('data.2.price') === $productOne->price);
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.price') === $productTwo->price);
+        $this->assertTrue($this->response->json('data.1.price') === $productThree->price);
+        $this->assertTrue($this->response->json('data.2.price') === $productOne->price);
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price_old', 'order' => 'ASC']);
-        var_dump($this->response->json());
-//        $this->response->assertOk();
-//
-//        $this->assertTrue($this->response->json('data.0.price_old') === $productTwo->price_old);
-//        $this->assertTrue($this->response->json('data.1.price_old') === $productOne->price_old);
-//        $this->assertTrue($this->response->json('data.2.price_old') === $productThree->price_old);
 
-//        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'tax_rate', 'order' => 'ASC']);
-//
-//        $this->response->assertOk();
-//
-//        $this->assertTrue($this->response->json('data.0.tax_rate') === $productTwo->tax_rate);
-//        $this->assertTrue($this->response->json('data.1.tax_rate') === $productOne->tax_rate);
-//        $this->assertTrue($this->response->json('data.2.tax_rate') === $productThree->tax_rate);
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.price_old') === $productTwo->price_old);
+        $this->assertTrue($this->response->json('data.1.price_old') === $productThree->price_old);
+        $this->assertTrue($this->response->json('data.2.price_old') === $productOne->price_old);
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'tax_rate', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.tax_rate') === $productTwo->tax_rate);
+        $this->assertTrue($this->response->json('data.1.tax_rate') === $productOne->tax_rate);
+        $this->assertTrue($this->response->json('data.2.tax_rate') === $productThree->tax_rate);
     }
 
     public function test_get_registered_productables_list()
