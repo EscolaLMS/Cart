@@ -161,7 +161,7 @@ class Product extends Model implements ProductInterface
         return $this->tax_rate ?? 0;
     }
 
-    public function getBuyableByUserAttribute(?CoreUser $user = null, int $quantity = 1): bool
+    public function getBuyableByUserAttribute(?CoreUser $user = null, ?int $quantity = null): bool
     {
         return app(ProductServiceContract::class)->productIsBuyableByUser($this, $user ?? Auth::user(), false, $quantity);
     }

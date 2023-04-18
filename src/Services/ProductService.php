@@ -10,6 +10,7 @@ use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
+use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Models\ProductUser;
@@ -203,12 +204,16 @@ class ProductService implements ProductServiceContract
         return Product::where('products.id', $product->getKey())->whereDoesntHaveProductablesNotOwnedByUser($user)->exists();
     }
 
-    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false, int $quantity = 1): bool
+    public function productIsBuyableByUser(Product $product, User $user, bool $check_productables = false, ?int $quantity = null): bool
     {
         $limit_per_user = $product->limit_per_user;
         $limit_total = $product->limit_total;
 
         $is_purchasable = $product->purchasable;
+
+        if (is_null($quantity)) {
+            $quantity = $this->productQuantityInCart($user, $product) + 1;
+        }
 
         $is_under_limit_per_user = is_null($limit_per_user) || ($product->getOwnedByUserQuantityAttribute($user) + $quantity <= $limit_per_user);
         $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) + $quantity <= $limit_total);
@@ -517,5 +522,20 @@ class ProductService implements ProductServiceContract
     public function canDetachProductableFromUser(Productable $productable, User $user): bool
     {
         return !$this->productableIsOwnedByUserThroughProduct($productable, $user);
+    }
+
+    private function productQuantityInCart(User $user, Product $product): int
+    {
+        $cart = Cart::where('user_id', $user->getAuthIdentifier())->latest()->firstOrCreate([
+            'user_id' => $user->getAuthIdentifier(),
+        ]);
+        if (!is_null($cart)) {
+            $cartItem = $cart
+                ->items()
+                ->whereHas('buyable', fn (Builder $query) => $query->where('products.id', '=', $product->getKey()))
+                ->first();
+            return !is_null($cartItem) ? $cartItem->quantity : 0;
+        }
+        return 0;
     }
 }
