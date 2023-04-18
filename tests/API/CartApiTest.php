@@ -381,7 +381,7 @@ class CartApiTest extends TestCase
         );
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
-        $this->response->assertCreated();
+        $this->response->assertOk();
         $this->response->assertJson(
             fn (AssertableJson $json) =>
             $json
