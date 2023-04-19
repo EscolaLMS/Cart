@@ -129,4 +129,13 @@ class AdminOrderApiTest extends TestCase
 
         $this->assertEquals($this->response->getData()->data->id, $order->id);
     }
+
+    public function test_fetch_order_that_doesnt_exist()
+    {
+        $order = Order::factory()->for(User::factory()->create())->create();
+        $order->delete();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/' . $order->getKey());
+        $this->response->assertStatus(422);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Requests;
 
+use EscolaLms\Cart\Exceptions\OrderNotFoundException;
 use EscolaLms\Cart\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +37,12 @@ class OrderViewRequest extends FormRequest
 
     public function getOrder(): Order
     {
-        return Order::findOrFail($this->getId());
+        $order = Order::find($this->getId());
+
+        if (is_null($order)) {
+            throw new OrderNotFoundException();
+        }
+
+        return $order;
     }
 }
