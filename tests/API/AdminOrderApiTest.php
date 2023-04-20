@@ -107,6 +107,28 @@ class AdminOrderApiTest extends TestCase
         $this->response->assertJsonCount(1, 'data');
     }
 
+    public function test_list_orders_sorted()
+    {
+        $order = Order::factory()->create();
+        $orderTwo = Order::factory()->create();
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'order_by' => 'id',
+            'order' => 'ASC',
+        ]);
+
+        $this->assertTrue($this->response->getData()->data[0]->id === $order->getKey());
+        $this->assertTrue($this->response->getData()->data[1]->id === $orderTwo->getKey());
+
+        $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders', [
+            'order_by' => 'id',
+            'order' => 'DESC',
+        ]);
+
+        $this->assertTrue($this->response->getData()->data[0]->id === $orderTwo->getKey());
+        $this->assertTrue($this->response->getData()->data[1]->id === $order->getKey());
+    }
+
     private function assertDataCountLessThanOrEqual($response, $count)
     {
         $this->assertLessThanOrEqual($count, count($response->getData()->data));
