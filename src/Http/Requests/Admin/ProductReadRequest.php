@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Exceptions\ProductNotFoundException;
 use EscolaLms\Cart\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +37,12 @@ class ProductReadRequest extends FormRequest
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        $product = Product::find($this->getId());
+
+        if ($product === null) {
+            throw new ProductNotFoundException();
+        }
+
+        return $product;
     }
 }

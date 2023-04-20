@@ -65,6 +65,18 @@ class ProductApiTest extends TestCase
         ]);
     }
 
+    public function test_get_product_not_found()
+    {
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create();
+        $product->delete();
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products/' . $product->getKey());
+        $this->response->assertStatus(422);
+    }
+
     public function test_search_products()
     {
         $user = $this->user;
