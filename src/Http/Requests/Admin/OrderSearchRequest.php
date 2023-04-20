@@ -30,7 +30,7 @@ class OrderSearchRequest extends FormRequest
             'productable_type' => ['sometimes', 'string', new ProductableRegisteredRule()],
             'per_page' => ['sometimes', 'integer'],
             'page' => ['sometimes', 'integer'],
-            'order_by' => ['sometimes', Rule::in(['created_at', 'updated_at', 'user_id'])],
+            'order_by' => ['sometimes', Rule::in(['id', 'created_at', 'updated_at', 'user_id'])],
             'order' => ['sometimes', Rule::in(['ASC', 'DESC'])],
             'status' => ['sometimes', Rule::in(OrderStatus::getValues())]
         ];
