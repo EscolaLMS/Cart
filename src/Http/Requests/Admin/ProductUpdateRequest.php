@@ -26,7 +26,7 @@ class ProductUpdateRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'type' => ['sometimes', Rule::in(ProductType::getValues())],
-            'description' => ['sometimes', 'nullable', 'string'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:65535'],
             'price' => ['sometimes', 'integer', new MinPrice()],
             'price_old' => ['sometimes', 'nullable', 'integer', new MinPrice()],
             'tax_rate' => ['sometimes', 'numeric', 'between:0.00,100.00'],
