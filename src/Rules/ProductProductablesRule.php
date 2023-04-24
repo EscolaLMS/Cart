@@ -35,9 +35,13 @@ class ProductProductablesRule implements Rule, DataAwareRule
                 $this->message = __('Each productable must be an array with keys `id` and `class`');
                 return false;
             }
+
+            $class = $productable['class'];
+            $id = $productable['id'];
+
             $productable = $this->productService->findProductable($productable['class'], $productable['id']);
             if (is_null($productable)) {
-                $this->message = __('Productable of class :class with id :id does not exist', ['class' => $productable['class'], 'id' => $productable['id']]);
+                $this->message = __('Productable of class :class with id :id does not exist', ['class' => $class, 'id' => $id]);
                 return false;
             }
         }
