@@ -17,8 +17,19 @@ class ProductSetQuantityInCartRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer', Rule::exists(Product::class, 'id')],
-            'quantity' => ['sometimes', 'integer', 'min:0', 'max:' . $this->getProduct()->limit_per_user],
+            'quantity' => array_merge(['sometimes', 'integer', 'min:0'], $this->getMaxQuantityRule()),
         ];
+    }
+
+    public function getMaxQuantityRule(): array
+    {
+        $product = Product::find($this->input('id'));
+
+        if (!$product) {
+            return [];
+        }
+
+        return ['max:' . $product->limit_per_user];
     }
 
     public function getId(): int
