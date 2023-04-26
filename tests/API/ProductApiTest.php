@@ -196,4 +196,21 @@ class ProductApiTest extends TestCase
             ->json('POST', "/api/admin/products/{$product->getKey()}/trigger-event-manually/{$template->getKey()}");
         $this->response->assertStatus(400);
     }
+
+    public function testProductAvailableAndSoldQuantity(): void
+    {
+        $student = $this->makeStudent();
+        $product = Product::factory()->create([
+            'limit_total' => 10,
+        ]);
+        $product->users()->sync([$student->getKey() => ['quantity' => 2]]);
+        $this
+            ->json('GET', "/api/products/{$product->getKey()}")
+            ->assertOk()
+            ->assertJsonFragment([
+                'id' => $product->getKey(),
+                'available_quantity' => 8,
+                'sold_quantity' => 2,
+            ]);
+    }
 }

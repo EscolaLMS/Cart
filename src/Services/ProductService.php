@@ -216,7 +216,7 @@ class ProductService implements ProductServiceContract
         }
 
         $is_under_limit_per_user = is_null($limit_per_user) || ($product->getOwnedByUserQuantityAttribute($user) + $quantity <= $limit_per_user);
-        $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->count()) + $quantity <= $limit_total);
+        $is_under_limit_total = is_null($limit_total) || (($product->users_count ?? $product->users()->sum('quantity')) + $quantity <= $limit_total);
         $is_productables_buyable = !$check_productables || $this->productProductablesAllBuyableByUser($product, $user);
         Log::debug(__('Checking if product is buyable'), [
             'user' => $user->getKey(),

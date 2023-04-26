@@ -75,6 +75,8 @@ use Illuminate\Support\Facades\Storage;
  * @property-read int|null $tags_count
  * @property-read Collection|User[] $users
  * @property-read int|null $users_count
+ * @property-read int|null $available_quantity
+ * @property-read int $sold_quantity
  * @method static \EscolaLms\Cart\Database\Factories\ProductFactory factory(...$parameters)
  * @method static ProductModelQueryBuilder|Product newModelQuery()
  * @method static ProductModelQueryBuilder|Product newQuery()
@@ -240,5 +242,15 @@ class Product extends Model implements ProductInterface
             }
         }
         return $duration;
+    }
+
+    public function getAvailableQuantityAttribute(): ?int
+    {
+        return is_null($this->limit_total) ? null : $this->limit_total - $this->sold_quantity;
+    }
+
+    public function getSoldQuantityAttribute(): int
+    {
+        return $this->users()->sum('quantity');
     }
 }
