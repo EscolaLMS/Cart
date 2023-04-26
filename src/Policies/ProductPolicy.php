@@ -37,7 +37,7 @@ class ProductPolicy
 
     public function buy(User $user, Product $product)
     {
-        return $user->can(CartPermissionsEnum::BUY_PRODUCTS) && $this->productService->productIsBuyableByUser($product, $user);
+        return $user->can(CartPermissionsEnum::BUY_PRODUCTS);
     }
 
     public function create(User $user)

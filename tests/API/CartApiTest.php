@@ -431,7 +431,7 @@ class CartApiTest extends TestCase
         $this->response = $this
             ->actingAs($user, 'api')
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
-        $this->response->assertForbidden();
+        $this->response->assertUnprocessable();
 
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
         $this->response->assertOk();

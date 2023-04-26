@@ -49,6 +49,8 @@ class BaseProductResource extends JsonResource
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
             'updated_at' => $this->getProduct()->updated_at,
             'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute())->toArray($request),
+            'available_quantity' => $this->getProduct()->available_quantity,
+            'sold_quantity' => $this->getProduct()->sold_quantity,
         ];
         return $data;
     }

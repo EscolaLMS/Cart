@@ -39,7 +39,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
         if (!$this->productService->productIsBuyableByUser($product, $user, false, $request->getQuantity())) {
-            return $this->sendError(__("You can not add this product to cart"), 403);
+            return $this->sendError(__("You can not add this product to cart"), 422);
         }
         return $this->sendResponse(
             $this->shopService->updateProductQuantity($cart, $product, $request->getQuantity()),
