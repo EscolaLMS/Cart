@@ -33,6 +33,7 @@ class AuthorResource extends JsonResource
                 'first_name' => $author->first_name,
                 'last_name' => $author->last_name,
                 'path_avatar' => $author->path_avatar,
+                'url_avatar' => $author->avatar_url,
                 'categories' => $author->categories,
             ],
             ModelFields::getExtraAttributesValues($author, MetaFieldVisibilityEnum::PUBLIC)
