@@ -45,6 +45,7 @@ class BaseProductResource extends JsonResource
             'poster_url' => $this->getProduct()->poster_absolute_url,
             'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : false,
             'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
+            'owned_quantity' => $user ? $this->getProduct()->getOwnedByUserQuantityAttribute($user) : 0,
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
             'updated_at' => $this->getProduct()->updated_at,
