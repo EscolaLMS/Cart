@@ -213,4 +213,20 @@ class ProductApiTest extends TestCase
                 'sold_quantity' => 2,
             ]);
     }
+
+    public function testProductGrossPrice(): void
+    {
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'tax_rate' => 23.0,
+        ]);
+        $this
+            ->json('GET', "/api/products/{$product->getKey()}")
+            ->assertOk()
+            ->assertJsonFragment([
+                'id' => $product->getKey(),
+                'price' => 1000,
+                'gross_price' => 1230,
+            ]);
+    }
 }
