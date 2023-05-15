@@ -52,6 +52,7 @@ class BaseProductResource extends JsonResource
             'authors' => AuthorResource::collection($this->getProduct()->getAuthorsAttribute())->toArray($request),
             'available_quantity' => $this->getProduct()->available_quantity,
             'sold_quantity' => $this->getProduct()->sold_quantity,
+            'gross_price' => $this->getProduct()->getGrossPrice(),
         ];
         return $data;
     }

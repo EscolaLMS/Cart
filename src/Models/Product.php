@@ -253,4 +253,14 @@ class Product extends Model implements ProductInterface
     {
         return $this->users()->sum('quantity');
     }
+
+    public function getGrossPrice(): int
+    {
+        return $this->getBuyablePrice() + $this->getTax();
+    }
+
+    public function getTax(): int
+    {
+        return (int) round($this->getBuyablePrice() * $this->getTaxRate() / 100, 0);
+    }
 }
