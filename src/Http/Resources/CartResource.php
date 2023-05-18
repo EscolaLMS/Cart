@@ -35,7 +35,8 @@ class CartResource extends JsonResource
             'total' => $this->getCart()->total,
             'subtotal' =>  $this->getCart()->subtotal,
             'tax' =>  $this->getCart()->getTaxAttribute($this->taxRate),
-            'items' => $this->getCartItemsResourceCollection()
+            'items' => $this->getCartItemsResourceCollection(),
+            'total_with_tax' => $this->getCart()->total_with_tax,
         ], $this);
     }
 }
