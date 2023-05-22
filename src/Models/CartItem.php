@@ -29,6 +29,7 @@ use Treestoneit\ShoppingCart\Models\CartItem as BaseCartItem;
  * @property-read float $tax_rate
  * @property-read mixed $total
  * @property-read int $total_with_tax
+ * @property-read int $price_with_tax
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] all($columns = ['*'])
  * @method static \Treestoneit\ShoppingCart\Models\CartItemCollection|static[] get($columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder|CartItem newModelQuery()
@@ -82,5 +83,15 @@ class CartItem extends BaseCartItem
     public function getTotalWithTaxAttribute(?int $rate = null): int
     {
         return $this->total + $this->getTaxAttribute($rate);
+    }
+
+    public function getPriceWithTaxAttribute(?int $rate = null): int
+    {
+        return $this->price + $this->getPriceTaxAttribute($rate);
+    }
+
+    public function getPriceTaxAttribute(?float $rate = null): int
+    {
+        return (int) round($this->price * ($this->getTaxRateAttribute($rate) / 100), 0);
     }
 }
