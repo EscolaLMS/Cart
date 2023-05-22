@@ -81,7 +81,11 @@ class OrderItem extends Model
 
     public function getPriceAttribute(): int
     {
-        return $this->getRawOriginal('price') ?? optional($this->buyable)->getBuyablePrice() ?? 0;
+        return match (true) {
+            !is_null($this->getRawOriginal('price')) => $this->getRawOriginal('price'),
+            !is_null($this->buyable) && method_exists($this->buyable, 'getBuyablePrice') => $this->buyable->getBuyablePrice(),
+            default => 0,
+        };
     }
 
     public function getSubtotalAttribute(): int
