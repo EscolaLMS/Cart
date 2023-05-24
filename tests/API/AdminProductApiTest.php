@@ -529,6 +529,22 @@ class AdminProductApiTest extends TestCase
             'productable_id' => $productable->getKey()
         ]));
 
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'id', 'order' => 'ASC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.id') === $productOne->getKey());
+        $this->assertTrue($this->response->json('data.1.id') === $productTwo->getKey());
+        $this->assertTrue($this->response->json('data.2.id') === $productThree->getKey());
+
+        $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'id', 'order' => 'DESC']);
+
+        $this->response->assertOk();
+
+        $this->assertTrue($this->response->json('data.0.id') === $productThree->getKey());
+        $this->assertTrue($this->response->json('data.1.id') === $productTwo->getKey());
+        $this->assertTrue($this->response->json('data.2.id') === $productOne->getKey());
+
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/admin/products', ['order_by' => 'price', 'order' => 'ASC']);
 
         $this->response->assertOk();
