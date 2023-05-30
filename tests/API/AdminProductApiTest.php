@@ -243,7 +243,7 @@ class AdminProductApiTest extends TestCase
 
     public function test_create_product_min_price()
     {
-        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 10);
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 1000);
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
 
@@ -278,7 +278,7 @@ class AdminProductApiTest extends TestCase
 
     public function test_update_product_min_price()
     {
-        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 10);
+        Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 1000);
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
 

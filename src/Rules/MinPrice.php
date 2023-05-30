@@ -21,6 +21,6 @@ class MinPrice implements Rule
 
     public function message(): string
     {
-        return __('Field :attribute must be greater or equal than ' . $this->min . '.');
+        return __('Field :attribute must be greater or equal than ' . ($this->min / 100) . '.');
     }
 }
