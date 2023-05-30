@@ -268,8 +268,8 @@ class AdminProductApiTest extends TestCase
             $json
                 ->where('message', 'The given data was invalid.')
                 ->where('errors', [
-                    'price' => ['Field price must be greater or equal than 10.'],
-                    'price_old' => ['Field price old must be greater or equal than 10.'],
+                    'price' => ['Field price must be greater than or equal to 10.'],
+                    'price_old' => ['Field price old must be greater than or equal to 10.'],
                 ])
                 ->etc()
         );
@@ -304,8 +304,8 @@ class AdminProductApiTest extends TestCase
             $json
                 ->where('message', 'The given data was invalid.')
                 ->where('errors', [
-                    'price' => ['Field price must be greater or equal than 10.'],
-                    'price_old' => ['Field price old must be greater or equal than 10.'],
+                    'price' => ['Field price must be greater than or equal to 10.'],
+                    'price_old' => ['Field price old must be greater than or equal to 10.'],
                 ])
                 ->etc()
         );
