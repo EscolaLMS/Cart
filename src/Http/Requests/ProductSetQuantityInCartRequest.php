@@ -25,7 +25,7 @@ class ProductSetQuantityInCartRequest extends FormRequest
     {
         $product = Product::find($this->input('id'));
 
-        if (!$product) {
+        if (!$product || is_null($product->limit_per_user)) {
             return [];
         }
 

@@ -109,6 +109,22 @@ class CartApiTest extends TestCase
         $this->assertNull($user->cart);
     }
 
+    public function test_add_product_to_cart_nullable_limit_per_user()
+    {
+        $user = $this->user;
+        /** @var Product $product */
+        $product = Product::factory([
+            'limit_per_user' => null,
+        ])->create();
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/products', [
+            'id' => $product->getKey(),
+        ]);
+        $this->response->assertOk();
+
+        $this->assertNotNull($user->cart->getKey());
+    }
+
     public function test_remove_product_from_cart()
     {
         $eventFake = Event::fake();
