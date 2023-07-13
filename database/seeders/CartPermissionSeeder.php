@@ -24,6 +24,7 @@ class CartPermissionSeeder extends Seeder
             CartPermissionsEnum::LIST_ALL_ORDERS,
             CartPermissionsEnum::LIST_ALL_PRODUCTS,
             CartPermissionsEnum::MANAGE_PRODUCTS,
+            CartPermissionsEnum::ORDERS_EXPORT,
         ]);
 
         $tutor->givePermissionTo([

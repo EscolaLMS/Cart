@@ -19,7 +19,6 @@ use EscolaLms\Cart\QueryBuilders\OrderModelQueryBuilder;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
-use EscolaLms\Payments\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -37,45 +36,7 @@ class OrderService implements OrderServiceContract
 
     public function searchAndPaginateOrders(OrdersSearchDto $searchDto, ?OrderDto $sortDto): LengthAwarePaginator
     {
-        /** @var OrderModelQueryBuilder $query */
-        $query = Order::query();
-
-        if (!is_null($searchDto->getDateFrom())) {
-            $query->where('created_at', '>=', $searchDto->getDateFrom());
-        }
-
-        if (!is_null($searchDto->getDateTo())) {
-            $query->where('created_at', '<=', $searchDto->getDateTo());
-        }
-
-        if (!is_null($searchDto->getUserId())) {
-            $query = $query->where('user_id', $searchDto->getUserId());
-        }
-
-        if (!is_null($searchDto->getProductId())) {
-            $query = $query->whereHasBuyable(Product::class, $searchDto->getProductId());
-        }
-
-        if (!is_null($searchDto->getProductableType())) {
-            $class = $searchDto->getProductableType();
-            /** @var Model $model */
-            $model = new $class();
-            if (!is_null($searchDto->getProductableId())) {
-                $query = $query->whereHasProductableClassAndId($model->getMorphClass(), $searchDto->getProductableId());
-            } else {
-                $query = $query->whereHasProductableClass($model->getMorphClass());
-            }
-        }
-
-        if (!is_null($searchDto->getStatus())) {
-            $query = $query->where('status', $searchDto->getStatus());
-        }
-
-        if (!is_null($sortDto) && !is_null($sortDto->getOrder())) {
-            $query = $query->orderBy($sortDto->getOrderBy(), $sortDto->getOrder());
-        }
-
-        return $query->paginate($searchDto->getPerPage() ?? 15);
+        return $this->searchOrders($searchDto, $sortDto)->paginate($searchDto->getPerPage() ?? 15);
     }
 
     public function find($id): Model
@@ -182,5 +143,48 @@ class OrderService implements OrderServiceContract
             event(new ProductBought($buyable, $order));
             $this->productService->attachProductToUser($buyable, $order->user, $orderItem->quantity ?? 1);
         }
+    }
+
+    public function searchOrders(OrdersSearchDto $searchDto, ?OrderDto $sortDto): Builder
+    {
+        /** @var OrderModelQueryBuilder $query */
+        $query = Order::query();
+
+        if (!is_null($searchDto->getDateFrom())) {
+            $query->where('created_at', '>=', $searchDto->getDateFrom());
+        }
+
+        if (!is_null($searchDto->getDateTo())) {
+            $query->where('created_at', '<=', $searchDto->getDateTo());
+        }
+
+        if (!is_null($searchDto->getUserId())) {
+            $query = $query->where('user_id', $searchDto->getUserId());
+        }
+
+        if (!is_null($searchDto->getProductId())) {
+            $query = $query->whereHasBuyable(Product::class, $searchDto->getProductId());
+        }
+
+        if (!is_null($searchDto->getProductableType())) {
+            $class = $searchDto->getProductableType();
+            /** @var Model $model */
+            $model = new $class();
+            if (!is_null($searchDto->getProductableId())) {
+                $query = $query->whereHasProductableClassAndId($model->getMorphClass(), $searchDto->getProductableId());
+            } else {
+                $query = $query->whereHasProductableClass($model->getMorphClass());
+            }
+        }
+
+        if (!is_null($searchDto->getStatus())) {
+            $query = $query->where('status', $searchDto->getStatus());
+        }
+
+        if (!is_null($sortDto) && !is_null($sortDto->getOrder())) {
+            $query = $query->orderBy($sortDto->getOrderBy(), $sortDto->getOrder());
+        }
+
+        return $query;
     }
 }

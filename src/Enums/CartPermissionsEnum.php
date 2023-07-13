@@ -14,4 +14,6 @@ class CartPermissionsEnum extends BasicEnum
 
     const LIST_PURCHASABLE_PRODUCTS = 'products_list_purchasable';
     const BUY_PRODUCTS = 'products_buy';
+
+    const ORDERS_EXPORT = 'orders_export';
 }
