@@ -41,4 +41,9 @@ class OrderPolicy
     {
         return false;
     }
+
+    public function export(?User $user): bool
+    {
+        return $user && $user->can(CartPermissionsEnum::ORDERS_EXPORT);
+    }
 }

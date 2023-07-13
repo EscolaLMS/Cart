@@ -8,6 +8,7 @@ use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Order;
 use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Core\Dtos\OrderDto;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -25,4 +26,5 @@ interface OrderServiceContract
     public function setOrderStatus(Order $order, int $status): void;
 
     public function processOrderItems(Order $order): void;
+    public function searchOrders(OrdersSearchDto $searchDto, ?OrderDto $sortDto): Builder;
 }
