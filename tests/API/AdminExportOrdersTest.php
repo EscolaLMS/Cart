@@ -52,8 +52,6 @@ class AdminExportOrdersTest extends TestCase
             return true;
         });
 
-        Order::factory()->count(10)->create();
-
         $this->actingAs($this->user, 'api')->json('GET', '/api/admin/orders/export', ['format' => ExportFormatEnum::XLS])->assertOk();
 
         Excel::assertDownloaded('orders.xls', function (OrdersExport $ordersExport) {
