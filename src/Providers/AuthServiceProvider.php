@@ -34,10 +34,5 @@ class AuthServiceProvider extends ServiceProvider
         if (!$this->app->routesAreCached() && method_exists(Passport::class, 'routes')) {
             Passport::routes();
         }
-
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('applications:export')->dailyAt('1:00');
-        });
     }
 }
