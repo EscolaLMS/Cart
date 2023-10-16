@@ -10,7 +10,6 @@ use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -59,6 +58,21 @@ class ShopService implements ShopServiceContract
         } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
             $this->orderService->setCancelled($order);
         }
+
+        $cartManager->destroy();
+
+        return $payment;
+    }
+
+    public function intentPurchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, array $parameters = []): Payment
+    {
+        $cartManager = $this->cartManagerForCart($cart);
+
+        $order = $this->orderService->createOrderFromCartManager($cartManager, $clientDetailsDto);
+
+        $paymentProcessor = $order->process();
+        $paymentProcessor->purchase($parameters);
+        $payment = $paymentProcessor->getPayment();
 
         $cartManager->destroy();
 

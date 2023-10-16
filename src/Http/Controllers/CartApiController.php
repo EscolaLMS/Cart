@@ -3,7 +3,6 @@
 namespace EscolaLms\Cart\Http\Controllers;
 
 use EscolaLms\Cart\Http\Requests\AddMissingProductsRequest;
-use EscolaLms\Cart\Http\Requests\CartItemRemoveFromCartRequest;
 use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductRemoveFromCartRequest;
@@ -99,6 +98,29 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
             ]));
 
             return $this->sendResponseForResource(PaymentResource::make($payment), __('Payment created'));
+        } catch (\Exception $e) {
+            return $this->sendError($e->getMessage(), 400);
+        }
+    }
+
+    public function payIntent(PaymentRequest $request): JsonResponse
+    {
+        try {
+            $cart = $this->shopService->cartForUser($request->user());
+
+            $payment = $this->shopService->intentPurchaseCart($cart, $request->toClientDetailsDto(), $request->except([
+                'client_name',
+                'client_email',
+                'client_street',
+                'client_street_number',
+                'client_postal',
+                'client_city',
+                'client_country',
+                'client_company',
+                'client_taxid',
+            ]));
+
+            return $this->sendResponseForResource(PaymentResource::make($payment), __('Payment intent created'));
         } catch (\Exception $e) {
             return $this->sendError($e->getMessage(), 400);
         }

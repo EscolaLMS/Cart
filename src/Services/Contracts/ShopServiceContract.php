@@ -21,12 +21,16 @@ interface ShopServiceContract
     public function cartAsJsonResource(Cart $cart, ?int $taxRate = null): JsonResource;
 
     public function addProductToCart(Cart $cart, Product $buyable, int $quantity = 1): void;
+
     public function removeProductFromCart(Cart $cart, Product $buyable, int $quantity = 1): void;
+
     public function updateProductQuantity(Cart $cart, Product $buyable, int $quantity): array;
 
     public function addMissingProductsToCart(Cart $cart, array $products): void;
 
     public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDeails = null, array $parameters = []): Payment;
+
+    public function intentPurchaseCart(Cart $cart, ?ClientDetailsDto $clientDeails = null, array $parameters = []): Payment;
 
     public function getAbandonedCarts(Carbon $from, Carbon $to): Collection;
 }

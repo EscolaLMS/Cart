@@ -16,6 +16,7 @@ use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Cart\Tests\Traits\CreatesPaymentMethods;
 use EscolaLms\Core\Enums\UserRole;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Payments\Enums\PaymentStatus;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use EscolaLms\Payments\Models\Payment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -40,20 +41,10 @@ class CartApiTest extends TestCase
         Shop::registerProductableClass(ExampleProductable::class);
 
         $this->shopService = app(ShopServiceContract::class);
+
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::STUDENT);
-    }
-
-    protected function createProductForTesting(): Product
-    {
-        $product = Product::factory()->single()->create();
-        $productable = ExampleProductable::factory()->create();
-        $product->productables()->save(new ProductProductable([
-            'productable_type' => $productable->getMorphClass(),
-            'productable_id' => $productable->getKey()
-        ]));
-        return $product;
     }
 
     public function test_add_product_to_cart()
@@ -154,7 +145,7 @@ class CartApiTest extends TestCase
 
         $eventFake->assertDispatched(
             ProductAddedToCart::class,
-            fn (ProductAddedToCart $event) => $event->getProduct()->getKey() === $product->getKey()
+            fn(ProductAddedToCart $event) => $event->getProduct()->getKey() === $product->getKey()
                 && $event->getUser()->getKey() === $user->getKey()
                 && $event->getCart()->getKey() === $cart->getKey()
         );
@@ -185,7 +176,7 @@ class CartApiTest extends TestCase
 
         $eventFake->assertDispatched(
             ProductRemovedFromCart::class,
-            fn (ProductRemovedFromCart $event) => $event->getProduct()->getKey() === $product->getKey()
+            fn(ProductRemovedFromCart $event) => $event->getProduct()->getKey() === $product->getKey()
                 && $event->getUser()->getKey() === $user->getKey()
                 && $event->getCart()->getKey() === $cart->getKey()
         );
@@ -218,6 +209,36 @@ class CartApiTest extends TestCase
         $this->assertContains($product->getKey(), $cartItemsId);
     }
 
+    public function test_pay_intent()
+    {
+        PaymentGateway::fake();
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()->create([
+            'price' => 1000,
+            'purchasable' => true,
+        ]);
+
+        $cart = $this->shopService->cartForUser($user);
+        $this->shopService->addProductToCart($cart, $product);
+
+        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay-intent', [
+            'gateway' => 'stripe-intent',
+        ]);
+
+        $this->response->assertCreated();
+
+        $product->refresh();
+
+        $this->assertDatabaseHas('payments', [
+            'amount' => 1000,
+            'status' => PaymentStatus::INTENT,
+            'driver' => 'stripe-intent',
+        ]);
+    }
+
     public function test_pay()
     {
         $eventFake = Event::fake(ProductBought::class);
@@ -237,7 +258,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
         $this->response->assertCreated();
 
-        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+        $eventFake->assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
 
         $product->refresh();
 
@@ -262,7 +283,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
         $this->response->assertCreated();
 
-        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+        $eventFake->assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
 
         $product->refresh();
 
@@ -331,8 +352,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', true)
                 ->where('data.owned', false)
                 ->where('data.limit_per_user', 1)
@@ -352,8 +372,7 @@ class CartApiTest extends TestCase
 
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', false)
                 ->where('data.owned', true)
                 ->where('data.limit_per_user', 1)
@@ -375,8 +394,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', true)
                 ->where('data.owned', false)
                 ->where('data.limit_per_user', 1)
@@ -390,8 +408,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
         $this->response->assertUnprocessable();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'The given data was invalid.')
+            fn(AssertableJson $json) => $json->where('message', 'The given data was invalid.')
                 ->where('errors.quantity', ['The quantity must not be greater than 1.'])
                 ->etc()
         );
@@ -399,8 +416,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json
+            fn(AssertableJson $json) => $json
                 ->where('data.total', 0)
                 ->where('data.subtotal', 0)
                 ->where('data.tax', 0)
@@ -425,8 +441,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', true)
                 ->where('data.owned', false)
                 ->where('data.limit_per_user', 3)
@@ -452,8 +467,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/cart');
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json
+            fn(AssertableJson $json) => $json
                 ->where('data.total', 0)
                 ->where('data.subtotal', 0)
                 ->where('data.tax', 0)
@@ -476,8 +490,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', true)
                 ->where('data.owned', false)
                 ->where('data.limit_per_user', 3)
@@ -489,8 +502,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'Product quantity changed')
+            fn(AssertableJson $json) => $json->where('message', 'Product quantity changed')
                 ->where('data', [
                     'operation' => QuantityOperationEnum::INCREMENT,
                     'difference' => 2,
@@ -507,8 +519,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'Product quantity changed')
+            fn(AssertableJson $json) => $json->where('message', 'Product quantity changed')
                 ->where('data', [
                     'operation' => QuantityOperationEnum::DECREMENT,
                     'difference' => 1,
@@ -525,8 +536,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'Product quantity changed')
+            fn(AssertableJson $json) => $json->where('message', 'Product quantity changed')
                 ->where('data', [
                     'operation' => QuantityOperationEnum::UNCHANGED,
                     'difference' => 0,
@@ -554,8 +564,7 @@ class CartApiTest extends TestCase
         $this->response = $this->actingAs($user, 'api')->json('GET', '/api/products/' . $product->getKey());
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('data.id', $product->getKey())
+            fn(AssertableJson $json) => $json->where('data.id', $product->getKey())
                 ->where('data.buyable', true)
                 ->where('data.owned', false)
                 ->where('data.limit_per_user', 3)
@@ -567,8 +576,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 2]);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'Product quantity changed')
+            fn(AssertableJson $json) => $json->where('message', 'Product quantity changed')
                 ->where('data', [
                     'operation' => QuantityOperationEnum::INCREMENT,
                     'difference' => 2,
@@ -590,8 +598,7 @@ class CartApiTest extends TestCase
             ->json('POST', '/api/cart/products', ['id' => $product->getKey(), 'quantity' => 1]);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->where('message', 'Product quantity changed')
+            fn(AssertableJson $json) => $json->where('message', 'Product quantity changed')
                 ->where('data', [
                     'operation' => QuantityOperationEnum::INCREMENT,
                     'difference' => 1,
@@ -632,5 +639,16 @@ class CartApiTest extends TestCase
         $this->assertContains($product->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product2->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
         $this->assertContains($product3->getKey(), $user->cart->items->pluck('buyable_id')->toArray());
+    }
+
+    protected function createProductForTesting(): Product
+    {
+        $product = Product::factory()->single()->create();
+        $productable = ExampleProductable::factory()->create();
+        $product->productables()->save(new ProductProductable([
+            'productable_type' => $productable->getMorphClass(),
+            'productable_id' => $productable->getKey()
+        ]));
+        return $product;
     }
 }
