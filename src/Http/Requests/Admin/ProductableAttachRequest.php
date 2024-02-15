@@ -35,7 +35,7 @@ class ProductableAttachRequest extends FormRequest
         return $this->validated()['productable_type'];
     }
 
-    public function getUser(): User
+    public function getCartUser(): User
     {
         return User::findOrFail($this->input('user_id'));
     }

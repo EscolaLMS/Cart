@@ -266,7 +266,7 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJson(
             fn (AssertableJson $json) =>
             $json
-                ->where('message', 'The given data was invalid.')
+                ->where('message', 'Field price must be greater than or equal to 10. (and 1 more error)')
                 ->where('errors', [
                     'price' => ['Field price must be greater than or equal to 10.'],
                     'price_old' => ['Field price old must be greater than or equal to 10.'],
@@ -302,7 +302,7 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJson(
             fn (AssertableJson $json) =>
             $json
-                ->where('message', 'The given data was invalid.')
+                ->where('message', 'Field price must be greater than or equal to 10. (and 1 more error)')
                 ->where('errors', [
                     'price' => ['Field price must be greater than or equal to 10.'],
                     'price_old' => ['Field price old must be greater than or equal to 10.'],
