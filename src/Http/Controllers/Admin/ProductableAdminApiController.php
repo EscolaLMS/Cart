@@ -33,7 +33,7 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
     public function attach(ProductableAttachRequest $request): JsonResponse
     {
         $productable = $this->productService->findProductable($request->getProductableType(), $request->getProductableId());
-        $user = $request->getUser();
+        $user = $request->getCartUser();
         $this->productService->attachProductableToUser($productable, $user);
         return $this->sendSuccess(__('Productable attached to user'));
     }
@@ -41,7 +41,7 @@ class ProductableAdminApiController extends EscolaLmsBaseController implements P
     public function detach(ProductableDetachRequest $request): JsonResponse
     {
         $productable = $this->productService->findProductable($request->getProductableType(), $request->getProductableId());
-        $user = $request->getUser();
+        $user = $request->getCartUser();
         if (!$this->productService->canDetachProductableFromUser($productable, $user)) {
             return $this->sendError(__('Unable to detach productable that was bought by User'), 403);
         }

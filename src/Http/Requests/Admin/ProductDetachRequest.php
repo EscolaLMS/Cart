@@ -41,7 +41,7 @@ class ProductDetachRequest extends FormRequest
         return Product::findOrFail($this->getProductId());
     }
 
-    public function getUser(): User
+    public function getCartUser(): User
     {
         return User::findOrFail($this->input('user_id'));
     }

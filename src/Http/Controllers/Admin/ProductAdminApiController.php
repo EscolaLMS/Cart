@@ -76,13 +76,13 @@ class ProductAdminApiController extends EscolaLmsBaseController implements Produ
 
     public function attach(ProductAttachRequest $request): JsonResponse
     {
-        $this->productService->attachProductToUser($request->getProduct(), $request->getUser());
+        $this->productService->attachProductToUser($request->getProduct(), $request->getCartUser());
         return $this->sendSuccess(__('Product attached to user'));
     }
 
     public function detach(ProductDetachRequest $request): JsonResponse
     {
-        $this->productService->detachProductFromUser($request->getProduct(), $request->getUser());
+        $this->productService->detachProductFromUser($request->getProduct(), $request->getCartUser());
         return $this->sendSuccess(__('Product detached from user'));
     }
 
