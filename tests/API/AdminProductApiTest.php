@@ -300,7 +300,7 @@ class AdminProductApiTest extends TestCase
         $productable = ExampleProductable::factory()->create();
 
         $productData = Product::factory()
-            ->subscription()
+            ->subscriptionWithTrial()
             ->make([
                 ...$data,
                 'productables' => [[
@@ -480,10 +480,10 @@ class AdminProductApiTest extends TestCase
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
         /** @var Product $product */
-        $product = Product::factory()->subscription()->create();
+        $product = Product::factory()->subscriptionWithTrial()->create();
 
         $productData = Product::factory()
-            ->subscription()
+            ->subscriptionWithTrial()
             ->make([
                 ...$data,
                 'productables' => [[
@@ -827,9 +827,9 @@ class AdminProductApiTest extends TestCase
             ['data' => ['subscription_duration' => null], 'errors' => ['subscription_duration' => 'The subscription duration field is required when type is subscription.']],
             ['data' => ['recursive' => null], 'errors' => ['recursive' => 'The recursive field is required when type is subscription.']],
             ['data' => ['has_trial' => null], 'errors' => ['has_trial' => 'The has trial field is required when type is subscription.']],
-            ['data' => ['trial_period' => null], 'errors' => ['trial_period' => 'The trial period field is required when type is subscription.']],
+            ['data' => ['trial_period' => null], 'errors' => ['trial_period' => 'The trial period field is required when has trial is true.']],
             ['data' => ['trial_period' => 'invalid_period'], 'errors' => ['trial_period' => 'The selected trial period is invalid.']],
-            ['data' => ['trial_duration' => null], 'errors' => ['trial_duration' => 'The trial duration field is required when type is subscription.']],
+            ['data' => ['trial_duration' => null], 'errors' => ['trial_duration' => 'The trial duration field is required when has trial is true.']],
             ['data' => ['trial_duration' => -1], 'errors' => ['trial_duration' => 'The trial duration must be greater than 0.']],
             ['data' => ['trial_duration' => 0], 'errors' => ['trial_duration' => 'The trial duration must be greater than 0.']],
         ];

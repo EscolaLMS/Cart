@@ -55,8 +55,8 @@ class ProductUpdateRequest extends FormRequest
             'recursive' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
             // trial
             'has_trial' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
-            'trial_period' => ['required_if:type,' . ProductType::SUBSCRIPTION . ',has_trial,true', Rule::in(PeriodEnum::getValues())],
-            'trial_duration' => ['required_if:type,' . ProductType::SUBSCRIPTION . ',has_trial,true', 'integer', 'gt:0'],
+            'trial_period' => ['nullable', 'required_if:has_trial,true', Rule::in(PeriodEnum::getValues())],
+            'trial_duration' => ['nullable', 'required_if:has_trial,true', 'integer', 'gt:0'],
         ];
     }
 
