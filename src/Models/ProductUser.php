@@ -25,6 +25,10 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @method static \Illuminate\Database\Eloquent\Builder|ProductUser whereQuantity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductUser whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductUser whereUserId($value)
+ * @property string|null $end_date
+ * @property string|null $status
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductUser whereEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductUser whereStatus($value)
  * @mixin \Eloquent
  */
 class ProductUser extends Pivot

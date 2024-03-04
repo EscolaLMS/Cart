@@ -98,7 +98,7 @@ interface ProductAdminSwagger
      *      ),
      *      @OA\Parameter(
      *          name="type",
-     *          description="Type (`single` or `bundle`)",
+     *          description="Type (`single`, `bundle`, `subscription`)",
      *          required=false,
      *          in="query",
      *          @OA\Schema(

@@ -55,7 +55,7 @@ class AdminProductApiTest extends TestCase
         $this->user->assignRole(UserRole::ADMIN);
     }
 
-    public function test_attach_and_detach_product()
+    public function test_attach_and_detach_product(): void
     {
         $event = Event::fake();
 
@@ -93,7 +93,7 @@ class AdminProductApiTest extends TestCase
         $event->assertDispatched(ProductDetached::class);
     }
 
-    public function test_attach_and_detach_productable()
+    public function test_attach_and_detach_productable(): void
     {
         $eventFake = Event::fake();
 
@@ -123,7 +123,7 @@ class AdminProductApiTest extends TestCase
         $this->assertTrue($productable->getOwnedByUserAttribute($student));
         $this->assertTrue(app(ProductServiceContract::class)->productIsOwnedByUser($product, $student, true));
 
-        $eventFake->assertDispatched(ProductableAttached::class, fn (ProductableAttached $event) => $event->getProductable()->getKey() === $productable->getKey());
+        $eventFake->assertDispatched(ProductableAttached::class, fn(ProductableAttached $event) => $event->getProductable()->getKey() === $productable->getKey());
 
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/productables/detach', [
             'user_id' => $student->getKey(),
@@ -135,10 +135,10 @@ class AdminProductApiTest extends TestCase
         $product->refresh();
         $this->assertFalse($productable->getOwnedByUserAttribute($student));
 
-        $eventFake->assertDispatched(ProductableDetached::class, fn (ProductableDetached $event) => $event->getProductable()->getKey() === $productable->getKey());
+        $eventFake->assertDispatched(ProductableDetached::class, fn(ProductableDetached $event) => $event->getProductable()->getKey() === $productable->getKey());
     }
 
-    public function test_detach_bought_productable()
+    public function test_detach_bought_productable(): void
     {
         $eventFake = Event::fake(ProductBought::class, ProductableDetached::class);
         $paymentsFake = PaymentGateway::fake();
@@ -166,7 +166,7 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($student, 'api')->json('POST', '/api/cart/pay');
         $this->response->assertCreated();
 
-        $eventFake->assertDispatched(ProductBought::class, fn (ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
+        $eventFake->assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
 
         $product->refresh();
 
@@ -182,7 +182,7 @@ class AdminProductApiTest extends TestCase
         $eventFake->assertNotDispatched(ProductableDetached::class);
     }
 
-    public function test_create_product()
+    public function test_create_product(): void
     {
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
@@ -214,18 +214,14 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertCreated();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->has(
+            fn(AssertableJson $json) => $json->has(
                 'data',
-                fn (AssertableJson $json) =>
-                $json
+                fn(AssertableJson $json) => $json
                     ->has(
                         'related_products',
-                        fn (AssertableJson $json) =>
-                        $json->each(
-                            fn (AssertableJson $json) =>
-                            $json
-                                ->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                        fn(AssertableJson $json) => $json->each(
+                            fn(AssertableJson $json) => $json
+                                ->where('id', fn($id) => in_array($id, $productData['related_products']))
                                 ->missing('related_products')
                                 ->etc()
                         )->etc()
@@ -241,7 +237,86 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJsonFragment(json_decode(ProductResource::make($product)->toJson(null), true));
     }
 
-    public function test_create_product_min_price()
+
+    public function test_create_product_subscription_type(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $productData = Product::factory()
+            ->subscription()
+            ->make(['productables' => [[
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]]])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/admin/products', $productData)
+            ->assertCreated()
+            ->assertJsonFragment([
+                'subscription_period' => $productData['subscription_period'],
+                'subscription_duration' => $productData['subscription_duration'],
+                'recursive' => $productData['recursive'],
+                'has_trial' => $productData['has_trial'],
+                'trial_period' => $productData['trial_period'],
+                'trial_duration' => $productData['trial_duration'],
+            ]);
+    }
+
+    public function test_create_product_subscription_type_with_trial(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $productData = Product::factory()
+            ->subscriptionWithTrial()
+            ->make(['productables' => [[
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]]])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/admin/products', $productData)
+            ->assertCreated()
+            ->assertJsonFragment([
+                'subscription_period' => $productData['subscription_period'],
+                'subscription_duration' => $productData['subscription_duration'],
+                'recursive' => $productData['recursive'],
+                'has_trial' => true,
+                'trial_period' => $productData['trial_period'],
+                'trial_duration' => $productData['trial_duration'],
+            ]);
+    }
+
+
+    /**
+     * @dataProvider invalidSubscriptionDataProvider
+     */
+    public function test_create_product_subscription_type_validation(array $data, array $errorKey): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $productData = Product::factory()
+            ->subscription()
+            ->make([
+                ...$data,
+                'productables' => [[
+                    'class' => ExampleProductable::class,
+                    'id' => $productable->getKey()
+                ]]
+            ])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/admin/products', $productData)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors($errorKey);
+    }
+
+    public function test_create_product_min_price(): void
     {
         Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 1000);
         /** @var ExampleProductable $productable */
@@ -264,8 +339,7 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('POST', '/api/admin/products', $productData);
         $this->response->assertUnprocessable();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json
+            fn(AssertableJson $json) => $json
                 ->where('message', 'Field price must be greater than or equal to 10. (and 1 more error)')
                 ->where('errors', [
                     'price' => ['Field price must be greater than or equal to 10.'],
@@ -276,7 +350,7 @@ class AdminProductApiTest extends TestCase
         Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 0);
     }
 
-    public function test_update_product_min_price()
+    public function test_update_product_min_price(): void
     {
         Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 1000);
         /** @var ExampleProductable $productable */
@@ -300,8 +374,7 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
         $this->response->assertUnprocessable();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json
+            fn(AssertableJson $json) => $json
                 ->where('message', 'Field price must be greater than or equal to 10. (and 1 more error)')
                 ->where('errors', [
                     'price' => ['Field price must be greater than or equal to 10.'],
@@ -312,7 +385,7 @@ class AdminProductApiTest extends TestCase
         Config::set(EscolaLmsCartServiceProvider::CONFIG_KEY . '.min_product_price', 0);
     }
 
-    public function test_update_product()
+    public function test_update_product(): void
     {
         $product = Product::factory()->single()->create();
         $productSecoond = Product::factory()->single()->create();
@@ -323,19 +396,15 @@ class AdminProductApiTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/products/' . $product->getKey(), $productData);
         $this->response->assertOk();
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->has(
+            fn(AssertableJson $json) => $json->has(
                 'data',
-                fn (AssertableJson $json) =>
-                $json
-                    ->where('id', fn (int $id) => $id === $product->getKey())
+                fn(AssertableJson $json) => $json
+                    ->where('id', fn(int $id) => $id === $product->getKey())
                     ->has(
                         'related_products',
-                        fn (AssertableJson $json) =>
-                        $json->each(
-                            fn (AssertableJson $json) =>
-                            $json
-                                ->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                        fn(AssertableJson $json) => $json->each(
+                            fn(AssertableJson $json) => $json
+                                ->where('id', fn($id) => in_array($id, $productData['related_products']))
                                 ->missing('related_products')
                                 ->etc()
                         )
@@ -345,7 +414,63 @@ class AdminProductApiTest extends TestCase
         );
     }
 
-    public function test_update_product_quantity()
+    public function test_update_product_subscription_type(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        /** @var Product $product */
+        $product = Product::factory()->subscription()->create();
+
+        $productData = Product::factory()
+            ->subscription()
+            ->make(['productables' => [[
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]]])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->putJson('/api/admin/products/' . $product->getKey(), $productData)
+            ->assertOk()
+            ->assertJsonFragment([
+                'subscription_period' => $productData['subscription_period'],
+                'subscription_duration' => $productData['subscription_duration'],
+                'recursive' => $productData['recursive'],
+                'has_trial' => $productData['has_trial'],
+                'trial_period' => $productData['trial_period'],
+                'trial_duration' => $productData['trial_duration'],
+            ]);
+    }
+
+    /**
+     * @dataProvider invalidSubscriptionDataProvider
+     */
+    public function test_update_product_subscription_type_validation(array $data, array $errorKey): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        /** @var Product $product */
+        $product = Product::factory()->subscription()->create();
+
+        $productData = Product::factory()
+            ->subscription()
+            ->make([
+                ...$data,
+                'productables' => [[
+                    'class' => ExampleProductable::class,
+                    'id' => $productable->getKey()
+                ]]
+            ])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->putJson('/api/admin/products/' . $product->getKey(), $productData)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors($errorKey);
+    }
+
+
+    public function test_update_product_quantity(): void
     {
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
@@ -382,27 +507,21 @@ class AdminProductApiTest extends TestCase
         $this->response->assertOk();
 
         $this->response->assertJson(
-            fn (AssertableJson $json) =>
-            $json->has(
+            fn(AssertableJson $json) => $json->has(
                 'data',
-                fn (AssertableJson $json) =>
-                $json->where('id', fn (int $id) => $id === $product->getKey())
+                fn(AssertableJson $json) => $json->where('id', fn(int $id) => $id === $product->getKey())
                     ->has(
                         'productables',
-                        fn (AssertableJson $json) =>
-                        $json->first(
-                            fn (AssertableJson $json) =>
-                            $json->where('productable_id', $productable->getKey())
+                        fn(AssertableJson $json) => $json->first(
+                            fn(AssertableJson $json) => $json->where('productable_id', $productable->getKey())
                                 ->where('quantity', 2)
                                 ->etc()
                         )->etc()
                     )
                     ->has(
                         'related_products',
-                        fn (AssertableJson $json) =>
-                        $json->each(
-                            fn (AssertableJson $json) =>
-                            $json->where('id', fn ($id) => in_array($id, $productData['related_products']))
+                        fn(AssertableJson $json) => $json->each(
+                            fn(AssertableJson $json) => $json->where('id', fn($id) => in_array($id, $productData['related_products']))
                                 ->missing('related_products')
                                 ->etc()
                         )
@@ -412,7 +531,7 @@ class AdminProductApiTest extends TestCase
         );
     }
 
-    public function test_search_products()
+    public function test_search_products(): void
     {
         $user = $this->user;
 
@@ -489,7 +608,7 @@ class AdminProductApiTest extends TestCase
         ]);
     }
 
-    public function test_search_products_with_sort()
+    public function test_search_products_with_sort(): void
     {
         $user = $this->user;
         $productable = ExampleProductable::factory()->create();
@@ -571,7 +690,7 @@ class AdminProductApiTest extends TestCase
         $this->markTestIncomplete('Fix sorting with null values, NULL has different order for MySQL and Postgres.');
     }
 
-    public function test_get_registered_productables_list()
+    public function test_get_registered_productables_list(): void
     {
         $this->response = $this->actingAs($this->user, 'api')->json('GET', '/api/admin/productables/registered');
         $this->response->assertOk();
@@ -582,7 +701,7 @@ class AdminProductApiTest extends TestCase
         ]);
     }
 
-    public function test_list_productables()
+    public function test_list_productables(): void
     {
         $productables = ExampleProductable::factory()->count(10)->create();
 
@@ -622,7 +741,7 @@ class AdminProductApiTest extends TestCase
         ]);
     }
 
-    public function test_find_single_product_for_productable()
+    public function test_find_single_product_for_productable(): void
     {
         /** @var Product $product */
         $product = Product::factory()->create();
@@ -666,5 +785,23 @@ class AdminProductApiTest extends TestCase
 
         $data = $response->getData()->data;
         Storage::assertExists($data->poster_path);
+    }
+
+    private function invalidSubscriptionDataProvider(): array
+    {
+        return [
+            ['data' => ['subscription_period' => null], 'errors' => ['subscription_period' => 'The subscription period field is required when type is subscription.']],
+            ['data' => ['subscription_period' => 'invalid_period'], 'errors' => ['subscription_period' => 'The selected subscription period is invalid.']],
+            ['data' => ['subscription_duration' => -1], 'errors' => ['subscription_duration' => 'The subscription duration must be greater than 0.']],
+            ['data' => ['subscription_duration' => 0], 'errors' => ['subscription_duration' => 'The subscription duration must be greater than 0.']],
+            ['data' => ['subscription_duration' => null], 'errors' => ['subscription_duration' => 'The subscription duration field is required when type is subscription.']],
+            ['data' => ['recursive' => null], 'errors' => ['recursive' => 'The recursive field is required when type is subscription.']],
+            ['data' => ['has_trial' => null], 'errors' => ['has_trial' => 'The has trial field is required when type is subscription.']],
+            ['data' => ['trial_period' => null], 'errors' => ['trial_period' => 'The trial period field is required when type is subscription.']],
+            ['data' => ['trial_period' => 'invalid_period'], 'errors' => ['trial_period' => 'The selected trial period is invalid.']],
+            ['data' => ['trial_duration' => null], 'errors' => ['trial_duration' => 'The trial duration field is required when type is subscription.']],
+            ['data' => ['trial_duration' => -1], 'errors' => ['trial_duration' => 'The trial duration must be greater than 0.']],
+            ['data' => ['trial_duration' => 0], 'errors' => ['trial_duration' => 'The trial duration must be greater than 0.']],
+        ];
     }
 }

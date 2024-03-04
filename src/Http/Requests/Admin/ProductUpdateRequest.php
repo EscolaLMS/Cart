@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
+use EscolaLms\Cart\Enums\PeriodEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
@@ -48,6 +49,14 @@ class ProductUpdateRequest extends FormRequest
             'tags.*' => ['string'],
             'related_products' => ['sometimes', 'array'],
             'related_products.*' => ['integer'],
+            // subscription
+            'subscription_period' => ['required_if:type,' . ProductType::SUBSCRIPTION, Rule::in(PeriodEnum::getValues())],
+            'subscription_duration' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'integer', 'gt:0'],
+            'recursive' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
+            // trial
+            'has_trial' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
+            'trial_period' => ['required_if:type,' . ProductType::SUBSCRIPTION, Rule::in(PeriodEnum::getValues())],
+            'trial_duration' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'integer', 'gt:0'],
         ];
     }
 

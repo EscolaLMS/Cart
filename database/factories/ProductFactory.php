@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\Database\Factories;
 
+use EscolaLms\Cart\Enums\PeriodEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -10,7 +11,7 @@ class ProductFactory extends Factory
 {
     protected $model = Product::class;
 
-    public function definition()
+    public function definition(): array
     {
         return [
             'name' => $this->faker->word(),
@@ -24,17 +25,45 @@ class ProductFactory extends Factory
         ];
     }
 
-    public function single()
+    public function single(): self
     {
         return $this->state([
             'type' => ProductType::SINGLE
         ]);
     }
 
-    public function bundle()
+    public function bundle(): self
     {
         return $this->state([
             'type' => ProductType::BUNDLE
+        ]);
+    }
+
+    public function subscription(): self
+    {
+        $hasTrial = true;
+
+        return $this->state([
+            'type' => ProductType::SUBSCRIPTION,
+            'subscription_period' => $this->faker->randomElement(PeriodEnum::getValues()),
+            'subscription_duration' => $this->faker->numberBetween(1, 10),
+            'recursive' => $this->faker->boolean,
+            'has_trial' => $hasTrial,
+            'trial_period' => $hasTrial ? $this->faker->randomElement(PeriodEnum::getValues()) : null,
+            'trial_duration' => $hasTrial ? $this->faker->numberBetween(1, 10) : null,
+        ]);
+    }
+
+    public function subscriptionWithTrial(): self
+    {
+        return $this->state([
+            'type' => ProductType::SUBSCRIPTION,
+            'subscription_period' => $this->faker->randomElement(PeriodEnum::getValues()),
+            'subscription_duration' => $this->faker->numberBetween(1, 10),
+            'recursive' => $this->faker->boolean,
+            'has_trial' => true,
+            'trial_period' => $this->faker->randomElement(PeriodEnum::getValues()),
+            'trial_duration' => $this->faker->numberBetween(1, 10),
         ]);
     }
 }

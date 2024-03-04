@@ -8,4 +8,5 @@ class ProductType extends BasicEnum
 {
     public const SINGLE = 'single';
     public const BUNDLE = 'bundle';
+    public const SUBSCRIPTION = 'subscription';
 }
