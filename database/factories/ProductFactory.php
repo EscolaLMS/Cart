@@ -41,7 +41,7 @@ class ProductFactory extends Factory
 
     public function subscription(): self
     {
-        $hasTrial = true;
+        $hasTrial = $this->faker->boolean;
 
         return $this->state([
             'type' => ProductType::SUBSCRIPTION,
