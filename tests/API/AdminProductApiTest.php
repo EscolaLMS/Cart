@@ -423,6 +423,11 @@ class AdminProductApiTest extends TestCase
 
         $productData = Product::factory()
             ->subscription()
+            ->state([
+                'subscription_period' => $product->subscription_period,
+                'subscription_duration' => $product->subscription_duration,
+                'recursive' => $product->recursive,
+            ])
             ->make(['productables' => [[
                 'class' => ExampleProductable::class,
                 'id' => $productable->getKey()
@@ -441,6 +446,31 @@ class AdminProductApiTest extends TestCase
                 'trial_duration' => $productData['trial_duration'],
             ]);
     }
+
+    public function test_update_product_subscription_type_cannot_update_subscription_fields(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        /** @var Product $product */
+        $product = Product::factory()->subscription()->create();
+
+        $productData = Product::factory()
+            ->subscription()
+            ->make(['productables' => [[
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]]])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->putJson('/api/admin/products/' . $product->getKey(), $productData)
+            ->assertBadRequest()
+            ->assertJsonFragment([
+                'success' => false,
+                'message' => 'Subscription fields cannot be edited',
+            ]);
+    }
+
 
     /**
      * @dataProvider invalidSubscriptionDataProvider

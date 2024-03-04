@@ -270,6 +270,21 @@ class ProductService implements ProductServiceContract
 
     public function update(Product $product, array $data): Product
     {
+        if ($product->type === ProductType::SUBSCRIPTION && $data['type'] !== ProductType::SUBSCRIPTION) {
+            throw new Exception(__('Product with subscription type cannot have type changed'));
+        }
+
+        if (
+            $product->type === ProductType::SUBSCRIPTION &&
+            (
+                $product->subscription_period !== $data['subscription_period']
+                || $product->subscription_duration !== $data['subscription_duration']
+                || $product->recursive !== $data['recursive']
+            )
+        ) {
+            throw new Exception(__('Subscription fields cannot be edited'));
+        }
+
         $relatedProducts = $data['related_products'] ?? null;
         unset($data['related_products']);
 
