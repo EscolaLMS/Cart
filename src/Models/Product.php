@@ -127,7 +127,8 @@ class Product extends Model implements ProductInterface
     ];
 
     protected $casts = [
-        'purchasable' => 'bool'
+        'purchasable' => 'bool',
+        'has_trial' => 'bool',
     ];
 
     public function productables(): HasMany
