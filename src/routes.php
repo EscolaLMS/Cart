@@ -38,6 +38,7 @@ Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function ()
     Route::delete('/products/{id}', [CartApiController::class, 'remove']);
     Route::post('/add', [CartApiController::class, 'addProductable']);
     Route::post('/pay', [CartApiController::class, 'pay']);
+    Route::post('/pay/products/{id}', [CartApiController::class, 'payProduct']);
 });
 
 Route::group(['prefix' => 'api/products'], function () {

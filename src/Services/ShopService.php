@@ -4,13 +4,13 @@ namespace EscolaLms\Cart\Services;
 
 use Carbon\Carbon;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Enums\QuantityOperationEnum;
 use EscolaLms\Cart\Events\ProductAddedToCart;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Http\Resources\CartResource;
 use EscolaLms\Cart\Models\Cart;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Services\CartManager;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
@@ -44,23 +44,43 @@ class ShopService implements ShopServiceContract
         return new CartManager($cart);
     }
 
-    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetailsDto = null, array $parameters = []): Payment
+    public function purchaseCart(Cart $cart, ?ClientDetailsDto $clientDetails = null, array $parameters = []): Payment
     {
         $cartManager = $this->cartManagerForCart($cart);
 
-        $order = $this->orderService->createOrderFromCartManager($cartManager, $clientDetailsDto);
+        $order = $this->orderService->createOrderFromCartManager($cartManager, $clientDetails);
 
         $paymentProcessor = $order->process();
         $paymentProcessor->purchase($parameters);
         $payment = $paymentProcessor->getPayment();
 
-        if ($payment->status->is(PaymentStatus::PAID)) {
-            // Do nothing, PaymentSuccessListener is enough for handling this
-        } elseif ($payment->status->is(PaymentStatus::CANCELLED)) {
+        if ($payment->status->is(PaymentStatus::CANCELLED)) {
             $this->orderService->setCancelled($order);
         }
 
         $cartManager->destroy();
+
+        return $payment;
+    }
+
+    public function purchaseProduct(Product $product, User $user, ?ClientDetailsDto $clientDetails = null, array $parameters = []): Payment
+    {
+        $order = $this->orderService->createOrderFromProduct($product, $user->getKey(), $clientDetails);
+
+        $paymentProcessor = $order->process();
+
+        $parameters['type'] = $product->type;
+        if (ProductType::isSubscriptionType($product->type)) {
+            $parameters += $product->getSubscriptionParameters();
+            $parameters += $product->getTrailParameters();
+        }
+
+        $paymentProcessor->purchase($parameters);
+        $payment = $paymentProcessor->getPayment();
+
+        if ($payment->status->is(PaymentStatus::CANCELLED)) {
+            $this->orderService->setCancelled($order);
+        }
 
         return $payment;
     }

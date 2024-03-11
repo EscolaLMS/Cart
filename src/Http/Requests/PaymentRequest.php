@@ -4,26 +4,17 @@ namespace EscolaLms\Cart\Http\Requests;
 
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Enums\CartPermissionsEnum;
+use EscolaLms\Cart\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PaymentRequest extends FormRequest
+abstract class PaymentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
         return $this->user()->can(CartPermissionsEnum::BUY_PRODUCTS);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'client_name' => ['sometimes', 'string'],
@@ -51,5 +42,10 @@ class PaymentRequest extends FormRequest
             $this->input('client_company'),
             $this->input('client_taxid')
         );
+    }
+
+    public function getCartUser(): User
+    {
+        return User::findOrFail($this->user()->getKey());
     }
 }
