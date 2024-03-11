@@ -20,7 +20,8 @@
     "nunomaduro/collision": ">=5.5",
     "nunomaduro/larastan": ">=0.7.6",
     "orchestra/testbench": ">=7.0",
-    "phpunit/phpunit": "^9.0"
+    "phpunit/phpunit": "^9.0",
+    "escolalms/courses": "^0"
   },
   "autoload": {
     "psr-4": {
