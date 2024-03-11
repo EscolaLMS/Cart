@@ -110,15 +110,6 @@ jobs:
       - name: Run tests
         run: vendor/bin/phpunit
 
-      - name: Clear config
-        run: vendor/bin/testbench config:clear
-
-      - name: Publish things
-        run: vendor/bin/testbench migrate:fresh
-
-      - name: Run tests
-        run: vendor/bin/phpunit
-
   php81-laravel-latest-phpunit-postgres:
     runs-on: ubuntu-latest
     container:
