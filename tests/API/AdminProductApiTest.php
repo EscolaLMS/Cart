@@ -25,7 +25,6 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
-use EscolaLms\Courses\Models\Course;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
