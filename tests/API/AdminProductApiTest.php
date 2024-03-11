@@ -237,7 +237,6 @@ class AdminProductApiTest extends TestCase
         $this->response->assertJsonFragment(json_decode(ProductResource::make($product)->toJson(null), true));
     }
 
-
     public function test_create_product_subscription_type(): void
     {
         /** @var ExampleProductable $productable */
@@ -261,6 +260,10 @@ class AdminProductApiTest extends TestCase
                 'has_trial' => $productData['has_trial'],
                 'trial_period' => $productData['trial_period'],
                 'trial_duration' => $productData['trial_duration'],
+            ])
+            ->assertJsonFragment([
+                'productable_id' => $productable->getKey(),
+                'productable_type' => 'EscolaLms\Cart\Tests\Mocks\ExampleProductable',
             ]);
     }
 
@@ -287,6 +290,53 @@ class AdminProductApiTest extends TestCase
                 'has_trial' => true,
                 'trial_period' => $productData['trial_period'],
                 'trial_duration' => $productData['trial_duration'],
+            ])
+            ->assertJsonFragment([
+                'productable_id' => $productable->getKey(),
+                'productable_type' => 'EscolaLms\Cart\Tests\Mocks\ExampleProductable',
+            ]);
+    }
+
+    public function test_create_product_subscription_all_in_type(): void
+    {
+        $productData = Product::factory()
+            ->subscription(ProductType::SUBSCRIPTION_ALL_IN)
+            ->make()
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/admin/products', $productData)
+            ->assertCreated()
+            ->assertJsonFragment([
+                'subscription_period' => $productData['subscription_period'],
+                'subscription_duration' => $productData['subscription_duration'],
+                'recursive' => $productData['recursive'],
+                'has_trial' => $productData['has_trial'],
+                'trial_period' => $productData['trial_period'],
+                'trial_duration' => $productData['trial_duration'],
+                'productables' => []
+            ]);
+    }
+
+    public function test_create_product_subscription_all_in_type_assign_productable(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+
+        $productData = Product::factory()
+            ->subscription(ProductType::SUBSCRIPTION_ALL_IN)
+            ->make(['productables' => [[
+                'class' => ExampleProductable::class,
+                'id' => $productable->getKey()
+            ]]])
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/admin/products', $productData)
+            ->assertBadRequest()
+            ->assertJsonFragment([
+                'success' => false,
+                'message' => 'Products cannot be assigned to all-in subscription type.'
             ]);
     }
 
@@ -447,6 +497,24 @@ class AdminProductApiTest extends TestCase
             ]);
     }
 
+    public function test_update_product_subscription_type_change_type(): void
+    {
+        /** @var Product $product */
+        $product = Product::factory()->subscription()->create();
+        $productData = Product::factory()
+            ->single()
+            ->make()
+            ->toArray();
+
+        $this->actingAs($this->user, 'api')
+            ->putJson('/api/admin/products/' . $product->getKey(), $productData)
+            ->assertBadRequest()
+            ->assertJsonFragment([
+                'success' => false,
+                'message' => 'Product with subscription type cannot have type changed'
+            ]);
+    }
+
     public function test_update_product_subscription_type_cannot_update_subscription_fields(): void
     {
         /** @var ExampleProductable $productable */
@@ -471,6 +539,31 @@ class AdminProductApiTest extends TestCase
             ]);
     }
 
+    public function test_update_product_subscription_all_in_type_assign_productable(): void
+    {
+        /** @var ExampleProductable $productable */
+        $productable = ExampleProductable::factory()->create();
+        /** @var Product $product */
+        $product = Product::factory()->subscription(ProductType::SUBSCRIPTION_ALL_IN)->create();
+
+        $productData = [
+            ...$product->toArray(),
+            'productables' => [
+                [
+                    'class' => ExampleProductable::class,
+                    'id' => $productable->getKey()
+                ]
+            ]
+        ];
+
+        $this->actingAs($this->user, 'api')
+            ->putJson('/api/admin/products/' . $product->getKey(), $productData)
+            ->assertBadRequest()
+            ->assertJsonFragment([
+                'success' => false,
+                'message' => 'Products cannot be assigned to all-in subscription type.'
+            ]);
+    }
 
     /**
      * @dataProvider invalidSubscriptionDataProvider

@@ -39,12 +39,12 @@ class ProductFactory extends Factory
         ]);
     }
 
-    public function subscription(): self
+    public function subscription(?string $productType = null): self
     {
         $hasTrial = $this->faker->boolean;
 
         return $this->state([
-            'type' => ProductType::SUBSCRIPTION,
+            'type' => $productType ?? ProductType::SUBSCRIPTION,
             'subscription_period' => $this->faker->randomElement(PeriodEnum::getValues()),
             'subscription_duration' => $this->faker->numberBetween(1, 10),
             'recursive' => $this->faker->boolean,
@@ -54,10 +54,10 @@ class ProductFactory extends Factory
         ]);
     }
 
-    public function subscriptionWithTrial(): self
+    public function subscriptionWithTrial(?string $productType = null): self
     {
         return $this->state([
-            'type' => ProductType::SUBSCRIPTION,
+            'type' => $productType ?? ProductType::SUBSCRIPTION,
             'subscription_period' => $this->faker->randomElement(PeriodEnum::getValues()),
             'subscription_duration' => $this->faker->numberBetween(1, 10),
             'recursive' => $this->faker->boolean,
