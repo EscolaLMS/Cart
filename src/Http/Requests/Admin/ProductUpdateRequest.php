@@ -2,7 +2,6 @@
 
 namespace EscolaLms\Cart\Http\Requests\Admin;
 
-use EscolaLms\Cart\Enums\PeriodEnum;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Models\Category;
 use EscolaLms\Cart\Models\Product;
@@ -10,14 +9,13 @@ use EscolaLms\Cart\Rules\MinPrice;
 use EscolaLms\Cart\Rules\PosterRule;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class ProductUpdateRequest extends FormRequest
+class ProductUpdateRequest extends ProductRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('update', $this->getProduct());
     }
@@ -49,14 +47,8 @@ class ProductUpdateRequest extends FormRequest
             'tags.*' => ['string'],
             'related_products' => ['sometimes', 'array'],
             'related_products.*' => ['integer'],
-            // subscription
-            'subscription_period' => ['required_if:type,' . ProductType::SUBSCRIPTION, Rule::in(PeriodEnum::getValues())],
-            'subscription_duration' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'integer', 'gt:0'],
-            'recursive' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
-            // trial
-            'has_trial' => ['required_if:type,' . ProductType::SUBSCRIPTION, 'boolean'],
-            'trial_period' => ['nullable', 'required_if:has_trial,true', Rule::in(PeriodEnum::getValues())],
-            'trial_duration' => ['nullable', 'required_if:has_trial,true', 'integer', 'gt:0'],
+            ...$this->subscriptionRules(),
+            ...$this->trialRules(),
         ];
     }
 
