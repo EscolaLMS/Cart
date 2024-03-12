@@ -5,6 +5,7 @@ use EscolaLms\Cart\Http\Controllers\Admin\ProductableAdminApiController;
 use EscolaLms\Cart\Http\Controllers\Admin\ProductAdminApiController;
 use EscolaLms\Cart\Http\Controllers\CartApiController;
 use EscolaLms\Cart\Http\Controllers\OrderApiController;
+use EscolaLms\Cart\Http\Controllers\PaymentApiController;
 use EscolaLms\Cart\Http\Controllers\ProductApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,8 +38,11 @@ Route::group(['prefix' => 'api/cart', 'middleware' => ['auth:api']], function ()
     Route::post('/missing', [CartApiController::class, 'addMissingProducts']);
     Route::delete('/products/{id}', [CartApiController::class, 'remove']);
     Route::post('/add', [CartApiController::class, 'addProductable']);
-    Route::post('/pay', [CartApiController::class, 'pay']);
-    Route::post('/pay/products/{id}', [CartApiController::class, 'payProduct']);
+});
+
+Route::group(['prefix' => 'api', 'middleware' => ['auth:api']], function () {
+    Route::post('cart/pay', [PaymentApiController::class, 'pay']);
+    Route::post('product/{id}/pay', [PaymentApiController::class, 'payProduct']);
 });
 
 Route::group(['prefix' => 'api/products'], function () {

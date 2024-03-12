@@ -3,10 +3,8 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
-use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Enums\QuantityOperationEnum;
 use EscolaLms\Cart\Events\ProductAddedToCart;
-use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductRemovedFromCart;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Models\Product;
@@ -217,107 +215,6 @@ class CartApiTest extends TestCase
             return $item['product_id'];
         }, $responseContent['data']['items']);
         $this->assertContains($product->getKey(), $cartItemsId);
-    }
-
-    public function test_pay(): void
-    {
-        $eventFake = Event::fake(ProductBought::class);
-        $paymentsFake = PaymentGateway::fake();
-
-        $user = $this->user;
-
-        /** @var Product $product */
-        $product = Product::factory()->create([
-            'price' => 1000,
-            'purchasable' => true,
-        ]);
-
-        $cart = $this->shopService->cartForUser($user);
-        $this->shopService->addProductToCart($cart, $product);
-
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
-        $this->response->assertCreated();
-
-        $eventFake->assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
-
-        $product->refresh();
-
-        $this->assertTrue($product->getOwnedByUserAttribute($user));
-    }
-
-    public function test_pay_product(): void
-    {
-        Event::fake(ProductBought::class);
-        PaymentGateway::fake();
-
-        $user = $this->user;
-
-        /** @var Product $product */
-        $product = Product::factory()->create([
-            'price' => 1000,
-            'purchasable' => true,
-        ]);
-
-        $this->actingAs($user, 'api')
-            ->postJson('/api/cart/pay/products/' . $product->getKey())
-            ->assertCreated();
-
-        Event::assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
-
-        $product->refresh();
-
-        $this->assertTrue($product->getOwnedByUserAttribute($user));
-    }
-
-    public function test_pay_subscription(): void
-    {
-        Event::fake(ProductBought::class);
-        PaymentGateway::fake();
-
-        $user = $this->user;
-
-        /** @var Product $product */
-        $product = Product::factory()
-            ->subscriptionWithTrial()
-            ->create([
-                'price' => 1000,
-                'purchasable' => true,
-            ]);
-
-        $this->actingAs($user, 'api')
-            ->postJson('/api/cart/pay/products/' . $product->getKey())
-            ->assertCreated();
-
-        Event::assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey() && $event->getProduct()->type === ProductType::SUBSCRIPTION);
-
-        $product->refresh();
-
-        $this->assertTrue($product->getOwnedByUserAttribute($user));
-    }
-
-    public function test_pay_for_free_products(): void
-    {
-        $eventFake = Event::fake(ProductBought::class);
-
-        $user = $this->user;
-
-        /** @var Product $product */
-        $product = Product::factory()->create([
-            'price' => 0,
-            'purchasable' => true,
-        ]);
-
-        $cart = $this->shopService->cartForUser($user);
-        $this->shopService->addProductToCart($cart, $product);
-
-        $this->response = $this->actingAs($user, 'api')->json('POST', '/api/cart/pay');
-        $this->response->assertCreated();
-
-        $eventFake->assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey());
-
-        $product->refresh();
-
-        $this->assertTrue($product->getOwnedByUserAttribute($user));
     }
 
     public function test_get_orders(): void
