@@ -17,3 +17,4 @@ providers:
   - EscolaLms\Payments\Providers\PaymentsServiceProvider
   - EscolaLms\Cart\EscolaLmsCartServiceProvider
   - EscolaLms\Templates\EscolaLmsTemplatesServiceProvider
+

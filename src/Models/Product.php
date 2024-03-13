@@ -42,7 +42,6 @@ use Illuminate\Support\Facades\Storage;
  *          type="integer"
  *      )
  * )
- *
  * @property int $id
  * @property string $name
  * @property string $type
@@ -103,6 +102,19 @@ use Illuminate\Support\Facades\Storage;
  * @method static ProductModelQueryBuilder|Product whereTeaserUrl($value)
  * @method static ProductModelQueryBuilder|Product whereType($value)
  * @method static ProductModelQueryBuilder|Product whereUpdatedAt($value)
+ * @property string|null $subscription_period
+ * @property int|null $subscription_duration
+ * @property bool $recursive
+ * @property bool|null $has_trial
+ * @property string|null $trial_period
+ * @property int|null $trial_duration
+ * @property-read string|null $poster_url_or_productable_thumbnail
+ * @method static ProductModelQueryBuilder|Product whereHasTrial($value)
+ * @method static ProductModelQueryBuilder|Product whereRecursive($value)
+ * @method static ProductModelQueryBuilder|Product whereSubscriptionDuration($value)
+ * @method static ProductModelQueryBuilder|Product whereSubscriptionPeriod($value)
+ * @method static ProductModelQueryBuilder|Product whereTrialDuration($value)
+ * @method static ProductModelQueryBuilder|Product whereTrialPeriod($value)
  * @mixin \Eloquent
  */
 class Product extends Model implements ProductInterface
@@ -115,7 +127,9 @@ class Product extends Model implements ProductInterface
     ];
 
     protected $casts = [
-        'purchasable' => 'bool'
+        'purchasable' => 'bool',
+        'has_trial' => 'bool',
+        'recursive' => 'bool'
     ];
 
     public function productables(): HasMany

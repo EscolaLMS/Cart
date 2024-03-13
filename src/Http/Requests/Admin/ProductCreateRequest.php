@@ -8,14 +8,13 @@ use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Rules\MinPrice;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class ProductCreateRequest extends FormRequest
+class ProductCreateRequest extends ProductRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('create', Product::class);
     }
@@ -46,6 +45,9 @@ class ProductCreateRequest extends FormRequest
             'tags.*' => ['string'],
             'related_products' => ['sometimes', 'array'],
             'related_products.*' => ['integer'],
+            ...$this->subscriptionRules(),
+            ...$this->trialRules(),
         ];
     }
+
 }

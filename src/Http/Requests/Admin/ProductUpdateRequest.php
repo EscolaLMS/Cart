@@ -9,14 +9,13 @@ use EscolaLms\Cart\Rules\MinPrice;
 use EscolaLms\Cart\Rules\PosterRule;
 use EscolaLms\Cart\Rules\ProductableRegisteredRule;
 use EscolaLms\Cart\Rules\ProductProductablesRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class ProductUpdateRequest extends FormRequest
+class ProductUpdateRequest extends ProductRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('update', $this->getProduct());
     }
@@ -48,6 +47,8 @@ class ProductUpdateRequest extends FormRequest
             'tags.*' => ['string'],
             'related_products' => ['sometimes', 'array'],
             'related_products.*' => ['integer'],
+            ...$this->subscriptionRules(),
+            ...$this->trialRules(),
         ];
     }
 

@@ -95,20 +95,11 @@ jobs:
       - name: Instantiate package
         uses: actions/checkout@v2
 
-      - name: Update composer
-        run: composer update
-
       - name: Setup environment
         run: cp env/postgres/* .
 
-      - name: Clear config
-        run: vendor/bin/testbench config:clear
-
-      - name: Publish things
-        run: vendor/bin/testbench migrate:fresh
-
-      - name: Run tests
-        run: vendor/bin/phpunit
+      - name: Update composer
+        run: composer update
 
       - name: Clear config
         run: vendor/bin/testbench config:clear
@@ -139,11 +130,11 @@ jobs:
       - name: Instantiate package
         uses: actions/checkout@v2
 
-      - name: Update composer
-        run: composer update
-
       - name: Setup environment
         run: cp env/postgres/* .
+
+      - name: Update composer
+        run: composer update
 
       - name: Clear config
         run: vendor/bin/testbench config:clear

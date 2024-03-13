@@ -53,6 +53,12 @@ class BaseProductResource extends JsonResource
             'available_quantity' => $this->getProduct()->available_quantity,
             'sold_quantity' => $this->getProduct()->sold_quantity,
             'gross_price' => $this->getProduct()->getGrossPrice(),
+            'subscription_period' => $this->getProduct()->subscription_period,
+            'subscription_duration' => $this->getProduct()->subscription_duration,
+            'recursive' => $this->getProduct()->recursive,
+            'has_trial' => $this->getProduct()->has_trial,
+            'trial_period' => $this->getProduct()->trial_period,
+            'trial_duration' => $this->getProduct()->trial_duration,
         ];
         return $data;
     }

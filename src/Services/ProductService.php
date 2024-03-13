@@ -270,6 +270,28 @@ class ProductService implements ProductServiceContract
 
     public function update(Product $product, array $data): Product
     {
+        if (ProductType::isSubscriptionType($product->type) && !ProductType::isSubscriptionType($data['type'])) {
+            throw new Exception(__('Product with subscription type cannot have type changed'));
+        }
+
+        if (
+            ProductType::isSubscriptionType($product->type) &&
+            (
+                $product->subscription_period !== $data['subscription_period']
+                || $product->subscription_duration !== $data['subscription_duration']
+                || $product->recursive !== $data['recursive']
+            )
+        ) {
+            throw new Exception(__('Subscription fields cannot be edited'));
+        }
+
+        if (
+            ($product->type === ProductType::SUBSCRIPTION_ALL_IN || (isset($data['type']) && $data['type'] === ProductType::SUBSCRIPTION_ALL_IN))
+            && !empty($data['productables'])
+        ) {
+            throw new Exception(__('Products cannot be assigned to all-in subscription type.'));
+        }
+
         $relatedProducts = $data['related_products'] ?? null;
         unset($data['related_products']);
 
@@ -381,6 +403,8 @@ class ProductService implements ProductServiceContract
                 'quantity' => $product->type === ProductType::SINGLE ? 1 : ($newProductable['quantity'] ?? 1),
             ]));
         }
+
+        $product->load('productables');
     }
 
     public function attachProductToUser(Product $product, User $user, int $quantity = 1): void
