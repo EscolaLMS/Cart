@@ -85,6 +85,39 @@ class OrderService implements OrderServiceContract
         return $order;
     }
 
+    public function createOrderFromProduct(Product $product, int $userId, ?ClientDetailsDto $clientDetailsDto = null): Order
+    {
+        $optionalClientDetailsDto = optional($clientDetailsDto);
+
+        /** @var User $user */
+        $user = User::find($userId);
+
+        $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
+
+        $order = new Order();
+        $order->user_id = $user->getKey();
+        $order->total = $product->getGrossPrice();
+        $order->subtotal = $product->price;
+        $order->tax = $product->getTaxRate();
+        $order->status = OrderStatus::PROCESSING;
+        $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
+        $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
+        $order->client_street = $optionalClientDetailsDto->getStreet();
+        $order->client_street_number = $optionalClientDetailsDto->getStreetNumber();
+        $order->client_postal = $optionalClientDetailsDto->getPostal();
+        $order->client_city = $optionalClientDetailsDto->getCity();
+        $order->client_country = $optionalClientDetailsDto->getCountry();
+        $order->client_company = $optionalClientDetailsDto->getCompany();
+        $order->client_taxid = $optionalClientDetailsDto->getTaxid();
+        $order->save();
+
+        $this->storeProductAsOrderItem($order, $product);
+
+        event(new OrderCreated($order));
+
+        return $order;
+    }
+
     public function storeCartItemAsOrderItem(Order $order, CartItem $item): OrderItem
     {
         return OrderItem::create([
@@ -95,6 +128,20 @@ class OrderService implements OrderServiceContract
             'quantity'     => $item->quantity,
             'tax_rate'     => $item->tax_rate,
             'extra_fees'   => $item->extra_fees,
+            'order_id'     => $order->getKey(),
+        ]);
+    }
+
+    public function storeProductAsOrderItem(Order $order, Product $product): OrderItem
+    {
+        return OrderItem::create([
+            'buyable_type' => Product::class,
+            'buyable_id'   => $product->getKey(),
+            'name'         => $product->name ?? null,
+            'price'        => $product->price,
+            'quantity'     => 1,
+            'tax_rate'     => $product->tax_rate,
+            'extra_fees'   => $product->extra_fees,
             'order_id'     => $order->getKey(),
         ]);
     }

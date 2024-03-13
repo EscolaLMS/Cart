@@ -3,8 +3,6 @@
 namespace EscolaLms\Cart\Http\Controllers;
 
 use EscolaLms\Cart\Http\Requests\AddMissingProductsRequest;
-use EscolaLms\Cart\Http\Requests\CartItemRemoveFromCartRequest;
-use EscolaLms\Cart\Http\Requests\PaymentRequest;
 use EscolaLms\Cart\Http\Requests\ProductableAddToCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductRemoveFromCartRequest;
 use EscolaLms\Cart\Http\Requests\ProductSetQuantityInCartRequest;
@@ -12,7 +10,6 @@ use EscolaLms\Cart\Http\Swagger\CartSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
-use EscolaLms\Payments\Http\Resources\PaymentResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -79,28 +76,5 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
             $this->shopService->updateProductQuantity($cart, $product, 0),
             __('Product removed from cart')
         );
-    }
-
-    public function pay(PaymentRequest $request): JsonResponse
-    {
-        try {
-            $cart = $this->shopService->cartForUser($request->user());
-
-            $payment = $this->shopService->purchaseCart($cart, $request->toClientDetailsDto(), $request->except([
-                'client_name',
-                'client_email',
-                'client_street',
-                'client_street_number',
-                'client_postal',
-                'client_city',
-                'client_country',
-                'client_company',
-                'client_taxid',
-            ]));
-
-            return $this->sendResponseForResource(PaymentResource::make($payment), __('Payment created'));
-        } catch (\Exception $e) {
-            return $this->sendError($e->getMessage(), 400);
-        }
     }
 }

@@ -275,6 +275,24 @@ class Product extends Model implements ProductInterface
 
     public function getTax(): int
     {
-        return (int) round($this->getBuyablePrice() * $this->getTaxRate() / 100, 0);
+        return (int)round($this->getBuyablePrice() * $this->getTaxRate() / 100, 0);
+    }
+
+    public function getSubscriptionParameters(): array
+    {
+        return [
+            'subscription_period' => $this->subscription_period,
+            'subscription_duration' => $this->subscription_duration,
+            'recursive' => $this->recursive
+        ];
+    }
+
+    public function getTrailParameters(): array
+    {
+        return [
+            'has_trial' => $this->has_trial,
+            'trial_period' => $this->trial_period,
+            'trial_duration' => $this->trial_duration,
+        ];
     }
 }
