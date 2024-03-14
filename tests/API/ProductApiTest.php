@@ -21,6 +21,7 @@ use EscolaLms\Templates\Models\TemplateSection;
 use EscolaLms\Templates\Tests\Mock\TestChannel;
 use EscolaLms\Templates\Tests\Mock\TestUserVariables;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\TestResponse;
 
@@ -228,5 +229,95 @@ class ProductApiTest extends TestCase
                 'price' => 1000,
                 'gross_price' => 1230,
             ]);
+    }
+
+    public function test_search_my_products_unauthorized(): void
+    {
+        $this->getJson('api/products/my')
+            ->assertUnauthorized();
+    }
+
+    /**
+     * @dataProvider myProductsFilterDataProvider
+     */
+    public function test_search_my_products(array $filters, callable $generator, int $filterCount): void
+    {
+        $user = $this->makeStudent();
+        $generator($user)->each(fn($factory) => $factory->create());
+
+        $this->actingAs($user, 'api')
+            ->getJson('api/products/my?' . http_build_query($filters))
+            ->assertOk()
+            ->assertJsonCount($filterCount, 'data')
+            ->assertJsonStructure(['data' => [[
+                'id',
+                'type',
+                'name',
+                'is_active',
+                'end_date',
+                'end_date',
+                'productables',
+            ]]]);
+    }
+
+    public function myProductsFilterDataProvider(): array
+    {
+        return [
+            [
+                'filter' => [],
+                'data' => (function (User $user) {
+                    $tasks = collect();
+                    $tasks->push(Product::factory()->count(5)->hasAttached(User::factory()->count(2)));
+                    $tasks->push(Product::factory()->count(3)->hasAttached($user));
+
+                    return $tasks;
+                }),
+                'filterCount' => 3,
+            ],
+            [
+                'filter' => [
+                    'type' => 'subscription',
+                ],
+                'data' => (function (User $user) {
+                    $tasks = collect();
+                    $tasks->push(Product::factory()->count(5)->hasAttached(User::factory()->count(2)));
+                    $tasks->push(Product::factory()->count(2)->hasAttached($user));
+                    $tasks->push(Product::factory()->state(['type' => 'subscription'])->count(1)->hasAttached($user));
+
+                    return $tasks;
+                }),
+                'filterCount' => 1,
+            ],
+            [
+                'filter' => [
+                    'active' => false,
+                ],
+                'data' => (function (User $user) {
+                    $tasks = collect();
+                    $tasks->push(Product::factory()->count(5)->hasAttached(User::factory()->count(2)));
+                    $tasks->push(Product::factory()->count(3)->hasAttached($user, ['end_date' => Carbon::now()->addMonth()]));
+                    $tasks->push(Product::factory()->count(1)->hasAttached($user, ['end_date' => null]));
+                    $tasks->push(Product::factory()->count(2)->hasAttached($user, ['end_date' => Carbon::now()->subMonth()]));
+
+                    return $tasks;
+                }),
+                'filterCount' => 2,
+            ],
+            [
+                'filter' => [
+                    'active' => true,
+                ],
+                'data' => (function (User $user) {
+                    $tasks = collect();
+                    $tasks->push(Product::factory()->count(5)->hasAttached(User::factory()->count(2)));
+                    $tasks->push(Product::factory()->count(3)->hasAttached($user, ['end_date' => Carbon::now()->addMonth()]));
+                    $tasks->push(Product::factory()->count(1)->hasAttached($user, ['end_date' => null]));
+                    $tasks->push(Product::factory()->count(2)->hasAttached($user, ['end_date' => Carbon::now()->subMonth()]));
+
+                    return $tasks;
+                }),
+                'filterCount' => 4,
+            ],
+        ];
     }
 }

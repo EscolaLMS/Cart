@@ -24,6 +24,11 @@ class ProductPolicy
         return $user->can(CartPermissionsEnum::LIST_ALL_PRODUCTS);
     }
 
+    public function viewMy(User $user)
+    {
+        return $user->can(CartPermissionsEnum::LIST_PURCHASABLE_PRODUCTS);
+    }
+
     public function viewPurchasable(?User $user = null)
     {
         return true;

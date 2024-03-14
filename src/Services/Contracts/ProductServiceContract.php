@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Services\Contracts;
 
 use EscolaLms\Cart\Contracts\Productable;
+use EscolaLms\Cart\Dtos\PageDto;
+use EscolaLms\Cart\Dtos\ProductSearchMyCriteriaDto;
 use EscolaLms\Cart\Dtos\ProductsSearchDto;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
@@ -44,4 +46,5 @@ interface ProductServiceContract
 
     public function productableIsOwnedByUserThroughProduct(Productable $productable, User $user): bool;
     public function canDetachProductableFromUser(Productable $productable, User $user): bool;
+    public function searchMy(ProductSearchMyCriteriaDto $dto, PageDto $pageDto, OrderDto $orderDto): LengthAwarePaginator;
 }

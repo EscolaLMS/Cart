@@ -46,6 +46,10 @@ Route::group(['prefix' => 'api', 'middleware' => ['auth:api']], function () {
 });
 
 Route::group(['prefix' => 'api/products'], function () {
+    Route::group(['prefix' => 'my', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [ProductApiController::class, 'indexMy']);
+    });
+
     Route::get('/{id}', [ProductApiController::class, 'read']);
     Route::get('/', [ProductApiController::class, 'index']);
 });
