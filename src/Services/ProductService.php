@@ -3,6 +3,8 @@
 namespace EscolaLms\Cart\Services;
 
 use EscolaLms\Cart\Contracts\Productable;
+use EscolaLms\Cart\Dtos\PageDto;
+use EscolaLms\Cart\Dtos\ProductSearchMyCriteriaDto;
 use EscolaLms\Cart\Dtos\ProductsSearchDto;
 use EscolaLms\Cart\Enums\ConstantEnum;
 use EscolaLms\Cart\Enums\ProductType;
@@ -17,6 +19,7 @@ use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
+use EscolaLms\Core\Repositories\Criteria\Criterion;
 use EscolaLms\Files\Helpers\FileHelper;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -546,6 +549,21 @@ class ProductService implements ProductServiceContract
     public function canDetachProductableFromUser(Productable $productable, User $user): bool
     {
         return !$this->productableIsOwnedByUserThroughProduct($productable, $user);
+    }
+
+    public function searchMy(ProductSearchMyCriteriaDto $dto, PageDto $pageDto, OrderDto $orderDto): LengthAwarePaginator
+    {
+        $query = Product::query();
+
+        foreach ($dto->toArray() as $criterion) {
+            if ($criterion instanceof Criterion) {
+                $query = $criterion->apply($query);
+            }
+        }
+
+        return $query
+            ->orderBy($orderDto->getOrderBy() ?? 'id', $orderDto->getOrder() ?? 'desc')
+            ->paginate($pageDto->getPerPage());
     }
 
     private function productQuantityInCart(User $user, Product $product): int

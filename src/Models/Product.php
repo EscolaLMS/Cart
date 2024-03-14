@@ -139,7 +139,9 @@ class Product extends Model implements ProductInterface
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'products_users')->using(ProductUser::class)->withPivot('quantity');
+        return $this->belongsToMany(User::class, 'products_users')
+            ->using(ProductUser::class)
+            ->withPivot(['quantity', 'end_date', 'status']);
     }
 
     public function tags(): MorphMany

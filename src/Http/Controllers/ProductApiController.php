@@ -3,7 +3,9 @@
 namespace EscolaLms\Cart\Http\Controllers;
 
 use EscolaLms\Cart\Http\Requests\ProductReadRequest;
+use EscolaLms\Cart\Http\Requests\ProductSearchMyRequest;
 use EscolaLms\Cart\Http\Requests\ProductSearchRequest;
+use EscolaLms\Cart\Http\Resources\MyProductResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Http\Swagger\ProductSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
@@ -34,5 +36,12 @@ class ProductApiController extends EscolaLmsBaseController implements ProductSwa
     public function read(ProductReadRequest $request): JsonResponse
     {
         return $this->sendResponseForResource(ProductResource::make($request->getProduct()), __('Product fetched'));
+    }
+
+    public function indexMy(ProductSearchMyRequest $request): JsonResponse
+    {
+        $results = $this->productService->searchMy($request->getCriteria(), $request->getPage(), $request->getOrder());
+
+        return $this->sendResponseForResource(MyProductResource::collection($results));
     }
 }
