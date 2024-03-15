@@ -6,6 +6,7 @@ use EscolaLms\Cart\Http\Controllers\Admin\ProductAdminApiController;
 use EscolaLms\Cart\Http\Controllers\CartApiController;
 use EscolaLms\Cart\Http\Controllers\OrderApiController;
 use EscolaLms\Cart\Http\Controllers\PaymentApiController;
+use EscolaLms\Cart\Http\Controllers\ProductablesApiController;
 use EscolaLms\Cart\Http\Controllers\ProductApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,10 @@ Route::group(['prefix' => 'api/products'], function () {
 
     Route::get('/{id}', [ProductApiController::class, 'read']);
     Route::get('/', [ProductApiController::class, 'index']);
+});
+
+Route::group(['prefix' => 'api/productables', 'middleware' => ['auth:api']], function () {
+    Route::post('attach', [ProductablesApiController::class, 'attach']);
 });
 
 Route::group(['prefix' => 'api/orders', 'middleware' => ['auth:api']], function () {

@@ -16,4 +16,14 @@ class ExampleProductableBase extends Model
     {
         return $this->belongsToMany(User::class, 'test_productables_users', 'test_productable_id', 'user_id');
     }
+
+    public static function getTableName(): string
+    {
+        return 'test_productables';
+    }
+
+    public static function getUsersTableName(): string
+    {
+        return 'test_productables_users';
+    }
 }
