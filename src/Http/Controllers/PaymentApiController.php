@@ -24,17 +24,11 @@ class PaymentApiController extends EscolaLmsBaseController implements PaymentSwa
         try {
             $cart = $this->shopService->cartForUser($request->user());
 
-            $payment = $this->shopService->purchaseCart($cart, $request->toClientDetailsDto(), $request->except([
-                'client_name',
-                'client_email',
-                'client_street',
-                'client_street_number',
-                'client_postal',
-                'client_city',
-                'client_country',
-                'client_company',
-                'client_taxid',
-            ]));
+            $payment = $this->shopService->purchaseCart(
+                $cart,
+                $request->toClientDetailsDto(),
+                $request->getAdditionalPaymentParameters()
+            );
 
             return $this->sendResponseForResource(PaymentResource::make($payment), __('Payment created'));
         } catch (\Exception $e) {
@@ -45,7 +39,12 @@ class PaymentApiController extends EscolaLmsBaseController implements PaymentSwa
     public function payProduct(PaymentProductRequest $request): JsonResponse
     {
         try {
-            $payment = $this->shopService->purchaseProduct($request->getProduct(), $request->user(), $request->toClientDetailsDto());
+            $payment = $this->shopService->purchaseProduct(
+                $request->getProduct(),
+                $request->user(),
+                $request->toClientDetailsDto(),
+                $request->getAdditionalPaymentParameters()
+            );
 
             return $this->sendResponseForResource(PaymentResource::make($payment), __('Payment created'));
         } catch (\Exception $e) {
