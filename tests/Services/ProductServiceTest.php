@@ -95,15 +95,13 @@ class ProductServiceTest extends TestCase
     private function assertHasProductsUsers(Product $product, User $user, ?Carbon $endDate = null): void
     {
         $result = ProductUser::query()->where('product_id', $product->getKey())->where('user_id', $user->getKey())->first();
-
-        $this->assertNotNull($result);
-
         $endDate = $endDate === null
             ? $product->has_trial
                 ? PeriodEnum::calculatePeriod(Carbon::now(), $product->trial_period, $product->trial_duration)
                 : PeriodEnum::calculatePeriod(Carbon::now(), $product->subscription_period, $product->subscription_duration)
             : $endDate;
 
+        $this->assertNotNull($result);
         $this->assertEquals($result->end_date, $endDate);
     }
 
