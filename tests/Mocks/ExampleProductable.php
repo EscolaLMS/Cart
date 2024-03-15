@@ -15,7 +15,9 @@ class ExampleProductable extends ExampleProductableBase implements Productable
 
     public function attachToUser(User $user, int $quantity = 1, ?Product $product = null): void
     {
-        $productUser = $product->users()->where('user_id', $user->getKey())->first()?->pivot;
+        $productUser = $product->users !== null || $product->users->isNotEmpty()
+            ? $product->users()->where('user_id', $user->getKey())->first()?->pivot
+            : null;
 
         $this->users()->syncWithoutDetaching([$user->getKey() => ['end_date' => $productUser?->end_date]]);
     }

@@ -27,7 +27,7 @@ class ExampleProductableMigration
             $table->id();
             $table->foreignId('test_productable_id');
             $table->foreignId('user_id');
-            $table->dateTime('end_date');
+            $table->dateTime('end_date')->nullable();
         });
     }
 }
