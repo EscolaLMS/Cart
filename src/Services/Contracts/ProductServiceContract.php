@@ -8,6 +8,7 @@ use EscolaLms\Cart\Dtos\ProductSearchMyCriteriaDto;
 use EscolaLms\Cart\Dtos\ProductsSearchDto;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -47,4 +48,6 @@ interface ProductServiceContract
     public function productableIsOwnedByUserThroughProduct(Productable $productable, User $user): bool;
     public function canDetachProductableFromUser(Productable $productable, User $user): bool;
     public function searchMy(ProductSearchMyCriteriaDto $dto, PageDto $pageDto, OrderDto $orderDto): LengthAwarePaginator;
+
+    public function hasActiveSubscriptionAllIn(User $user): ?Product;
 }

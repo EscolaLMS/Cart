@@ -74,4 +74,9 @@ class ProductPolicy
     {
         return $user->can(CartPermissionsEnum::MANAGE_PRODUCTS);
     }
+
+    public function attachToProduct(User $user)
+    {
+        return $user->can(CartPermissionsEnum::BUY_PRODUCTS);
+    }
 }

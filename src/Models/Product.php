@@ -90,6 +90,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
  * @method static ProductModelQueryBuilder|Product whereHasUser(\EscolaLms\Core\Models\User $user)
+ * @method static ProductModelQueryBuilder|Product whereHasUserWithType(\EscolaLms\Core\Models\User $user, string $productType)
  * @method static ProductModelQueryBuilder|Product whereId($value)
  * @method static ProductModelQueryBuilder|Product whereLimitPerUser($value)
  * @method static ProductModelQueryBuilder|Product whereLimitTotal($value)

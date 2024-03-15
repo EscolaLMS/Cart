@@ -6,6 +6,7 @@ use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ProductModelQueryBuilder extends Builder
@@ -28,6 +29,17 @@ class ProductModelQueryBuilder extends Builder
     public function whereHasUser(User $user): ProductModelQueryBuilder
     {
         return $this->whereHas('users', fn (Builder $query) => $query->where('users.id', $user->getKey()));
+    }
+
+    public function whereHasUserWithProductType(User $user, string $productType, ?bool $active = true): ProductModelQueryBuilder
+    {
+        return $this->whereHas('users', fn (Builder $query) => $query
+            ->where('users.id', $user->getKey())
+            ->where('type', $productType)
+            ->when($active, fn(Builder $query) => $query->whereDate('end_date', '>=', Carbon::now()))
+            ->when(!$active, fn(Builder $query) => $query->whereDate('end_date', '<=', Carbon::now()))
+            ->orderBy('end_date', 'desc')
+        );
     }
 
     public function whereDoesntHaveProductablesNotOwnedByUser(?User $user = null): Builder

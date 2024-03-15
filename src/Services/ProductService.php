@@ -606,4 +606,9 @@ class ProductService implements ProductServiceContract
         }
         return 0;
     }
+
+    public function hasActiveSubscriptionAllIn(User $user): ?Product
+    {
+        return Product::query()->whereHasUserWithProductType($user, ProductType::SUBSCRIPTION_ALL_IN)->first();
+    }
 }
