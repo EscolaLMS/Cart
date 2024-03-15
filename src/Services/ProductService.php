@@ -7,7 +7,9 @@ use EscolaLms\Cart\Dtos\PageDto;
 use EscolaLms\Cart\Dtos\ProductSearchMyCriteriaDto;
 use EscolaLms\Cart\Dtos\ProductsSearchDto;
 use EscolaLms\Cart\Enums\ConstantEnum;
+use EscolaLms\Cart\Enums\PeriodEnum;
 use EscolaLms\Cart\Enums\ProductType;
+use EscolaLms\Cart\Enums\SubscriptionStatus;
 use EscolaLms\Cart\Events\ProductableAttached;
 use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
@@ -25,10 +27,9 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -439,7 +440,32 @@ class ProductService implements ProductServiceContract
                 $quantity = $product->limit_per_user - $productUserPivot->quantity;
             }
             $productUserPivot->quantity += $quantity;
+
+            if (ProductType::isSubscriptionType($product->type)) {
+                $productUserPivot->end_date = PeriodEnum::calculatePeriod($productUserPivot->end_date, $product->subscription_period, $product->subscription_duration);
+                $productUserPivot->status = SubscriptionStatus::ACTIVE;
+            }
+
             $productUserPivot->save();
+        }
+
+        if (ProductType::isSubscriptionType($product->type) && $productUserPivot->wasRecentlyCreated) {
+            $hasSubscription = ProductUser::query()
+                ->where('user_id', $user->getKey())
+                ->whereRelation('product', 'type', 'in', ProductType::subscriptionTypes())
+                ->where('product_id', '!=', $product->getKey())
+                ->exists();
+
+            $endDate = PeriodEnum::calculatePeriod(Carbon::now(), $product->subscription_period, $product->subscription_duration);
+
+            if ($product->has_trial && !$hasSubscription) {
+                $endDate = PeriodEnum::calculatePeriod(Carbon::now(), $product->trial_period, $product->trial_duration);
+            }
+
+            ProductUser::query()->updateOrCreate(
+                ['user_id' => $user->getKey(), 'product_id' => $product->getKey()],
+                ['quantity' => 1, 'end_date' => $endDate, 'status' => SubscriptionStatus::ACTIVE]
+            );
         }
 
         if ($quantity === 0) {

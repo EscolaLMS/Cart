@@ -35,6 +35,10 @@ class ProductUser extends Pivot
 {
     protected $table = 'products_users';
 
+    protected $casts = [
+        'end_date' => 'datetime'
+    ];
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

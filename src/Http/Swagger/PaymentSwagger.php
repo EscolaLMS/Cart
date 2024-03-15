@@ -87,7 +87,7 @@ interface PaymentSwagger
 
     /**
      * @OA\Post(
-     *      path="/api/cart/pay/products/{id}",
+     *      path="/api/product/{id}/pay",
      *      description="Pay for single product",
      *      tags={"Cart"},
      *      security={

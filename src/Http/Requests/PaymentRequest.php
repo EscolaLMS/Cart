@@ -44,6 +44,21 @@ abstract class PaymentRequest extends FormRequest
         );
     }
 
+    public function getAdditionalPaymentParameters(): array
+    {
+        return $this->except([
+            'client_name',
+            'client_email',
+            'client_street',
+            'client_street_number',
+            'client_postal',
+            'client_city',
+            'client_country',
+            'client_company',
+            'client_taxid',
+        ]);
+    }
+
     public function getCartUser(): User
     {
         return User::findOrFail($this->user()->getKey());
