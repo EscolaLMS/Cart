@@ -87,6 +87,13 @@ class OrderService implements OrderServiceContract
 
     public function createOrderFromProduct(Product $product, int $userId, ?ClientDetailsDto $clientDetailsDto = null): Order
     {
+        // todo
+//        $hasSubscription = ProductUser::query()
+//            ->where('user_id', $user->getKey())
+//            ->whereRelation('product', 'type', 'in', ProductType::subscriptionTypes())
+//            ->where('product_id', '!=', $product->getKey())
+//            ->exists();
+
         $optionalClientDetailsDto = optional($clientDetailsDto);
 
         /** @var User $user */
@@ -96,10 +103,10 @@ class OrderService implements OrderServiceContract
 
         $order = new Order();
         $order->user_id = $user->getKey();
-        $order->total = $product->getGrossPrice();
-        $order->subtotal = $product->price;
-        $order->tax = $product->getTaxRate();
-        $order->status = OrderStatus::PROCESSING;
+        $order->total = $product->getGrossPrice(); // todo $has_trail ? 1 : $product->getGrossPrice()
+        $order->subtotal = $product->price;  // todo $has_trail ? 1 : $product->price
+        $order->tax = $product->getTaxRate();  // todo $has_trail ? 0 : $product->getTaxRate()
+        $order->status = OrderStatus::PROCESSING; // todo $has_trail ? OrderStatus::TRIAL_PROCESSING : OrderStatus::PROCESSING
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
         $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
@@ -151,6 +158,9 @@ class OrderService implements OrderServiceContract
         if ($order->status === OrderStatus::PAID) {
             return;
         }
+
+        // todo OrderStatus::TRIAL_PROCESSING
+
         $this->setOrderStatus($order, OrderStatus::PAID);
         event(new OrderPaid($order));
         $this->processOrderItems($order);
