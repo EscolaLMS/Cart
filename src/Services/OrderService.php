@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Services;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Dtos\OrdersSearchDto;
 use EscolaLms\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\OrderCancelled;
 use EscolaLms\Cart\Events\OrderCreated;
 use EscolaLms\Cart\Events\OrderPaid;
@@ -92,17 +93,25 @@ class OrderService implements OrderServiceContract
         /** @var User $user */
         $user = User::find($userId);
 
-        $userTrial = $user->orders()->where('status', OrderStatus::TRIAL_PAID)->exists();
-
         $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
         $user->orders()->where('status', OrderStatus::TRIAL_PROCESSING)->update(['status' => OrderStatus::TRIAL_CANCELLED]);
 
+        $hasSubscriptionOrders = $user->orders()
+            ->whereNotIn('status', [OrderStatus::TRIAL_CANCELLED, OrderStatus::CANCELLED])
+            ->whereRelation('items', fn($query) => $query
+                ->whereHasMorph('buyable', [Product::class], fn ($query) => $query
+                    ->whereIn('type', ProductType::subscriptionTypes()))
+            )
+            ->exists();
+
+        $useTrial = !$hasSubscriptionOrders && $product->has_trial;
+
         $order = new Order();
         $order->user_id = $user->getKey();
-        $order->total = $userTrial ? $product->getGrossPrice() : 1;
-        $order->subtotal = $userTrial ? $product->price : 1;
-        $order->tax = $userTrial ? $product->getTaxRate() : 0;
-        $order->status = $userTrial ? OrderStatus::PROCESSING : OrderStatus::TRIAL_PROCESSING;
+        $order->total = $useTrial ? 100 : $product->getGrossPrice();
+        $order->subtotal = $useTrial ? 100 : $product->price;
+        $order->tax = $useTrial ? 0 : $product->getTaxRate();
+        $order->status = $useTrial ? OrderStatus::TRIAL_PROCESSING : OrderStatus::PROCESSING;
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
         $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
