@@ -114,6 +114,35 @@ class PaymentApiTest extends TestCase
 
         /** @var Product $product */
         $product = Product::factory()
+            ->subscriptionWithoutTrial()
+            ->create([
+                'price' => 1000,
+                'purchasable' => true,
+            ]);
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/product/' . $product->getKey() . '/pay')
+            ->assertCreated()
+            ->assertJsonFragment([
+                'amount' => 1000
+            ]);
+
+        Event::assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey() && $event->getProduct()->type === ProductType::SUBSCRIPTION);
+
+        $product->refresh();
+
+        $this->assertTrue($product->getOwnedByUserAttribute($user));
+    }
+
+    public function test_pay_subscription_with_trial(): void
+    {
+        Event::fake(ProductBought::class);
+        PaymentGateway::fake();
+
+        $user = $this->user;
+
+        /** @var Product $product */
+        $product = Product::factory()
             ->subscriptionWithTrial()
             ->create([
                 'price' => 1000,
@@ -122,13 +151,23 @@ class PaymentApiTest extends TestCase
 
         $this->actingAs($user, 'api')
             ->postJson('/api/product/' . $product->getKey() . '/pay')
-            ->assertCreated();
+            ->assertCreated()
+            ->assertJsonFragment([
+                'amount' => 100
+            ]);
 
         Event::assertDispatched(ProductBought::class, fn(ProductBought $event) => $event->getProduct()->getKey() === $product->getKey() && $event->getProduct()->type === ProductType::SUBSCRIPTION);
 
         $product->refresh();
 
         $this->assertTrue($product->getOwnedByUserAttribute($user));
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/product/' . $product->getKey() . '/pay')
+            ->assertCreated()
+            ->assertJsonFragment([
+                'amount' => 1000
+            ]);
     }
 
     public function test_pay_for_free_products(): void
