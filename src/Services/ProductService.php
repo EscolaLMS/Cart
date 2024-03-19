@@ -50,9 +50,8 @@ class ProductService implements ProductServiceContract
         }
         if (!in_array($productableClass, $this->productables)) {
             $this->productables[] = $productableClass;
-            $model = new $productableClass();
-            assert($model instanceof Model);
-            $this->productablesMorphs[$model->getMorphClass()] = $productableClass;
+            assert(is_subclass_of($productableClass, Model::class));
+            $this->productablesMorphs[$productableClass::getMorphClassStatic()] = $productableClass;
         }
     }
 

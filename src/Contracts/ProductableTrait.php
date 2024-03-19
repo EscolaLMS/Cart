@@ -165,4 +165,9 @@ trait ProductableTrait
     {
         return (int) ($this->duration ?? 0);
     }
+
+    public static function getMorphClassStatic(): string
+    {
+        return self::class;
+    }
 }
