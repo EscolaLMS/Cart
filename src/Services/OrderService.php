@@ -87,26 +87,22 @@ class OrderService implements OrderServiceContract
 
     public function createOrderFromProduct(Product $product, int $userId, ?ClientDetailsDto $clientDetailsDto = null): Order
     {
-        // todo
-//        $hasSubscription = ProductUser::query()
-//            ->where('user_id', $user->getKey())
-//            ->whereRelation('product', 'type', 'in', ProductType::subscriptionTypes())
-//            ->where('product_id', '!=', $product->getKey())
-//            ->exists();
-
         $optionalClientDetailsDto = optional($clientDetailsDto);
 
         /** @var User $user */
         $user = User::find($userId);
 
+        $userTrial = $user->orders()->where('status', OrderStatus::TRIAL_PAID)->exists();
+
         $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
+        $user->orders()->where('status', OrderStatus::TRIAL_PROCESSING)->update(['status' => OrderStatus::TRIAL_CANCELLED]);
 
         $order = new Order();
         $order->user_id = $user->getKey();
-        $order->total = $product->getGrossPrice(); // todo $has_trail ? 1 : $product->getGrossPrice()
-        $order->subtotal = $product->price;  // todo $has_trail ? 1 : $product->price
-        $order->tax = $product->getTaxRate();  // todo $has_trail ? 0 : $product->getTaxRate()
-        $order->status = OrderStatus::PROCESSING; // todo $has_trail ? OrderStatus::TRIAL_PROCESSING : OrderStatus::PROCESSING
+        $order->total = $userTrial ? $product->getGrossPrice() : 1;
+        $order->subtotal = $userTrial ? $product->price : 1;
+        $order->tax = $userTrial ? $product->getTaxRate() : 0;
+        $order->status = $userTrial ? OrderStatus::PROCESSING : OrderStatus::TRIAL_PROCESSING;
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
         $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
@@ -159,9 +155,8 @@ class OrderService implements OrderServiceContract
             return;
         }
 
-        // todo OrderStatus::TRIAL_PROCESSING
-
-        $this->setOrderStatus($order, OrderStatus::PAID);
+        $status = $order->status === OrderStatus::TRIAL_PROCESSING ? OrderStatus::TRIAL_PAID : OrderStatus::PAID;
+        $this->setOrderStatus($order, $status);
         event(new OrderPaid($order));
         $this->processOrderItems($order);
     }
