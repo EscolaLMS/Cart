@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Services;
 
 use Carbon\Carbon;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
+use EscolaLms\Cart\Enums\OrderStatus;
 use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Enums\QuantityOperationEnum;
 use EscolaLms\Cart\Events\ProductAddedToCart;
@@ -72,7 +73,7 @@ class ShopService implements ShopServiceContract
         $parameters['type'] = $product->type;
         if (ProductType::isSubscriptionType($product->type)) {
             $parameters += $product->getSubscriptionParameters();
-            $parameters += $product->getTrailParameters();
+            $parameters += $order->status === OrderStatus::TRIAL_PROCESSING ? $product->getTrailParameters() : [];
         }
 
         $paymentProcessor->purchase($parameters);

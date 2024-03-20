@@ -5,6 +5,7 @@ namespace EscolaLms\Cart\Services;
 use EscolaLms\Cart\Dtos\ClientDetailsDto;
 use EscolaLms\Cart\Dtos\OrdersSearchDto;
 use EscolaLms\Cart\Enums\OrderStatus;
+use EscolaLms\Cart\Enums\ProductType;
 use EscolaLms\Cart\Events\OrderCancelled;
 use EscolaLms\Cart\Events\OrderCreated;
 use EscolaLms\Cart\Events\OrderPaid;
@@ -93,13 +94,24 @@ class OrderService implements OrderServiceContract
         $user = User::find($userId);
 
         $user->orders()->where('status', OrderStatus::PROCESSING)->update(['status' => OrderStatus::CANCELLED]);
+        $user->orders()->where('status', OrderStatus::TRIAL_PROCESSING)->update(['status' => OrderStatus::TRIAL_CANCELLED]);
+
+        $hasSubscriptionOrders = $user->orders()
+            ->whereNotIn('status', [OrderStatus::TRIAL_CANCELLED, OrderStatus::CANCELLED])
+            ->whereRelation('items', fn($query) => $query
+                ->whereHasMorph('buyable', [Product::class], fn ($query) => $query
+                    ->whereIn('type', ProductType::subscriptionTypes()))
+            )
+            ->exists();
+
+        $useTrial = !$hasSubscriptionOrders && $product->has_trial;
 
         $order = new Order();
         $order->user_id = $user->getKey();
-        $order->total = $product->getGrossPrice();
-        $order->subtotal = $product->price;
-        $order->tax = $product->getTaxRate();
-        $order->status = OrderStatus::PROCESSING;
+        $order->total = $useTrial ? 100 : $product->getGrossPrice();
+        $order->subtotal = $useTrial ? 100 : $product->price;
+        $order->tax = $useTrial ? 0 : $product->getTaxRate();
+        $order->status = $useTrial ? OrderStatus::TRIAL_PROCESSING : OrderStatus::PROCESSING;
         $order->client_name = $optionalClientDetailsDto->getName() ?? $order->user->name;
         $order->client_email = $optionalClientDetailsDto->getEmail() ?? $order->user->email;
         $order->client_street = $optionalClientDetailsDto->getStreet();
@@ -151,7 +163,9 @@ class OrderService implements OrderServiceContract
         if ($order->status === OrderStatus::PAID) {
             return;
         }
-        $this->setOrderStatus($order, OrderStatus::PAID);
+
+        $status = $order->status === OrderStatus::TRIAL_PROCESSING ? OrderStatus::TRIAL_PAID : OrderStatus::PAID;
+        $this->setOrderStatus($order, $status);
         event(new OrderPaid($order));
         $this->processOrderItems($order);
     }
