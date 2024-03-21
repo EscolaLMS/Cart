@@ -30,6 +30,11 @@ class RenewRecursiveProductUser implements ShouldQueue
 
     }
 
+    public function getProductUser(): ProductUser
+    {
+        return $this->productUser;
+    }
+
     public function handle(OrderServiceContract $orderService): void
     {
         $product = Product::find($this->productUser->product_id);
@@ -60,8 +65,6 @@ class RenewRecursiveProductUser implements ShouldQueue
             'gateway' => $prevPayment->driver,
             'gateway_order_id' => $prevPayment->gateway_order_id
         ];
-
-        $var = array_change_key_case($parameters, CASE_UPPER);
 
         if (ProductType::isSubscriptionType($product->type)) {
             $parameters += $product->getSubscriptionParameters();

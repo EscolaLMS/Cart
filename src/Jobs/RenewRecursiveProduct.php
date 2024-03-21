@@ -18,7 +18,7 @@ class RenewRecursiveProduct implements ShouldQueue
     public function handle(ProductServiceContract $productService): void
     {
         $productService
-            ->getRecursiveProductUserBeforeExpiredEndDate(Carbon::now()->subHour(), Carbon::now()->addHours(4)) // todo utc
-            ->each(fn(ProductUser $productUser) => RenewRecursiveProductUser::dispatchSync($productUser));
+            ->getRecursiveProductUserBeforeExpiredEndDate(Carbon::now()->subHour(), Carbon::now()->addHour())
+            ->each(fn(ProductUser $productUser) => RenewRecursiveProductUser::dispatch($productUser));
     }
 }

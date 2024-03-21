@@ -2,20 +2,16 @@
 
 namespace EscolaLms\Cart\Tests\Feature;
 
-use EscolaLms\Cart\Enums\PeriodEnum;
 use EscolaLms\Cart\Enums\SubscriptionStatus;
-use EscolaLms\Cart\Jobs\RenewRecursiveProduct;
-use EscolaLms\Cart\Jobs\RenewRecursiveProductUser;
+use EscolaLms\Cart\Jobs\ExpireRecursiveProduct;
 use EscolaLms\Cart\Models\Product;
-use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Core\Tests\CreatesUsers;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Queue;
 
-class RenewRecursiveProductTest extends TestCase
+class ExpireRecursiveProductTest extends TestCase
 {
     use CreatesUsers, DatabaseTransactions;
 
@@ -23,13 +19,13 @@ class RenewRecursiveProductTest extends TestCase
     {
         parent::setUp();
 
-        Queue::fake();
         Carbon::setTestNow(Carbon::now()->startOfDay());
     }
 
-    public function testRenewRecursiveProductOnlyActive(): void
+    public function testExpireRecursiveProductMarkAsExpired(): void
     {
-        $product = Product::factory()->subscriptionWithoutTrial()->state(['subscription_period' => PeriodEnum::DAILY, 'subscription_duration' => 3])->create();
+        /** @var Product $product */
+        $product = Product::factory()->subscriptionWithoutTrial()->create();
         $user1 = $this->makeStudent();
         $user2 = $this->makeStudent();
         $user3 = $this->makeStudent();
@@ -37,28 +33,27 @@ class RenewRecursiveProductTest extends TestCase
         $user5 = $this->makeStudent();
 
         $product->users()->sync([
-            $user1->getKey() => ['end_date' => Carbon::now()->addHours(2), 'status' => SubscriptionStatus::ACTIVE],
+            $user1->getKey() => ['end_date' => Carbon::now()->addHour(), 'status' => SubscriptionStatus::ACTIVE],
             $user2->getKey() => ['end_date' => Carbon::now()->subHour(), 'status' => SubscriptionStatus::ACTIVE],
             $user3->getKey() => ['end_date' => Carbon::now()->subHour(), 'status' => SubscriptionStatus::CANCELLED],
             $user4->getKey() => ['end_date' => Carbon::now()->subHour(), 'status' => SubscriptionStatus::EXPIRED],
             $user5->getKey() => ['end_date' => null, 'status' => null]
         ]);
 
-        (new RenewRecursiveProduct())->handle(app(ProductServiceContract::class));
+        (new ExpireRecursiveProduct())->handle();
 
-        Queue::assertPushed(
-            fn(RenewRecursiveProductUser $job) =>
-                in_array($job->getProductUser()->user_id, [$user1->getKey(), $user2->getKey()])
-                && !in_array($job->getProductUser()->user_id, [$user3->getKey(), $user4->getKey(), $user3->getKey()])
-        );
+        $this->assertProductUserHas($user1, $product, SubscriptionStatus::ACTIVE);
+        $this->assertProductUserHas($user2, $product, SubscriptionStatus::EXPIRED);
+        $this->assertProductUserHas($user3, $product, SubscriptionStatus::CANCELLED);
+        $this->assertProductUserHas($user4, $product, SubscriptionStatus::EXPIRED);
+        $this->assertProductUserHas($user5, $product, null);
     }
 
-    private function assertProductUserHas(User $user, Product $product, ?Carbon $endDate, ?string $status): void
+    private function assertProductUserHas(User $user, Product $product, ?string $status): void
     {
         $this->assertDatabaseHas('products_users', [
             'user_id' => $user->getKey(),
             'product_id' => $product->getKey(),
-            'end_date' => $endDate,
             'status' => $status
         ]);
     }
