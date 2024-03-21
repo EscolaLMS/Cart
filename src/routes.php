@@ -53,6 +53,7 @@ Route::group(['prefix' => 'api/products'], function () {
 
     Route::get('/{id}', [ProductApiController::class, 'read']);
     Route::get('/', [ProductApiController::class, 'index']);
+    Route::post('/cancel/{id}', [ProductApiController::class, 'cancel'])->middleware(['auth:api']);
 });
 
 Route::group(['prefix' => 'api/productables', 'middleware' => ['auth:api']], function () {

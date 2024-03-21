@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Http\Swagger;
 
 use EscolaLms\Cart\Http\Requests\ProductReadRequest;
+use EscolaLms\Cart\Http\Requests\ProductRecursiveCancelRequest;
 use EscolaLms\Cart\Http\Requests\ProductSearchMyRequest;
 use EscolaLms\Cart\Http\Requests\ProductSearchRequest;
 use Illuminate\Http\JsonResponse;
@@ -282,4 +283,50 @@ interface ProductSwagger
      *   )
      */
     public function read(ProductReadRequest $request): JsonResponse;
+
+
+    /**
+     * @OA\Post(
+     *      path="/api/products/cancel/{id}",
+     *      description="Cancel recursive product",
+     *      tags={"Products"},
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          name="id",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer",
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json",
+     *          ),
+     *          @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="success",
+     *                  type="boolean"
+     *              ),
+     *              @OA\Property(
+     *                  property="message",
+     *                  type="string"
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=422,
+     *          description="Bad request",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          )
+     *      )
+     *   )
+     */
+    public function cancel(ProductRecursiveCancelRequest $request): JsonResponse;
 }

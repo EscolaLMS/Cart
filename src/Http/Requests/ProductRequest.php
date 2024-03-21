@@ -16,7 +16,7 @@ abstract class ProductRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->input('id');
+        return $this->input('id') ? $this->input('id') : $this->route('id') ;
     }
 
     public function getProduct(): Product

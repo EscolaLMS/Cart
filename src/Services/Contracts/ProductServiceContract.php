@@ -53,4 +53,6 @@ interface ProductServiceContract
     public function hasActiveSubscriptionAllIn(User $user): ?Product;
 
     public function getRecursiveProductUserBeforeExpiredEndDate(Carbon $start, Carbon $end): Collection;
+
+    public function cancelActiveRecursiveProduct(Product $product, User $user): void;
 }

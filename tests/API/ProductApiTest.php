@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Tests\API;
 
 use EscolaLms\Cart\Database\Seeders\CartPermissionSeeder;
+use EscolaLms\Cart\Enums\SubscriptionStatus;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Models\Product;
@@ -258,6 +259,68 @@ class ProductApiTest extends TestCase
                 'end_date',
                 'productables',
             ]]]);
+    }
+
+    public function testCancelSubscriptionActive(): void
+    {
+        Carbon::setTestNow(Carbon::now()->startOfDay());
+        $user = $this->makeStudent();
+        $product = Product::factory()->subscription()->state(['recursive' => true])->create();
+        $product->users()->sync([$user->getKey() => ['end_date' => Carbon::now()->addDay(), 'status' => SubscriptionStatus::ACTIVE]]);
+
+        $this->actingAs($user, 'api')
+            ->postJson('api/products/cancel/' . $product->getKey())
+            ->assertOk();
+
+        $this->assertDatabaseHas('products_users', [
+            'user_id' => $user->getKey(),
+            'product_id' => $product->getKey(),
+            'status' => SubscriptionStatus::CANCELLED,
+            'end_date' => Carbon::now()->addDay()
+        ]);
+    }
+
+    public function testCancelSubscriptionExpired(): void
+    {
+        Carbon::setTestNow(Carbon::now()->startOfDay());
+        $user = $this->makeStudent();
+        $product = Product::factory()->subscription()->state(['recursive' => true])->create();
+        $product->users()->sync([$user->getKey() => ['end_date' => Carbon::now()->subDay(), 'status' => SubscriptionStatus::EXPIRED]]);
+
+        $this->actingAs($user, 'api')
+            ->postJson('api/products/cancel/' . $product->getKey())
+            ->assertOk();
+
+        $this->assertDatabaseHas('products_users', [
+            'user_id' => $user->getKey(),
+            'product_id' => $product->getKey(),
+            'status' => SubscriptionStatus::EXPIRED,
+            'end_date' => Carbon::now()->subDay()
+        ]);
+    }
+
+    public function testCancelSubscriptionNotFound(): void
+    {
+        $user = $this->makeStudent();
+
+        $this->actingAs($user, 'api')
+            ->postJson('api/products/cancel/123')
+            ->assertNotFound();
+    }
+
+    public function testCancelSubscriptionForbidden(): void
+    {
+        $user = config('auth.providers.users.model')::factory()->create();
+
+        $this->actingAs($user, 'api')
+            ->postJson('api/products/cancel/123')
+            ->assertForbidden();
+    }
+
+    public function testCancelSubscriptionUnauthorized(): void
+    {
+        $this->postJson('api/products/cancel/123')
+            ->assertUnauthorized();
     }
 
     public function myProductsFilterDataProvider(): array

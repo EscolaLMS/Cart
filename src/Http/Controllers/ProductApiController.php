@@ -3,6 +3,7 @@
 namespace EscolaLms\Cart\Http\Controllers;
 
 use EscolaLms\Cart\Http\Requests\ProductReadRequest;
+use EscolaLms\Cart\Http\Requests\ProductRecursiveCancelRequest;
 use EscolaLms\Cart\Http\Requests\ProductSearchMyRequest;
 use EscolaLms\Cart\Http\Requests\ProductSearchRequest;
 use EscolaLms\Cart\Http\Resources\MyProductResource;
@@ -43,5 +44,12 @@ class ProductApiController extends EscolaLmsBaseController implements ProductSwa
         $results = $this->productService->searchMy($request->getCriteria(), $request->getPage(), $request->getOrder());
 
         return $this->sendResponseForResource(MyProductResource::collection($results));
+    }
+
+    public function cancel(ProductRecursiveCancelRequest $request): JsonResponse
+    {
+        $this->productService->cancelActiveRecursiveProduct($request->getProduct(), $request->user());
+
+        return $this->sendSuccess(__('Subscription cancelled successfully'));
     }
 }
