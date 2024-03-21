@@ -79,4 +79,9 @@ class ProductPolicy
     {
         return $user->can(CartPermissionsEnum::BUY_PRODUCTS);
     }
+
+    public function cancelProductRecursive(User $user)
+    {
+        return $user->can(CartPermissionsEnum::BUY_PRODUCTS);
+    }
 }

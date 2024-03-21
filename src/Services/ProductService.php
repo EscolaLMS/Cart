@@ -620,4 +620,13 @@ class ProductService implements ProductServiceContract
             ->whereBetween('end_date', [$start, $end])
             ->get();
     }
+
+    public function cancelActiveRecursiveProduct(Product $product, User $user): void
+    {
+        ProductUser::query()
+            ->where('user_id', $user->getKey())
+            ->where('product_id', $product->getKey())
+            ->where('status', SubscriptionStatus::ACTIVE)
+            ->update(['status' => SubscriptionStatus::CANCELLED]);
+    }
 }
