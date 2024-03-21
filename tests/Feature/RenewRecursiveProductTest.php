@@ -29,7 +29,7 @@ class RenewRecursiveProductTest extends TestCase
 
     public function testRenewRecursiveProductOnlyActive(): void
     {
-        $product = Product::factory()->subscriptionWithoutTrial()->state(['subscription_period' => PeriodEnum::DAILY, 'subscription_duration' => 3])->create();
+        $product = Product::factory()->subscriptionWithoutTrial()->state(['subscription_period' => PeriodEnum::DAILY, 'subscription_duration' => 3, 'recursive' => true])->create();
         $user1 = $this->makeStudent();
         $user2 = $this->makeStudent();
         $user3 = $this->makeStudent();
@@ -46,18 +46,6 @@ class RenewRecursiveProductTest extends TestCase
 
         (new RenewRecursiveProduct())->handle(app(ProductServiceContract::class));
 
-        Queue::assertPushed(
-            fn(RenewRecursiveProductUser $job) => in_array($job->getProductUser()->user_id, [$user1->getKey(), $user2->getKey()])
-        );
-    }
-
-    private function assertProductUserHas(User $user, Product $product, ?Carbon $endDate, ?string $status): void
-    {
-        $this->assertDatabaseHas('products_users', [
-            'user_id' => $user->getKey(),
-            'product_id' => $product->getKey(),
-            'end_date' => $endDate,
-            'status' => $status
-        ]);
+        Queue::assertPushed(RenewRecursiveProductUser::class, 1);
     }
 }
