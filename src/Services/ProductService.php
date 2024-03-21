@@ -435,11 +435,13 @@ class ProductService implements ProductServiceContract
 
         $productUserPivot = ProductUser::query()->firstOrCreate(['user_id' => $user->getKey(), 'product_id' => $product->getKey()], ['quantity' => $quantity]);
 
-        if (!$productUserPivot->wasRecentlyCreated && !is_null($product->limit_per_user)) {
-            if ($product->limit_per_user < ($productUserPivot->quantity + $quantity)) {
-                $quantity = $product->limit_per_user - $productUserPivot->quantity;
+        if (!$productUserPivot->wasRecentlyCreated) {
+            if (!is_null($product->limit_per_user)) {
+                if ($product->limit_per_user < ($productUserPivot->quantity + $quantity)) {
+                    $quantity = $product->limit_per_user - $productUserPivot->quantity;
+                }
+                $productUserPivot->quantity += $quantity;
             }
-            $productUserPivot->quantity += $quantity;
 
             if (ProductType::isSubscriptionType($product->type)) {
                 $productUserPivot->end_date = PeriodEnum::calculatePeriod($productUserPivot->end_date, $product->subscription_period, $product->subscription_duration);
