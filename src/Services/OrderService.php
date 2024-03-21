@@ -144,16 +144,16 @@ class OrderService implements OrderServiceContract
         ]);
     }
 
-    public function storeProductAsOrderItem(Order $order, Product $product): OrderItem
+    public function storeProductAsOrderItem(Order $order, Product $product, ?bool $trial = false): OrderItem
     {
         return OrderItem::create([
             'buyable_type' => Product::class,
             'buyable_id'   => $product->getKey(),
             'name'         => $product->name ?? null,
-            'price'        => $product->price,
+            'price'        => $trial ? 100 : $product->price,
             'quantity'     => 1,
-            'tax_rate'     => $product->tax_rate,
-            'extra_fees'   => $product->extra_fees,
+            'tax_rate'     => $trial ? 0 : $product->tax_rate,
+            'extra_fees'   => $trial ? 0 : $product->extra_fees,
             'order_id'     => $order->getKey(),
         ]);
     }
