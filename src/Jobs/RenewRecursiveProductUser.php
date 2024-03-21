@@ -59,7 +59,7 @@ class RenewRecursiveProductUser implements ShouldQueue
         $paymentProcessor = $newOrder->process();
 
         $parameters = [
-            'return_url' => config(),
+            'return_url' => url('/'),
             'email' => $user->email,
             'type' => $product->type,
             'gateway' => $prevPayment->driver,
