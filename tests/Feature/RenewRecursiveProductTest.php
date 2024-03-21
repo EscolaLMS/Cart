@@ -47,9 +47,7 @@ class RenewRecursiveProductTest extends TestCase
         (new RenewRecursiveProduct())->handle(app(ProductServiceContract::class));
 
         Queue::assertPushed(
-            fn(RenewRecursiveProductUser $job) =>
-                in_array($job->getProductUser()->user_id, [$user1->getKey(), $user2->getKey()])
-                && !in_array($job->getProductUser()->user_id, [$user3->getKey(), $user4->getKey(), $user3->getKey()])
+            fn(RenewRecursiveProductUser $job) => in_array($job->getProductUser()->user_id, [$user1->getKey(), $user2->getKey()])
         );
     }
 
