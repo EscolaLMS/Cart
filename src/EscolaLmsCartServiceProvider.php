@@ -5,6 +5,7 @@ namespace EscolaLms\Cart;
 use EscolaLms\Cart\Console\Commands\AbandonedCart;
 use EscolaLms\Cart\Providers\AuthServiceProvider;
 use EscolaLms\Cart\Providers\EventServiceProvider;
+use EscolaLms\Cart\Providers\ScheduleServiceProvider;
 use EscolaLms\Cart\Providers\SettingsServiceProvider;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
@@ -13,7 +14,6 @@ use EscolaLms\Cart\Services\OrderService;
 use EscolaLms\Cart\Services\ProductService;
 use EscolaLms\Cart\Services\ShopService;
 use EscolaLms\Templates\EscolaLmsTemplatesServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Treestoneit\ShoppingCart\CartServiceProvider as TreestoneitCartServiceProvider;
 
@@ -48,6 +48,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         $this->app->register(AuthServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
         $this->app->register(SettingsServiceProvider::class);
+        $this->app->register(ScheduleServiceProvider::class);
 
         if (!$this->app->getProviders(EscolaLms\Cart\EscolaLmsTemplatesServiceProvider::class)) {
             $this->app->register(EscolaLmsTemplatesServiceProvider::class);
@@ -65,9 +66,5 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         ], 'escolalms_cart.config');
 
         $this->commands(AbandonedCart::class);
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command(AbandonedCart::class)->dailyAt('1:00');
-        });
     }
 }

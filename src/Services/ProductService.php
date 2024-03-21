@@ -611,4 +611,13 @@ class ProductService implements ProductServiceContract
     {
         return Product::query()->whereHasUserWithProductType($user, ProductType::SUBSCRIPTION_ALL_IN)->first();
     }
+
+    public function getRecursiveProductUserBeforeExpiredEndDate(Carbon $start, Carbon $end): Collection
+    {
+        return ProductUser::query()
+            ->whereRelation('product', 'recursive', '=', true)
+            ->where('status', SubscriptionStatus::ACTIVE)
+            ->whereBetween('end_date', [$start, $end])
+            ->get();
+    }
 }

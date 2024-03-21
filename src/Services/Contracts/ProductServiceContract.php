@@ -13,6 +13,7 @@ use EscolaLms\Core\Dtos\OrderDto;
 use EscolaLms\Core\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 interface ProductServiceContract
@@ -50,4 +51,6 @@ interface ProductServiceContract
     public function searchMy(ProductSearchMyCriteriaDto $dto, PageDto $pageDto, OrderDto $orderDto): LengthAwarePaginator;
 
     public function hasActiveSubscriptionAllIn(User $user): ?Product;
+
+    public function getRecursiveProductUserBeforeExpiredEndDate(Carbon $start, Carbon $end): Collection;
 }
