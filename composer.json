@@ -75,11 +75,5 @@
     }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true,
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/dbojdo/przelewy24-php"
-    }
-  ]
+  "prefer-stable": true
 }
