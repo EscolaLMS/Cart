@@ -8,6 +8,7 @@ use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
+use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Models\User;
 use EscolaLms\Core\Tests\CreatesUsers;
@@ -90,6 +91,13 @@ class ProductServiceTest extends TestCase
         $this->productService->attachProductToUser($product, $user);
 
         $this->assertHasProductsUsers($product, $user, $endDate);
+    }
+
+    public function testRegisterProductable(): void
+    {
+        $this->productService->registerProductableClass(ExampleProductable::class);
+        $this->assertContains(ExampleProductable::class, $this->productService->listRegisteredProductableClasses());
+        $this->assertArrayHasKey(ExampleProductable::getMorphClassStatic(), $this->productService->listRegisteredMorphClasses());
     }
 
     private function assertHasProductsUsers(Product $product, User $user, ?Carbon $endDate = null): void

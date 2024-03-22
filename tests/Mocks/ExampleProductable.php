@@ -33,4 +33,9 @@ class ExampleProductable extends ExampleProductableBase implements Productable
     {
         return ExampleProductableFactory::new();
     }
+
+    public static function getMorphClassStatic(): string
+    {
+        return parent::class;
+    }
 }

@@ -105,4 +105,6 @@ interface Productable
      * Get productable duration in seconds
      */
     public function getProductableDuration(): int;
+
+    public static function getMorphClassStatic(): string;
 }
