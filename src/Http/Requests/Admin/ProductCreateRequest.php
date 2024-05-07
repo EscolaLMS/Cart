@@ -47,6 +47,7 @@ class ProductCreateRequest extends ProductRequest
             'related_products.*' => ['integer'],
             ...$this->subscriptionRules(),
             ...$this->trialRules(),
+            'fields' => ['nullable', 'array'],
         ];
     }
 

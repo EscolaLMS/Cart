@@ -116,6 +116,9 @@ use Illuminate\Support\Facades\Storage;
  * @method static ProductModelQueryBuilder|Product whereSubscriptionPeriod($value)
  * @method static ProductModelQueryBuilder|Product whereTrialDuration($value)
  * @method static ProductModelQueryBuilder|Product whereTrialPeriod($value)
+ * @property array|null $fields
+ * @method static ProductModelQueryBuilder|Product whereFields($value)
+ * @method static ProductModelQueryBuilder|Product whereHasUserWithProductType(\EscolaLms\Core\Models\User $user, string $productType, ?bool $active = true)
  * @mixin \Eloquent
  */
 class Product extends Model implements ProductInterface
@@ -130,7 +133,8 @@ class Product extends Model implements ProductInterface
     protected $casts = [
         'purchasable' => 'bool',
         'has_trial' => 'bool',
-        'recursive' => 'bool'
+        'recursive' => 'bool',
+        'fields' => 'array',
     ];
 
     public function productables(): HasMany

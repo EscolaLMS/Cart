@@ -11,6 +11,7 @@ use EscolaLms\Cart\Models\ProductUser;
 use EscolaLms\Cart\Models\User;
 use EscolaLms\Cart\Services\Contracts\OrderServiceContract;
 use EscolaLms\Payments\Enums\PaymentStatus;
+use EscolaLms\Payments\Facades\PaymentGateway;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
@@ -53,6 +54,12 @@ class RenewRecursiveProductUser implements ShouldQueue
             ->whereIn('status', [PaymentStatus::PAID(), PaymentStatus::REFUNDED()])
             ->orderBy('created_at', 'desc')
             ->first();
+
+        $paymentDriver = PaymentGateway::driver($prevPayment->driver);
+
+        if (!$paymentDriver->ableToRenew()) {
+            return;
+        }
 
         $newOrder = $orderService->createOrderFromProduct($product, $user->getKey(), $this->getClientDetailsDto($order));
 
