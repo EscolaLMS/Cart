@@ -21,7 +21,10 @@ class ProductFactory extends Factory
             'price_old' => null,
             'tax_rate' => 0,
             'limit_total' => null,
-            'limit_per_user' => 1
+            'limit_per_user' => 1,
+            'fields' => [
+                $this->faker->word => $this->faker->word
+            ]
         ];
     }
 
