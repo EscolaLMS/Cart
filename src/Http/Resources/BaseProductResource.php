@@ -59,6 +59,7 @@ class BaseProductResource extends JsonResource
             'has_trial' => $this->getProduct()->has_trial,
             'trial_period' => $this->getProduct()->trial_period,
             'trial_duration' => $this->getProduct()->trial_duration,
+            'fields' => $this->getProduct()->fields,
         ];
         return $data;
     }

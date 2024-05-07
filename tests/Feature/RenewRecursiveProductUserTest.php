@@ -15,6 +15,7 @@ use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Payments\Facades\PaymentGateway;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 
@@ -57,6 +58,31 @@ class RenewRecursiveProductUserTest extends TestCase
         $productUser->refresh();
         $this->assertEquals(Carbon::now(), $productUser->end_date);
         $this->assertProductUserHas($user1, $product, Carbon::now(), SubscriptionStatus::ACTIVE);
+    }
+
+    public function testRenewRecursiveProductUserOnlyActiveUnableToRenewDriver(): void
+    {
+        Event::fake([ProductBought::class]);
+        Config::set('escola_settings.use_database', true);
+        Config::set('escolalms_payments.default_gateway', 'free');
+
+        $user1 = $this->makeStudent();
+        $product = Product::factory()->subscriptionWithoutTrial()->state(['subscription_period' => PeriodEnum::DAILY, 'subscription_duration' => 3, 'extra_fees' => 0])->create();
+        $this->makeOrder($product, $user1);
+
+        $product->users()->sync([
+            $user1->getKey() => ['end_date' => Carbon::now()->subDays(3), 'status' => SubscriptionStatus::ACTIVE],
+        ]);
+        $productUser = $product->users()->where('user_id', $user1->getKey())->first()->pivot;
+
+        $this->assertEquals(Carbon::now()->subDays(3), $productUser->end_date);
+        $this->assertProductUserHas($user1, $product, Carbon::now()->subDays(3), SubscriptionStatus::ACTIVE);
+
+        (new RenewRecursiveProductUser($product->users()->where('user_id', $user1->getKey())->first()->pivot))->handle(app(OrderServiceContract::class));
+
+        $productUser->refresh();
+        $this->assertEquals(Carbon::now()->subDays(3), $productUser->end_date);
+        $this->assertProductUserHas($user1, $product, Carbon::now()->subDays(3), SubscriptionStatus::ACTIVE);
     }
 
     private function makeOrder(Product $product, User $user): Order
