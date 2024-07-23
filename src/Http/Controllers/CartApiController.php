@@ -10,6 +10,7 @@ use EscolaLms\Cart\Http\Swagger\CartSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Core\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -26,13 +27,16 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
 
     public function index(Request $request): JsonResponse
     {
-        $cart = $this->shopService->cartForUser($request->user());
+        /** @var User $user */
+        $user = $request->user();
+        $cart = $this->shopService->cartForUser($user);
         return $this->sendResponseForResource($this->shopService->cartAsJsonResource($cart), __("Cart data fetched"));
     }
 
     public function setProductQuantity(ProductSetQuantityInCartRequest $request): JsonResponse
     {
         $product = $request->getProduct();
+        /** @var User $user */
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
         if (!$this->productService->productIsBuyableByUser($product, $user, false, $request->getQuantity())) {
@@ -46,6 +50,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
 
     public function addMissingProducts(AddMissingProductsRequest $request): JsonResponse
     {
+        /** @var User $user */
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
         $this->shopService->addMissingProductsToCart($cart, $request->input('products', []));
@@ -59,8 +64,10 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
         if (!$product) {
             return $this->sendError(__('Single Product for this productable does not exist'), 404);
         }
-        $cart = $this->shopService->cartForUser($request->user());
-        if (!$this->productService->productIsBuyableByUser($product, $request->user())) {
+        /** @var User $user */
+        $user = $request->user();
+        $cart = $this->shopService->cartForUser($user);
+        if (!$this->productService->productIsBuyableByUser($product, $user)) {
             return $this->sendError(__("You can not add this product to cart"), 403);
         }
         $this->shopService->addProductToCart($cart, $product, 1);
@@ -70,6 +77,7 @@ class CartApiController extends EscolaLmsBaseController implements CartSwagger
     public function remove(ProductRemoveFromCartRequest $request): JsonResponse
     {
         $product = $request->getProduct();
+        /** @var User $user */
         $user = $request->user();
         $cart = $this->shopService->cartForUser($user);
         return $this->sendResponse(

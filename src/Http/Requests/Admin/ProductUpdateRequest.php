@@ -55,11 +55,15 @@ class ProductUpdateRequest extends ProductRequest
 
     public function getId(): int
     {
-        return $this->route('id');
+        /** @var int $id */
+        $id = $this->route('id');
+        return $id;
     }
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getId());
+        return $product;
     }
 }

@@ -8,12 +8,12 @@ use Illuminate\Validation\Rule;
 
 class ProductRemoveFromCartRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return !!$this->user();
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
         $this->merge([
@@ -30,11 +30,13 @@ class ProductRemoveFromCartRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->input('id');
+        return (int) $this->input('id');
     }
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getId());
+        return $product;
     }
 }

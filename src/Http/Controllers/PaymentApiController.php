@@ -7,6 +7,7 @@ use EscolaLms\Cart\Http\Requests\PaymentProductRequest;
 use EscolaLms\Cart\Http\Swagger\PaymentSwagger;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Payments\Http\Resources\PaymentResource;
 use Illuminate\Http\JsonResponse;
 
@@ -22,7 +23,9 @@ class PaymentApiController extends EscolaLmsBaseController implements PaymentSwa
     public function pay(PaymentCartRequest $request): JsonResponse
     {
         try {
-            $cart = $this->shopService->cartForUser($request->user());
+            /** @var User $user */
+            $user = $request->user();
+            $cart = $this->shopService->cartForUser($user);
 
             $payment = $this->shopService->purchaseCart(
                 $cart,
@@ -39,9 +42,11 @@ class PaymentApiController extends EscolaLmsBaseController implements PaymentSwa
     public function payProduct(PaymentProductRequest $request): JsonResponse
     {
         try {
+            /** @var User $user */
+            $user = $request->user();
             $payment = $this->shopService->purchaseProduct(
                 $request->getProduct(),
-                $request->user(),
+                $user,
                 $request->toClientDetailsDto(),
                 $request->getAdditionalPaymentParameters()
             );

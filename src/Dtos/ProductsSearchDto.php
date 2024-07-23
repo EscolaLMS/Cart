@@ -10,12 +10,13 @@ class ProductsSearchDto implements DtoContract
     protected ?string $type;
     protected ?bool $free;
     protected ?string $productable_class;
-    protected $productable_id;
+    protected ?int $productable_id;
+    protected ?string $productable_type;
     protected ?bool $purchasable = true;
     protected ?int $per_page;
     protected ?array $tags;
 
-    public function __construct(?string $name = null, ?string $type = null, ?bool $free = null, ?string $productable_type  = null, ?int $productable_id = null, ?bool $purchasable = true, ?int $per_page = null, ?array $tags)
+    public function __construct(?string $name = null, ?string $type = null, ?bool $free = null, ?string $productable_type  = null, ?int $productable_id = null, ?bool $purchasable = true, ?int $per_page = null, ?array $tags = null)
     {
         $this->name = $name;
         $this->type = $type;

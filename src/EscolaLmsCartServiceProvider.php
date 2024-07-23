@@ -30,7 +30,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         ShopServiceContract::class => ShopService::class,
     ];
 
-    public function boot()
+    public function boot(): void
     {
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
@@ -41,7 +41,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         }
     }
 
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/config.php', 'escolalms_cart');
 
@@ -50,7 +50,7 @@ class EscolaLmsCartServiceProvider extends ServiceProvider
         $this->app->register(SettingsServiceProvider::class);
         $this->app->register(ScheduleServiceProvider::class);
 
-        if (!$this->app->getProviders(EscolaLms\Cart\EscolaLmsTemplatesServiceProvider::class)) {
+        if (!$this->app->getProviders(EscolaLmsTemplatesServiceProvider::class)) {
             $this->app->register(EscolaLmsTemplatesServiceProvider::class);
         }
         if (!$this->app->getProviders(TreestoneitCartServiceProvider::class)) {

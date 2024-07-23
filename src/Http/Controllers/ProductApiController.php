@@ -12,6 +12,7 @@ use EscolaLms\Cart\Http\Swagger\ProductSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Cart\Services\Contracts\ShopServiceContract;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Core\Models\User;
 use Illuminate\Http\JsonResponse;
 use EscolaLms\Core\Dtos\OrderDto as SortDto;
 
@@ -48,7 +49,9 @@ class ProductApiController extends EscolaLmsBaseController implements ProductSwa
 
     public function cancel(ProductRecursiveCancelRequest $request): JsonResponse
     {
-        $this->productService->cancelActiveRecursiveProduct($request->getProduct(), $request->user());
+        /** @var User $user */
+        $user = $request->user();
+        $this->productService->cancelActiveRecursiveProduct($request->getProduct(), $user);
 
         return $this->sendSuccess(__('Subscription cancelled successfully'));
     }

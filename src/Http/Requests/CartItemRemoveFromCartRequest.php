@@ -8,12 +8,12 @@ use Illuminate\Validation\Rule;
 
 class CartItemRemoveFromCartRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return !!$this->user();
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
         $this->merge([
@@ -30,6 +30,8 @@ class CartItemRemoveFromCartRequest extends FormRequest
 
     public function getCartItemId(): int
     {
-        return $this->route('id');
+        /** @var int $id */
+        $id = $this->route('id');
+        return $id;
     }
 }

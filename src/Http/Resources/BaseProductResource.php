@@ -6,6 +6,7 @@ use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Categories\Http\Resources\CategoryResource;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Tags\Models\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,8 @@ class BaseProductResource extends JsonResource
 
     public function toArray($request): array
     {
-        $user = $request ? $request->user() : Auth::user();
+        /** @var User $user */
+        $user = $request->user() ?? Auth::user();
         $data = [
             'id' => $this->getProduct()->getKey(),
             'type' => $this->getProduct()->type,
@@ -43,8 +45,8 @@ class BaseProductResource extends JsonResource
             'teaser_url' => $this->getProduct()->teaser_url,
             'poster_path' => $this->getProduct()->getPosterUrlOrProductableThumbnailAttribute(),
             'poster_url' => $this->getProduct()->poster_absolute_url,
-            'buyable' => $user ? $this->getProduct()->getBuyableByUserAttribute($user) : false,
-            'owned' => $user ? $this->getProduct()->getOwnedByUserAttribute($user) : false,
+            'buyable' => $user && $this->getProduct()->getBuyableByUserAttribute($user),
+            'owned' => $user && $this->getProduct()->getOwnedByUserAttribute($user),
             'owned_quantity' => $user ? $this->getProduct()->getOwnedByUserQuantityAttribute($user) : 0,
             'categories' => CategoryResource::collection($this->getProduct()->categories)->toArray($request),
             'tags' => $this->getProduct()->tags->map(fn (Tag $tag) => $tag->title)->toArray(),

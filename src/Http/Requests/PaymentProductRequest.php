@@ -14,6 +14,8 @@ class PaymentProductRequest extends PaymentRequest
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getProductId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getProductId());
+        return $product;
     }
 }

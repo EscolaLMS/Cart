@@ -10,12 +10,12 @@ use Illuminate\Validation\Rule;
 
 class OrderViewRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('view', $this->getOrder());
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
         $this->merge([
@@ -23,7 +23,7 @@ class OrderViewRequest extends FormRequest
         ]);
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'id' => ['required', 'integer', Rule::exists(Order::class, 'id')],
@@ -32,11 +32,14 @@ class OrderViewRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->route('id');
+        /** @var int $id */
+        $id = $this->route('id');
+        return $id;
     }
 
     public function getOrder(): Order
     {
+        /** @var Order|null $order */
         $order = Order::find($this->getId());
 
         if (is_null($order)) {
