@@ -180,7 +180,6 @@ class ShopService implements ShopServiceContract
             /** @var Product $productModel */
             $productModel = Product::find($product);
             if (!$cartManager->hasProduct($productModel) && $this->productService->productIsBuyableByUser($productModel, $cart->user)) {
-                // @phpstan-ignore-next-line
                 $cartManager->add($productModel, 1);
             }
         }

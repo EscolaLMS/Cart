@@ -70,15 +70,15 @@ class CartItem extends BaseCartItem
         return (int) round($this->getSubtotalAttribute() * ($this->getTaxRateAttribute($rate) / 100), 0);
     }
 
+    // @phpstan-ignore-next-line
     public function getSubtotalAttribute(): int
     {
-        // @phpstan-ignore-next-line
         return (int) round(parent::getSubtotalAttribute(), 0);
     }
 
+    // @phpstan-ignore-next-line
     public function getTotalAttribute(): int
     {
-        // @phpstan-ignore-next-line
         return (int) round(parent::getTotalAttribute(), 0);
     }
 
