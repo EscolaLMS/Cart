@@ -12,7 +12,7 @@ class ProductDetailedResource extends ProductResource
     public function toArray($request): array
     {
         /** @var User $user */
-        $user = $request->user() ?? Auth::user();
+        $user = $request ? $request->user() : Auth::user();
         $result = parent::toArray($request);
         if ($user->can(AuthPermissionsEnum::USER_LIST)) {
             $result['users']  = $this->getProduct()->users->map(fn (User $user) => ['id' => $user->getKey(), 'email' => $user->email, 'name' => $user->name])->toArray();
