@@ -70,19 +70,19 @@ class CartItem extends BaseCartItem
         return (int) round($this->getSubtotalAttribute() * ($this->getTaxRateAttribute($rate) / 100), 0);
     }
 
-    public function getSubtotalAttribute()
+    public function getSubtotalAttribute(): int
     {
         return (int) round(parent::getSubtotalAttribute(), 0);
     }
 
-    public function getTotalAttribute()
+    public function getTotalAttribute(): int
     {
         return (int) round(parent::getTotalAttribute(), 0);
     }
 
     public function getTotalWithTaxAttribute(?int $rate = null): int
     {
-        return $this->total + $this->getTaxAttribute($rate);
+        return (int) $this->total + $this->getTaxAttribute($rate);
     }
 
     public function getPriceWithTaxAttribute(?int $rate = null): int

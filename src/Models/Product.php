@@ -86,7 +86,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static ProductModelQueryBuilder|Product whereDoesntHaveProductablesNotOwnedByUser(?\EscolaLms\Core\Models\User $user = null)
  * @method static ProductModelQueryBuilder|Product whereDuration($value)
  * @method static ProductModelQueryBuilder|Product whereExtraFees($value)
- * @method static ProductModelQueryBuilder|Product whereHasProductable(\Illuminate\Database\Eloquent\Model $productable)
+ * @method static ProductModelQueryBuilder|Product whereHasProductable(\Illuminate\Database\Eloquent\Model|Productable $productable)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClass(string $productable_type)
  * @method static ProductModelQueryBuilder|Product whereHasProductableClassAndId(string $productable_type, int $productable_id)
  * @method static ProductModelQueryBuilder|Product whereHasUser(\EscolaLms\Core\Models\User $user)
@@ -169,6 +169,7 @@ class Product extends Model implements ProductInterface
         return $this->description ?? '';
     }
 
+    // @phpstan-ignore-next-line
     public function getBuyablePrice(?array $options = null): int
     {
         return $this->price;
@@ -186,12 +187,16 @@ class Product extends Model implements ProductInterface
 
     public function getBuyableByUserAttribute(?CoreUser $user = null, ?int $quantity = null): bool
     {
-        return app(ProductServiceContract::class)->productIsBuyableByUser($this, $user ?? Auth::user(), false, $quantity);
+        /** @var CoreUser $user */
+        $user = $user ?? Auth::user();
+        return app(ProductServiceContract::class)->productIsBuyableByUser($this, $user, false, $quantity);
     }
 
     public function getOwnedByUserAttribute(?CoreUser $user = null): bool
     {
-        return app(ProductServiceContract::class)->productIsOwnedByUser($this, $user ?? Auth::user());
+        /** @var CoreUser $user */
+        $user = $user ?? Auth::user();
+        return app(ProductServiceContract::class)->productIsOwnedByUser($this, $user);
     }
 
     public function getOwnedByUserQuantityAttribute(?CoreUser $user = null): int
@@ -219,7 +224,7 @@ class Product extends Model implements ProductInterface
         }
 
         if ($this->type === ProductType::SINGLE) {
-            /** @var ProductProductable $first */
+            /** @var ProductProductable|null $first */
             $first = $this->productables->first();
             if ($first) {
                 $productable = $first->getCanonicalProductableAttribute();

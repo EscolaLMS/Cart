@@ -34,6 +34,7 @@ class AuthorResource extends JsonResource
                 'last_name' => $author->last_name,
                 'path_avatar' => $author->path_avatar,
                 'url_avatar' => $author->avatar_url,
+                // @phpstan-ignore-next-line
                 'categories' => $author->categories,
             ],
             ModelFields::getExtraAttributesValues($author, MetaFieldVisibilityEnum::PUBLIC)

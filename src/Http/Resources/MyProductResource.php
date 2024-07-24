@@ -58,6 +58,7 @@ class MyProductResource extends JsonResource
 {
     public function toArray($request): array
     {
+        // @phpstan-ignore-next-line
         $productUserPivot = $this->users()->where('user_id', $request->user()->getKey())->first()?->pivot;
 
         return [

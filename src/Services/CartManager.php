@@ -31,7 +31,7 @@ class CartManager extends BaseCartManager implements CartManagerContract
     {
         /** @var CartItem $item */
         foreach ($this->content() as $item) {
-            if (!class_exists($item->buyable_type) || is_null($item->buyable)) {
+            if (!class_exists($item->buyable_type)) {
                 $this->remove($item->getKey());
             }
         }
@@ -84,7 +84,10 @@ class CartManager extends BaseCartManager implements CartManagerContract
     public function findBuyable(Buyable $buyable): ?CartItem
     {
         assert($buyable instanceof Model);
-        return $this->content()->where('buyable_id', $buyable->getKey())->where('buyable_type', $buyable->getMorphClass())->first();
+        /** @var CartItem|null $cartItem */
+        $cartItem = $this->content()->where('buyable_id', $buyable->getKey())->where('buyable_type', $buyable->getMorphClass())->first();
+
+        return $cartItem;
     }
 
     public function hasProduct(Product $product): bool

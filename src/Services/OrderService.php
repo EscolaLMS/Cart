@@ -77,6 +77,7 @@ class OrderService implements OrderServiceContract
         $order->client_taxid = $optionalClientDetailsDto->getTaxid();
         $order->save();
 
+        /** @var CartItem $item */
         foreach ($cart->items as $item) {
             $this->storeCartItemAsOrderItem($order, $item);
         }
@@ -132,7 +133,8 @@ class OrderService implements OrderServiceContract
 
     public function storeCartItemAsOrderItem(Order $order, CartItem $item): OrderItem
     {
-        return OrderItem::create([
+        /** @var OrderItem $orderItem */
+        $orderItem = OrderItem::create([
             'buyable_type' => $item->buyable_type,
             'buyable_id'   => $item->buyable_id,
             'name'         => $item->buyable->name ?? $item->buyable->title ?? null,
@@ -142,11 +144,14 @@ class OrderService implements OrderServiceContract
             'extra_fees'   => $item->extra_fees,
             'order_id'     => $order->getKey(),
         ]);
+
+        return $orderItem;
     }
 
     public function storeProductAsOrderItem(Order $order, Product $product, ?bool $trial = false): OrderItem
     {
-        return OrderItem::create([
+        /** @var OrderItem $orderItem */
+        $orderItem = OrderItem::create([
             'buyable_type' => Product::class,
             'buyable_id'   => $product->getKey(),
             'name'         => $product->name ?? null,
@@ -156,6 +161,8 @@ class OrderService implements OrderServiceContract
             'extra_fees'   => $trial ? 0 : $product->extra_fees,
             'order_id'     => $order->getKey(),
         ]);
+
+        return $orderItem;
     }
 
     public function setPaid(Order $order): void

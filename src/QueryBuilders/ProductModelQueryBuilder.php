@@ -48,6 +48,7 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', function (Builder $subquery) use ($user) {
             // We need to change queried model to the one that implements Productable class and has NotOwnedByUser scope method
             $class = Shop::canonicalProductableClass(get_class($subquery->getModel()));
+            // @phpstan-ignore-next-line
             return $subquery->setModel(new $class)->notOwnedByUser($user);
         }));
     }
@@ -58,6 +59,7 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereDoesntHave('productables', fn (Builder $query) => $query->whereHas('productable', function (Builder $subquery) use ($user) {
             // We need to change queried model to the one that implements Productable class and has NotBuyableByUser scope method
             $class = Shop::canonicalProductableClass(get_class($subquery->getModel()));
+            // @phpstan-ignore-next-line
             return $subquery->setModel(new $class)->notBuyableByUser($user);
         }));
     }

@@ -9,12 +9,12 @@ use Illuminate\Validation\Rule;
 
 class ProductReadRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
         $this->merge([
@@ -22,7 +22,7 @@ class ProductReadRequest extends FormRequest
         ]);
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'id' => ['required', 'integer', Rule::exists(Product::class, 'id')],
@@ -31,11 +31,13 @@ class ProductReadRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->input('id');
+        return (int) $this->input('id');
     }
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getId());
+        return $product;
     }
 }

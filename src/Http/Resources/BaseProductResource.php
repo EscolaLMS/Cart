@@ -25,7 +25,7 @@ class BaseProductResource extends JsonResource
 
     public function toArray($request): array
     {
-        /** @var User $user */
+        /** @var User $user|null */
         $user = $request->user() ?? Auth::user();
         $data = [
             'id' => $this->getProduct()->getKey(),
