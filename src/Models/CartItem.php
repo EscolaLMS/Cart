@@ -72,11 +72,13 @@ class CartItem extends BaseCartItem
 
     public function getSubtotalAttribute(): int
     {
+        // @phpstan-ignore-next-line
         return (int) round(parent::getSubtotalAttribute(), 0);
     }
 
     public function getTotalAttribute(): int
     {
+        // @phpstan-ignore-next-line
         return (int) round(parent::getTotalAttribute(), 0);
     }
 

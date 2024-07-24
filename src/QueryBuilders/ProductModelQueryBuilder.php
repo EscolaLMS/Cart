@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Cart\QueryBuilders;
 
+use EscolaLms\Cart\Contracts\Productable;
 use EscolaLms\Cart\Facades\Shop;
 use EscolaLms\Core\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,7 @@ class ProductModelQueryBuilder extends Builder
         return $this->whereHas('productables', fn (Builder $query) => $query->where('productable_type', $productable_type));
     }
 
-    public function whereHasProductable(Model $productable): ProductModelQueryBuilder
+    public function whereHasProductable(Model|Productable $productable): ProductModelQueryBuilder
     {
         return $this->whereHasProductableClassAndId($productable->getMorphClass(), $productable->getKey());
     }
