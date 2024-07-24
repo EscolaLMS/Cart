@@ -15,6 +15,7 @@ use EscolaLms\Cart\Events\ProductableDetached;
 use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Models\Cart;
+use EscolaLms\Cart\Models\CartItem;
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
 use EscolaLms\Cart\Models\ProductUser;
@@ -142,7 +143,9 @@ class ProductService implements ProductServiceContract
 
     public function findSingleProductForProductable(Productable $productable): ?Product
     {
-        return Product::where('type', ProductType::SINGLE)->whereHasProductable($productable)->first();
+        /** @var Product|null $product */
+        $product = Product::where('type', ProductType::SINGLE)->whereHasProductable($productable)->first();
+        return $product;
     }
 
     public function searchAndPaginateProducts(ProductsSearchDto $searchDto, ?OrderDto $orderDto = null): LengthAwarePaginator
@@ -443,6 +446,7 @@ class ProductService implements ProductServiceContract
             }
 
             if (ProductType::isSubscriptionType($product->type)) {
+                // @phpstan-ignore-next-line
                 $productUserPivot->end_date = PeriodEnum::calculatePeriod($productUserPivot->end_date, $product->subscription_period, $product->subscription_duration);
                 $productUserPivot->status = SubscriptionStatus::ACTIVE;
             }
@@ -595,22 +599,25 @@ class ProductService implements ProductServiceContract
 
     private function productQuantityInCart(User $user, Product $product): int
     {
+        /** @var Cart $cart */
         $cart = Cart::where('user_id', $user->getAuthIdentifier())->latest()->firstOrCreate([
             'user_id' => $user->getAuthIdentifier(),
         ]);
-        if (!is_null($cart)) {
-            $cartItem = $cart
-                ->items()
-                ->whereHas('buyable', fn (Builder $query) => $query->where('products.id', '=', $product->getKey()))
-                ->first();
-            return !is_null($cartItem) ? $cartItem->quantity : 0;
-        }
-        return 0;
+        /** @var CartItem|null $cartItem */
+        $cartItem = $cart
+            ->items()
+            ->whereHas('buyable', fn (Builder $query) => $query->where('products.id', '=', $product->getKey()))
+            ->first();
+
+        return !is_null($cartItem) ? $cartItem->quantity : 0;
     }
 
     public function hasActiveSubscriptionAllIn(User $user): ?Product
     {
-        return Product::query()->whereHasUserWithProductType($user, ProductType::SUBSCRIPTION_ALL_IN)->first();
+        /** @var Product $product */
+        $product = Product::query()->whereHasUserWithProductType($user, ProductType::SUBSCRIPTION_ALL_IN)->first();
+
+        return $product;
     }
 
     public function getRecursiveProductUserBeforeExpiredEndDate(Carbon $start, Carbon $end): Collection

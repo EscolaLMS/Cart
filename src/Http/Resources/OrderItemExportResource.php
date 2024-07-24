@@ -27,6 +27,7 @@ class OrderItemExportResource extends JsonResource
             'tax' =>  $this->getOrderItem()->tax,
             'total' => $this->getOrderItem()->total,
             'total_with_tax' => $this->getOrderItem()->total_with_tax,
+            // @phpstan-ignore-next-line
             $this->mergeWhen($this->getOrderItem()->buyable instanceof Product, fn () => ['product_name' => $this->getOrderItem()->buyable->name]),
         ];
     }

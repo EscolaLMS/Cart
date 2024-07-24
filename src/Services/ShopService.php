@@ -177,6 +177,7 @@ class ShopService implements ShopServiceContract
     {
         $cartManager = $this->cartManagerForCart($cart);
         foreach ($products as $product) {
+            /** @var Product $productModel */
             $productModel = Product::find($product);
             if (!$cartManager->hasProduct($productModel) && $this->productService->productIsBuyableByUser($productModel, $cart->user)) {
                 $cartManager->add($productModel, 1);

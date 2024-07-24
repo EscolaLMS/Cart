@@ -10,12 +10,12 @@ use Illuminate\Validation\Rule;
 
 class ProductReadRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return Gate::allows('view', $this->getProduct());
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
         $this->merge([
@@ -32,11 +32,14 @@ class ProductReadRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->route('id');
+        /** @var int $id */
+        $id = $this->route('id');
+        return $id;
     }
 
     public function getProduct(): Product
     {
+        /** @var Product|null $product */
         $product = Product::find($this->getId());
 
         if ($product === null) {

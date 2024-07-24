@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 
 class ProductSetQuantityInCartRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return $this->user()->can('buy', $this->getProduct());
     }
@@ -23,6 +23,7 @@ class ProductSetQuantityInCartRequest extends FormRequest
 
     public function getMaxQuantityRule(): array
     {
+        /** @var Product|null $product */
         $product = Product::find($this->input('id'));
 
         if (!$product || is_null($product->limit_per_user)) {
@@ -34,12 +35,14 @@ class ProductSetQuantityInCartRequest extends FormRequest
 
     public function getId(): int
     {
-        return $this->input('id');
+        return (int) $this->input('id');
     }
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getId());
+        return $product;
     }
 
     public function getQuantity(): int

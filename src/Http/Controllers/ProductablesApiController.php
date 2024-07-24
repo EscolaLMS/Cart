@@ -7,6 +7,7 @@ use EscolaLms\Cart\Http\Requests\ProductableAttachRequest;
 use EscolaLms\Cart\Http\Swagger\ProductablesSwagger;
 use EscolaLms\Cart\Services\Contracts\ProductServiceContract;
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Core\Models\User;
 use Illuminate\Http\JsonResponse;
 
 class ProductablesApiController extends EscolaLmsBaseController implements ProductablesSwagger
@@ -20,6 +21,7 @@ class ProductablesApiController extends EscolaLmsBaseController implements Produ
 
     public function attach(ProductableAttachRequest $request): JsonResponse
     {
+        /** @var User $user */
         $user = $request->user();
         $activeSubscription = $this->productService->hasActiveSubscriptionAllIn($user);
 

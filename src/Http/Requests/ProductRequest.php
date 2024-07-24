@@ -21,7 +21,9 @@ abstract class ProductRequest extends FormRequest
 
     public function getProduct(): Product
     {
-        return Product::findOrFail($this->getId());
+        /** @var Product $product */
+        $product = Product::findOrFail($this->getId());
+        return $product;
     }
 
     public function getCartUser(): User

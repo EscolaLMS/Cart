@@ -38,7 +38,9 @@ class RenewRecursiveProductUser implements ShouldQueue
 
     public function handle(OrderServiceContract $orderService): void
     {
+        /** @var Product $product */
         $product = Product::find($this->productUser->product_id);
+        /** @var User $user */
         $user = User::find($this->productUser->user_id);
 
         /** @var Order $order */

@@ -25,12 +25,15 @@ class OrderItemModelQueryBuilder extends Builder
 
     public function whereHasProductableClassAndId(string $productable_type, int $productable_id): OrderModelQueryBuilder
     {
-        return $this->whereHas(
+        /** @var OrderModelQueryBuilder $query */
+        $query = $this->whereHas(
             'buyable',
             fn (Builder $query) => $query->whereHas(
                 'productables',
                 fn (Builder $subquery) => $subquery->where('productable_type', $productable_type)->where('productable_id', $productable_id)
             )
         );
+
+        return $query;
     }
 }

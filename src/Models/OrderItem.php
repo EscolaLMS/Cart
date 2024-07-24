@@ -83,7 +83,7 @@ class OrderItem extends Model
     {
         return match (true) {
             !is_null($this->getRawOriginal('price')) => $this->getRawOriginal('price'),
-            !is_null($this->buyable) && method_exists($this->buyable, 'getBuyablePrice') => $this->buyable->getBuyablePrice(),
+            method_exists($this->buyable, 'getBuyablePrice') => $this->buyable->getBuyablePrice(),
             default => 0,
         };
     }

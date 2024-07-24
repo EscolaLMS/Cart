@@ -54,9 +54,6 @@ class ProductProductable extends Model
     public function getCanonicalProductableAttribute(): ?Productable
     {
         $productable = $this->productable;
-        if (is_null($productable)) {
-            return null;
-        }
         if ($productable instanceof Productable) {
             return $productable;
         }

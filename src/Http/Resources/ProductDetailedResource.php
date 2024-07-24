@@ -11,6 +11,8 @@ class ProductDetailedResource extends ProductResource
 {
     public function toArray($request): array
     {
+        /** @var User $user */
+        // @phpstan-ignore-next-line
         $user = $request ? $request->user() : Auth::user();
         $result = parent::toArray($request);
         if ($user->can(AuthPermissionsEnum::USER_LIST)) {
