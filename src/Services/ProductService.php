@@ -421,7 +421,7 @@ class ProductService implements ProductServiceContract
                 'productable_id' => $newProductable['id'],
                 'productable_type' => $model->getMorphClass(),
                 'quantity' => $product->type === ProductType::SINGLE ? 1 : ($newProductable['quantity'] ?? 1),
-                'position' => $newProductable['position'] ?? null,
+                'position' => $newProductable['position'],
             ]));
         }
 
