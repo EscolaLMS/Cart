@@ -20,6 +20,7 @@ use Throwable;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $quantity
+ * @property ?int $position
  * @property-read Productable|null $canonical_productable
  * @property-read \EscolaLms\Cart\Models\Product|null $product
  * @property-read Model|\Eloquent $productable

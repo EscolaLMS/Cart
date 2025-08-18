@@ -47,8 +47,12 @@ use Illuminate\Support\Carbon;
  *                   property="productable_id",
  *                   type="string",
  *              ),
+ *               @OA\Property(
+ *                   property="position",
+ *                   type="int",
+ *                   example=1
+ *              ),
  *           )
- *       )
  *       ),
  * )
  *
@@ -68,10 +72,14 @@ class MyProductResource extends JsonResource
             'is_active' => !$productUserPivot?->end_date || $productUserPivot?->end_date >= Carbon::now(),
             'end_date' => $productUserPivot?->end_date,
             'status' => $productUserPivot?->status,
-            'productables' => $this->productables->map(fn(ProductProductable $productProductable) => [
-                'productable_class' => $productProductable->productable_type,
-                'productable_id' => $productProductable->productable_id
-            ]),
+            'productables' => $this->productables
+                ->sortBy('position')
+                ->values()
+                ->map(fn(ProductProductable $productProductable) => [
+                    'productable_class' => $productProductable->productable_type,
+                    'productable_id' => $productProductable->productable_id,
+                    'position' => $productProductable->position,
+                ]),
         ];
     }
 }

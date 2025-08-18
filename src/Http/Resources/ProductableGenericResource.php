@@ -39,6 +39,7 @@ class ProductableGenericResource extends JsonResource
             'quantity' => $this->getProductProductable() ? $this->getProductProductable()->quantity : 1,
             'name' => $this->getProductable()->getName(),
             'description' => $this->getProductable()->getDescription(),
+            'position' => $this->getProductProductable()?->position,
         ];
     }
 }
