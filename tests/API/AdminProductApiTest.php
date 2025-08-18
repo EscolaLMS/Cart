@@ -654,6 +654,85 @@ class AdminProductApiTest extends TestCase
         );
     }
 
+    public function test_update_product_position(): void
+    {
+        /** @var ExampleProductable $productable1 */
+        $productable1 = ExampleProductable::factory()->create();
+
+        /** @var ExampleProductable $productable2 */
+        $productable2 = ExampleProductable::factory()->create();
+
+        /** @var ExampleProductable $productable3 */
+        $productable3 = ExampleProductable::factory()->create();
+
+        /** @var Product $product */
+        $product = Product::factory()->bundle()->create();
+
+        $product->productables()->create([
+            'productable_id' => $productable1->getKey(),
+            'productable_type' => $productable1->getMorphClass(),
+        ]);
+        $product->productables()->create([
+            'productable_id' => $productable2->getKey(),
+            'productable_type' => $productable2->getMorphClass(),
+        ]);
+        $product->productables()->create([
+            'productable_id' => $productable3->getKey(),
+            'productable_type' => $productable3->getMorphClass(),
+        ]);
+
+        $productData = Product::factory()->bundle()->make()->toArray();
+        $productData['productables'] = [
+            [
+                'id' => $productable2->getKey(),
+                'class' => ExampleProductable::class,
+                'position' => 2,
+            ],
+            [
+                'id' => $productable1->getKey(),
+                'class' => ExampleProductable::class, // no position -> should go to the end
+            ],
+            [
+                'id' => $productable3->getKey(),
+                'class' => ExampleProductable::class,
+                'position' => 1,
+            ],
+        ];
+
+        $this->response = $this->actingAs($this->user, 'api')->json(
+            'PUT',
+            '/api/admin/products/' . $product->getKey(),
+            $productData
+        );
+
+        $this->response->assertOk();
+
+        $this->response->assertJson(
+            fn (AssertableJson $json) => $json->has(
+                'data',
+                fn (AssertableJson $json) => $json->where('id', fn (int $id) => $id === $product->getKey())
+                    ->has(
+                        'productables',
+                        fn (AssertableJson $json) => $json->first(
+                            fn (AssertableJson $json) => $json->where('productable_id', $productable3->getKey())
+                                ->where('position', 1)
+                                ->etc()
+                        )->has(
+                            '1',
+                            fn (AssertableJson $json) => $json->where('productable_id', $productable2->getKey())
+                                ->where('position', 2)
+                                ->etc()
+                        )->has(
+                            '2',
+                            fn (AssertableJson $json) => $json->where('productable_id', $productable1->getKey())
+                                ->where('position', 3)
+                                ->etc()
+                        )->etc()
+                    )->etc()
+            )->etc()
+        );
+    }
+
     public function test_search_products(): void
     {
         $user = $this->user;

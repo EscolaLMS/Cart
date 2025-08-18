@@ -39,6 +39,7 @@ class ProductCreateRequest extends ProductRequest
             'productables.*.id' => ['integer'],
             'productables.*.class' => ['string', new ProductableRegisteredRule()],
             'productables.*.quantity' => ['sometimes', 'integer', 'min:1'],
+            'productables.*.position' => ['nullable', 'integer', 'min:1'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', Rule::exists(Category::class, 'id')],
             'tags' => ['sometimes', 'array'],

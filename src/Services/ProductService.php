@@ -264,6 +264,7 @@ class ProductService implements ProductServiceContract
             'productable_id' => $productProductable->productable_id,
             'productable_type' => $productProductable->productable_type,
             'quantity' => $productProductable->quantity,
+            'position' => $productProductable->position,
             'name' => null,
             'description' => null,
         ]);
@@ -378,7 +379,14 @@ class ProductService implements ProductServiceContract
             throw new Exception(__('Product with type SINGLE can contain only one single Productable'));
         }
 
-        $productablesCollection = (new Collection($productables))->keyBy('id');
+        $productablesCollection = (new Collection($productables))
+            ->sortBy(fn (array $item) => $item['position'] ?? PHP_INT_MAX)
+            ->values()
+            ->map(function (array $item, int $key) {
+                $item['position'] = $key+1;
+                return $item;
+            })
+            ->keyBy('id');
 
         foreach ($product->productables as $existingProductable) {
             $productableInUpdateData = $productablesCollection->first(
@@ -390,9 +398,15 @@ class ProductService implements ProductServiceContract
                 $existingProductable->delete();
             } else {
                 $existingProductable->quantity = ($product->type === ProductType::SINGLE) ? 1 : ($productableInUpdateData['quantity'] ?? 1);
-                if ($existingProductable->isDirty('quantity')) {
+
+                if (array_key_exists('position', $productableInUpdateData)) {
+                    $existingProductable->position = $productableInUpdateData['position'];
+                }
+
+                if ($existingProductable->isDirty()) {
                     $existingProductable->save();
                 }
+
                 $productablesCollection->forget($productableInUpdateData['id']);
             }
         }
@@ -407,6 +421,7 @@ class ProductService implements ProductServiceContract
                 'productable_id' => $newProductable['id'],
                 'productable_type' => $model->getMorphClass(),
                 'quantity' => $product->type === ProductType::SINGLE ? 1 : ($newProductable['quantity'] ?? 1),
+                'position' => $newProductable['position'],
             ]));
         }
 
