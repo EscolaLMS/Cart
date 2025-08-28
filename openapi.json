@@ -1981,6 +1981,10 @@
                                 },
                                 "productable_id": {
                                     "type": "string"
+                                },
+                                "position": {
+                                    "type": "integer",
+                                    "example": 1
                                 }
                             },
                             "type": "object"
