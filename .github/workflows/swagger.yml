@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  phpunit-code-coverage:
+  swagger-gh-pages:
     runs-on: ubuntu-latest
     container:
       image: escolalms/php:8.2
@@ -47,6 +47,8 @@ jobs:
 
       - name: Generate Swagger UI
         uses: Legion2/swagger-ui-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           output: swagger-ui
           spec-file: openapi.json
