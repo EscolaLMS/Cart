@@ -22,6 +22,7 @@ class ProductFactory extends Factory
             'tax_rate' => 0,
             'limit_total' => null,
             'limit_per_user' => 1,
+            'language' => $this->faker->randomElement(['en', 'pl']),
             'fields' => [
                 $this->faker->word => $this->faker->word
             ]

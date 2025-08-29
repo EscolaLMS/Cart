@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Tags\Models\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
@@ -54,6 +55,15 @@ use Illuminate\Support\Carbon;
  *              ),
  *           )
  *       ),
+ *       @OA\Property(
+ *          property="tags",
+ *          type="array",
+ *          @OA\Items(type="string")
+ *       ),
+ *       @OA\Property(
+ *          property="language",
+ *          type="string",
+ *       ),
  * )
  *
  * @mixin Product
@@ -80,6 +90,8 @@ class MyProductResource extends JsonResource
                     'productable_id' => $productProductable->productable_id,
                     'position' => $productProductable->position,
                 ]),
+            'tags' => $this->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'language' =>  $this->language,
         ];
     }
 }
