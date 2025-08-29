@@ -599,7 +599,7 @@ class ProductService implements ProductServiceContract
 
     public function searchMy(ProductSearchMyCriteriaDto $dto, PageDto $pageDto, OrderDto $orderDto): LengthAwarePaginator
     {
-        $query = Product::query();
+        $query = Product::query()->with(['tags']);
 
         foreach ($dto->toArray() as $criterion) {
             if ($criterion instanceof Criterion) {
