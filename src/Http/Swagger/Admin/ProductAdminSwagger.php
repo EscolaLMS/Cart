@@ -124,6 +124,11 @@ interface ProductAdminSwagger
      *              @OA\Items(type="string")
      *          ),
      *      ),
+     *      @OA\Property(
+     *           property="language",
+     *           description="language",
+     *           type="string",
+     *       ),
      *      @OA\Response(
      *          response=200,
      *          description="successful operation",
@@ -253,6 +258,10 @@ interface ProductAdminSwagger
      *                      property="related_products",
      *                      type="array",
      *                      @OA\Items(type="integer")
+     *                  ),
+     *                  @OA\Property(
+     *                      property="language",
+     *                      type="string",
      *                  ),
      *              )
      *          )
@@ -439,6 +448,11 @@ interface ProductAdminSwagger
      *                      property="related_products",
      *                      type="array",
      *                      @OA\Items(type="integer")
+     *                  ),
+     *                  @OA\Property(
+     *                      property="language",
+     *                      description="language",
+     *                      type="string",
      *                  ),
      *              )
      *          )
