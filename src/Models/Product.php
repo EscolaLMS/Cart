@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $duration
  * @property int|null $limit_per_user
  * @property int|null $limit_total
+ * @property string|null $language
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Collection|\EscolaLms\Cart\Models\Category[] $categories

@@ -60,6 +60,10 @@ use Illuminate\Support\Carbon;
  *          type="array",
  *          @OA\Items(type="string")
  *       ),
+ *       @OA\Property(
+ *          property="language",
+ *          type="string",
+ *       ),
  * )
  *
  * @mixin Product
@@ -87,6 +91,7 @@ class MyProductResource extends JsonResource
                     'position' => $productProductable->position,
                 ]),
             'tags' => $this->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'language' =>  $this->language,
         ];
     }
 }

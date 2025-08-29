@@ -49,7 +49,7 @@ class ProductCreateRequest extends ProductRequest
             ...$this->subscriptionRules(),
             ...$this->trialRules(),
             'fields' => ['nullable', 'array'],
+            'language' => ['nullable', 'string', 'max:2'],
         ];
     }
-
 }

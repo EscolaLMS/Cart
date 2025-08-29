@@ -13,7 +13,6 @@ use EscolaLms\Cart\Events\ProductAttached;
 use EscolaLms\Cart\Events\ProductBought;
 use EscolaLms\Cart\Events\ProductDetached;
 use EscolaLms\Cart\Facades\Shop;
-use EscolaLms\Cart\Http\Resources\BaseProductResource;
 use EscolaLms\Cart\Http\Resources\ProductDetailedResource;
 use EscolaLms\Cart\Http\Resources\ProductResource;
 use EscolaLms\Cart\Models\Category;
@@ -25,12 +24,11 @@ use EscolaLms\Cart\Tests\Mocks\ExampleProductable;
 use EscolaLms\Cart\Tests\Mocks\ExampleProductableBase;
 use EscolaLms\Cart\Tests\TestCase;
 use EscolaLms\Core\Enums\UserRole;
-use EscolaLms\Courses\Models\Course;
 use EscolaLms\Payments\Facades\PaymentGateway;
-use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -187,8 +185,6 @@ class AdminProductApiTest extends TestCase
         /** @var ExampleProductable $productable */
         $productable = ExampleProductable::factory()->create();
 
-        $productData = Product::factory()->make()->toArray();
-
         $productSecoond = Product::factory()->single()->create();
         $productSecoond->relatedProducts()->sync(Product::factory(5)->create()->pluck('id')->toArray());
 
@@ -217,6 +213,7 @@ class AdminProductApiTest extends TestCase
             fn(AssertableJson $json) => $json->has(
                 'data',
                 fn(AssertableJson $json) => $json
+                    ->where('language', $productData['language'])
                     ->has(
                         'related_products',
                         fn(AssertableJson $json) => $json->each(
@@ -450,6 +447,7 @@ class AdminProductApiTest extends TestCase
                 'data',
                 fn(AssertableJson $json) => $json
                     ->where('id', fn(int $id) => $id === $product->getKey())
+                    ->where('language', $productData['language'])
                     ->has(
                         'related_products',
                         fn(AssertableJson $json) => $json->each(
