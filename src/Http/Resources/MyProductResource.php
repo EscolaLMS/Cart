@@ -61,6 +61,11 @@ use Illuminate\Support\Carbon;
  *          @OA\Items(type="string")
  *       ),
  *       @OA\Property(
+ *          property="categories",
+ *          type="array",
+ *          @OA\Items(ref="#/components/schemas/ProductCategorySimpleResource")
+ *       ),
+ *       @OA\Property(
  *          property="language",
  *          type="string",
  *       ),
@@ -91,6 +96,7 @@ class MyProductResource extends JsonResource
                     'position' => $productProductable->position,
                 ]),
             'tags' => $this->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'categories' => CategorySimpleResource::collection($this->categories),
             'language' =>  $this->language,
         ];
     }
