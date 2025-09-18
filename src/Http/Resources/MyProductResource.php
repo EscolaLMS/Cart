@@ -4,6 +4,7 @@ namespace EscolaLms\Cart\Http\Resources;
 
 use EscolaLms\Cart\Models\Product;
 use EscolaLms\Cart\Models\ProductProductable;
+use EscolaLms\Categories\Http\Resources\CategoryResource;
 use EscolaLms\Tags\Models\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
@@ -61,6 +62,11 @@ use Illuminate\Support\Carbon;
  *          @OA\Items(type="string")
  *       ),
  *       @OA\Property(
+ *          property="categories",
+ *          type="array",
+ *          @OA\Items(ref="#/components/schemas/ProductCategorySimpleResource")
+ *       ),
+ *       @OA\Property(
  *          property="language",
  *          type="string",
  *       ),
@@ -91,6 +97,7 @@ class MyProductResource extends JsonResource
                     'position' => $productProductable->position,
                 ]),
             'tags' => $this->tags->map(fn (Tag $tag) => $tag->title)->toArray(),
+            'categories' => CategorySimpleResource::collection($this->categories),
             'language' =>  $this->language,
         ];
     }
