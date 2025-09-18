@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Cart\Http\Resources;
 
-use EscolaLms\Dictionaries\Models\Category;
+use EscolaLms\Cart\Models\Category;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
